@@ -1,0 +1,9 @@
+repositories:
+  libfranka_0_9_2:
+    type: git
+    url: https://github.com/LCAS/libfranka.git
+    version: lcas_0.9.2
+  franka_arm_ros2:
+    type: git
+    url: https://github.com/LCAS/franka_arm_ros2.git
+    version: bc05b65cf87c20ffa02b890d0f23bd39505fd4aa

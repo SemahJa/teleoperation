@@ -1,0 +1,17 @@
+{
+  "name": "Panda FCI 4.2.2 — ROS 2 Humble",
+  "dockerComposeFile": ["../docker/compose.yaml"],
+  "service": "panda-ros2",
+  "workspaceFolder": "/ws",
+  "shutdownAction": "stopCompose",
+  "overrideCommand": false,
+  "remoteUser": "root",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "ms-iot.vscode-ros",
+        "ms-vscode.cpptools"
+      ]
+    }
+  }
+}

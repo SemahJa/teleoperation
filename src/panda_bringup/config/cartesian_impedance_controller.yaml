@@ -1,0 +1,8 @@
+panda_cartesian_impedance_controller:
+  ros__parameters:
+    # Spong filtered error: r = V - Vd + Lambda e.
+    # The static Cartesian gain is Kr * Lambda.
+    lambda_translation: 50.0
+    gain_translation: 30.0        # 30 * 50 = 1500 N/m
+    lambda_rotation: 40.0
+    gain_rotation: 4.5            # 4.5 * 40 = 180 Nm/rad

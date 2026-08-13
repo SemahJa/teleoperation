@@ -1,0 +1,22 @@
+services:
+  panda-ros2:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+    image: panda-ros2-fci-4.2.2:dev
+    network_mode: host
+    ipc: host
+    cap_add:
+      - SYS_NICE
+    ulimits:
+      rtprio: 99
+      memlock: -1
+    working_dir: /ws
+    volumes:
+      - ..:/ws:rw
+      - /tmp/.X11-unix:/tmp/.X11-unix:rw
+    environment:
+      - DISPLAY=${DISPLAY}
+    command: bash
+    stdin_open: true
+    tty: true
