@@ -1,11 +1,8 @@
-"""Validated per-arm mapper configuration and explicit rosbag recording plans."""
+"""Validated per-arm mapper configuration."""
 from dataclasses import dataclass
-from datetime import datetime, timezone
-import json
 import math
 from pathlib import Path
 import re
-import uuid
 
 import yaml
 
@@ -145,56 +142,6 @@ def load_arms(path):
     if any(arm.parameters['controller_state_topic'] in outputs | inputs for arm in result):
         raise ValueError('raw controller input must not alias mapper output or measured pose')
     return result
-
-
-def default_recording_topics(arms):
-    topics = ['/quest_usb_bridge/left/controller_state']
-    for arm in arms:
-        p = arm.parameters
-        topics.extend([p['controller_state_topic'], p['command_topic'], p['monitor_topic'],
-                       p['measured_pose_topic'], arm.state_topic,
-                       full_topic('watchdog_events', arm.namespace),
-                       full_topic('gripper_events', arm.namespace),
-                       full_topic('controller_status', arm.namespace),
-                       full_topic('homing_status', arm.namespace),
-                       full_topic('cbf_status', arm.namespace),
-                       full_topic('joint_states', arm.namespace)])
-    return list(dict.fromkeys(topics))
-
-
-@dataclass
-class RecordingPlan:
-    topics: list
-    output: str
-    command: list
-
-
-def recording_plan(path, arms, topics_override='', output_root_override=''):
-    config = read_mapping(path)
-    if set(config) - {'include_default_topics', 'topics', 'output_root', 'storage_id'}:
-        raise ValueError('unknown recording configuration key')
-    if topics_override:
-        topics = json.loads(topics_override)
-    else:
-        topics = config.get('topics', [])
-        if not isinstance(topics, list):
-            raise ValueError('recording topics must be a list')
-        if boolean(config.get('include_default_topics', True), 'include_default_topics'):
-            topics = default_recording_topics(arms) + topics
-    if not isinstance(topics, list) or not topics:
-        raise ValueError('enabled recording needs at least one explicitly selected topic')
-    topics = list(dict.fromkeys(full_topic(topic) for topic in topics))
-    root = output_root_override or config.get('output_root', '')
-    if not isinstance(root, str) or not root or not Path(root).expanduser().is_absolute():
-        raise ValueError('recording output_root must be an absolute container path')
-    storage = config.get('storage_id', 'sqlite3')
-    if not isinstance(storage, str) or not _TOKEN.fullmatch(storage):
-        raise ValueError('invalid rosbag storage plugin name')
-    stamp = datetime.now(timezone.utc).strftime('%Y%m%dT%H%M%SZ')
-    output = str(Path(root).expanduser() / f'quest_{stamp}_{uuid.uuid4().hex[:8]}')
-    # Arguments are passed directly; no shell or topic glob expansion.
-    return RecordingPlan(topics, output, ['ros2', 'bag', 'record', '--storage', storage,
-                                         '--output', output, *topics])
 
 
 def select_arms(arms, mode='single', single_controller='right'):

@@ -1,0 +1,7 @@
+hand:
+  speed_mps: 0.02
+  grasp_force_n: 5.0
+  grasp_width_m: -1.0
+  epsilon_inner_m: -1.0
+  epsilon_outer_m: -1.0
+arm_settings: {}

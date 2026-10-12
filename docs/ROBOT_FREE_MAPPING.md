@@ -67,7 +67,7 @@ cd /home/jiachun/franka_teleoperation
 docker compose -f docker/compose.yaml run --rm --name quest-mapping-ros \
   panda-ros2 bash -lc \
   'source /opt/ros/humble/setup.bash && source /ws/install/setup.bash &&
-   ros2 launch quest_teleop robot_free.launch.py mock_measured_pose:=true'
+   ros2 launch teleop_bringup robot_free.launch.py mock_measured_pose:=true'
 ```
 
 If no USB bridge is running, add `start_bridge:=true` to that launch command.

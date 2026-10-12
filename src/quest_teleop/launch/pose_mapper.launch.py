@@ -7,6 +7,7 @@ from launch_ros.parameter_descriptions import ParameterValue
 
 def generate_launch_description():
     names = {
+        'namespace': '/',
         'controller_id': 'right',
         'controller_state_topic': '/quest_usb_bridge/controller_state',
         'measured_pose_topic': '/panda_1/teleop_anchor_pose',
@@ -24,9 +25,9 @@ def generate_launch_description():
     }
     args = [DeclareLaunchArgument(name, default_value=value) for name, value in names.items()]
     params = {name: LaunchConfiguration(name) for name in names
-              if name != 'reference_to_robot_xyzw'}
+              if name not in ('reference_to_robot_xyzw', 'namespace')}
     params['reference_to_robot_xyzw'] = ParameterValue(
-        LaunchConfiguration('reference_to_robot_xyzw'), value_type=list)
+        LaunchConfiguration('reference_to_robot_xyzw'))
     return LaunchDescription(args + [Node(
         package='quest_teleop', executable='pose_mapper', name='pose_mapper',
-        output='screen', parameters=[params])])
+        namespace=LaunchConfiguration('namespace'), output='screen', parameters=[params])])

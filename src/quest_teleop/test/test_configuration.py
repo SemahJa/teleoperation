@@ -5,7 +5,7 @@ import tempfile
 import unittest
 
 import yaml
-from quest_teleop.configuration import load_arms, recording_plan, select_arms
+from quest_teleop.configuration import load_arms, select_arms
 
 
 class ConfigurationTest(unittest.TestCase):
@@ -69,28 +69,6 @@ class ConfigurationTest(unittest.TestCase):
         with self.assertRaises(ValueError): select_arms(one, 'dual')
         with self.assertRaises(ValueError): select_arms(arms, 'other')
 
-    def test_recording_can_replace_extend_and_deduplicate_topics(self):
-        arms = load_arms(self.write('arms.yaml', self.config))
-        config = self.write('recording.yaml', {'include_default_topics': True,
-            'topics': ['/custom', '/custom'], 'output_root': str(self.root)})
-        default = recording_plan(config, arms)
-        self.assertIn('/left_arm/cartesian_teleop_command', default.topics)
-        self.assertIn('/right_arm/gripper_events', default.topics)
-        self.assertEqual(default.topics.count('/custom'), 1)
-        override = recording_plan(config, arms, json.dumps(['/selected', '/selected']))
-        self.assertEqual(override.topics, ['/selected'])
-        self.assertNotIn('/custom', override.command)
-        self.assertNotEqual(default.output, override.output)
-        self.assertFalse(Path(override.output).exists())
-        replacement = self.write('replacement.yaml', {'include_default_topics': False,
-            'topics': ['/only'], 'output_root': str(self.root)})
-        self.assertEqual(recording_plan(replacement, arms).topics, ['/only'])
-        with self.assertRaises(ValueError):
-            recording_plan(config, arms, '[]')
-        with self.assertRaises(ValueError):
-            recording_plan(config, arms, '["--all"]')
-        with self.assertRaises(ValueError):
-            recording_plan(config, arms, output_root_override='relative')
 
 
 if __name__ == '__main__':

@@ -6,6 +6,7 @@ from launch_ros.actions import Node
 
 def generate_launch_description():
     return LaunchDescription([
+        DeclareLaunchArgument('namespace', default_value='/'),
         DeclareLaunchArgument('listen_port', default_value='45454'),
         DeclareLaunchArgument('bind_address', default_value='127.0.0.1'),
         DeclareLaunchArgument('command_timeout_ms', default_value='100'),
@@ -16,6 +17,7 @@ def generate_launch_description():
             package='quest_teleop',
             executable='quest_usb_bridge',
             name='quest_usb_bridge',
+            namespace=LaunchConfiguration('namespace'),
             output='screen',
             parameters=[{
                 'listen_port': LaunchConfiguration('listen_port'),

@@ -1,5 +1,6 @@
 build/
 install/
+.workspace-artifacts-*/
 log/
 android/quest_teleop/.gradle/
 android/quest_teleop/local.properties
@@ -8,3 +9,7 @@ android/quest_teleop/**/*.apk
 .vscode/
 .env
 src/third_party/osqp_0_6_3/
+
+# Generated Python bytecode from package builds and tests.
+__pycache__/
+*.py[cod]

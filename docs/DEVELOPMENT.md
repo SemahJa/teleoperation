@@ -4,7 +4,7 @@
 
 Use the existing ROS container on Ubuntu 22.04 with ROS 2 Humble. The robot-control process must run on the deployment host's PREEMPT_RT kernel; Docker does not provide the kernel. Do not launch the physical controller until the new controller's hardware-safety acceptance gate is complete.
 
-The new interfaces and packages are under `src/quest_teleop_interfaces`, `src/quest_teleop`, and `src/franka_teleop_controller`. The legacy `panda_bringup` and `panda_demos` packages are intentionally unchanged. Build the new workspace with the existing Humble container workflow after importing pinned third-party dependencies.
+The package boundaries and launch commands are described in [PACKAGE_STRUCTURE.md](PACKAGE_STRUCTURE.md): `quest_teleop_interfaces`, `quest_teleop`, `recording`, `teleop_controllers`, `teleop_gripper`, `safety_filter` and `teleop_bringup`. The legacy `panda_bringup` and `panda_demos` packages are intentionally unchanged. Build the new workspace with the existing Humble container workflow after importing pinned third-party dependencies.
 
 The USB listener is available as `ros2 launch quest_teleop quest_usb_bridge.launch.py`. Start the ADB reverse mapping with `scripts/quest_adb_reverse.sh`. Wire framing and JSON schema are documented in `docs/quest-usb-protocol.md`. The headset application now uses the OpenXR app/HUD port from `thesis_ws`, with optional passthrough, controller aim rays, and readable per-hand pose/native twist/input diagnostics. It sends the existing versioned framed telemetry over USB/ADB. The HUD reports USB connection, clock validity/uncertainty, and right-controller local trigger/deadman state; robot arming is explicitly unknown. The bridge publishes raw telemetry and source-time validity after clock synchronization. Mapping is implemented and tested against mock measured poses; the atomic arm consumer, Hand worker, independent homing and Panda CBF runtime now pass robot-free acceptance. Integrated single/dual launch and left Menu recording commands are in `docs/TELEOPERATION_RUNTIME.md`. Physical commissioning remains separate. See `docs/VR_APP_PORT.md` for port details and runtime checks.
 
@@ -30,7 +30,7 @@ Authorize the host key in the Quest headset. Never enable wireless ADB. USB perm
 
 ## Recording
 
-`ros2 launch quest_teleop robot_free.launch.py` loads validated per-arm mapper configuration and optional recording. Recording is disabled by default; enable it with `recording_enabled:=true`. Replace its topics via `recording_topics:='["/selected/topic"]'` or a custom `recording_config` YAML file. Bags default to `/ws/log/quest_bags` inside the existing mounted workspace. See `docs/ROBOT_FREE_MAPPING.md` for complete commands, two-arm mock configuration, and manual calibration conventions.
+`ros2 launch teleop_bringup robot_free.launch.py` loads validated per-arm mapper configuration and optional recording. Recording is disabled by default; enable it with `recording_enabled:=true`. Replace its topics via `recording_topics:='["/selected/topic"]'` or a custom `recording_config` YAML file. Bags default to `/ws/log/quest_bags` inside the existing mounted workspace. See `docs/ROBOT_FREE_MAPPING.md` for complete commands, two-arm mock configuration, and manual calibration conventions.
 
 ## Verification status
 

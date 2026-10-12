@@ -1,0 +1,8 @@
+controller:
+  lambda_translation: 50.0
+  lambda_rotation: 40.0
+  gain_translation: 20.0
+  gain_rotation: 2.5
+  maximum_torque_rate: 900.0
+  homing_speed_factor: 0.15
+arm_settings: {}

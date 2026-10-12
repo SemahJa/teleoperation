@@ -1,4 +1,37 @@
-# Milestone 1 implementation policy
+# Teleoperation implementation policy
+
+## Startup Hand calibration override (2026-10-12)
+
+The operator explicitly requests automatic calibration when `start_hand:=true`.
+This supersedes historical instructions below requiring manual-only startup
+calibration. The operator further requests no separate calibration launch
+configuration: enabling Hand automatically requests startup calibration. Operator launch
+with Hand enabled requests one empty-hand calibration; document physical finger
+motion and empty-hand preparation. Retain manual recalibration, hardware operator
+confirmation, no automatic retries/grasp, and robot-free agent validation.
+
+## Current prerequisite: package reorganization (2026-10-12)
+
+Before Milestone 2 implementation, the operator explicitly requests separate
+`quest_teleop`, `recording`, `teleop_controllers`, `teleop_gripper`, `safety_filter`
+and `teleop_bringup` packages with feature launches and configurable combined
+bringup. Preserve `panda_bringup` and `panda_demos` unchanged. Current boundaries
+and migration commands: [PACKAGE_STRUCTURE.md](PACKAGE_STRUCTURE.md).
+
+## Latest scope: Milestone 2 (2026-10-12)
+
+The operator accepted Milestone 1 after successful single-arm hardware
+teleoperation with CBF disabled. Next implement asynchronous CBF-QP for
+single-arm experiments first, plus controller performance measurement,
+smooth reference generation and distinct controller structures for comparison.
+See [MILESTONE_2.md](MILESTONE_2.md) for the design and acceptance criteria.
+Preserve the working nominal controller as the selectable baseline; the new
+request authorizes additional controller structures despite older instructions
+below to preserve only that law. Keep dual-arm execution unchanged in the first
+asynchronous stage. Agent development and automated tests remain robot-free;
+physical FCI/device trials remain operator actions.
+
+The sections below retain Milestone 1 requirements and historical evidence.
 
 Status: milestone 1 implementation policy and implementation order approved. Remaining technical details and deployment commissioning values are listed below; approval of the plan alone is not authorization to change implementation code. The repository owner has since explicitly requested continued implementation within this approved scope.
 
@@ -166,7 +199,7 @@ The latest user instruction supersedes older homing/CBF deferrals in historical 
 ## Confirmed controller architecture and sequencing
 
 - Do not modify `src/panda_bringup` or `src/panda_demos` to implement the new controller architecture.
-- Copy the existing Cartesian impedance controller into `src/franka_teleop_controller` for further implementation.
+- Copy the existing Cartesian impedance controller into `src/teleop_controllers` for further implementation.
 - Keep the legacy Panda direct-libfranka approach for milestone 1, subject to compatibility verification.
 - Preserve the copied controller's filtered-error impedance law: `r = measured_twist - desired_twist + Lambda * pose_error`; `tau_nominal = -J^T * Kr * r + coriolis`.
 - Expose translational/rotational Lambda and Kr as configurable per-arm parameters. Select physical-test gains during commissioning rather than treating existing launch gains as approved test values.
@@ -188,7 +221,11 @@ The latest user instruction supersedes older homing/CBF deferrals in historical 
 
 - `src/quest_teleop_interfaces`: custom raw VR state and Cartesian command messages.
 - `src/quest_teleop`: USB telemetry receiver, mapping, filtering, and multi-arm launch.
-- `src/franka_teleop_controller`: copied impedance controller and non-real-time Franka Hand worker.
+- `src/teleop_controllers`: arm impedance control, homing and future controller structures.
+- `src/teleop_gripper`: Hand decision core and separate non-real-time worker.
+- `src/safety_filter`: CBF constraints/QP, coordinator and model/handoff utilities.
+- `src/recording`: recording plans and Menu/continuous rosbag recording.
+- `src/teleop_bringup`: composition with independent feature switches.
 - `android/quest_teleop`: native C++ OpenXR APK project.
 - Keep existing `src/panda_bringup` and `src/panda_demos` unchanged.
 
@@ -309,7 +346,7 @@ All stages below belong to milestone 1: single-Panda VR teleoperation with imped
 - `android/quest_teleop` samples both Touch grip poses, native `XrSpaceVelocity`, validity, inputs, LOCAL-space generation, focus, and Quest monotonic acquisition time. OpenXR action `isActive` is preserved separately from trigger/grip/button values. TCP transport retains queued samples rather than coalescing per hand; queue overflow drops the connection and disarms. Optional `XR_FB_passthrough` is enabled when runtime exposes it and permits creation; projection background uses alpha with opaque fallback. Headset runtime/permission behavior is unverified. GLES UI still shows only USB, clock, right tracking, and right deadman indicators; readable per-controller status/pose/twist display remains unresolved. APK is telemetry-only; no robot command path.
 - ADB Android/ADB containers are in `docker/android.Dockerfile` and `docker/android-compose.yaml`. Both ROS and ADB containers use host networking; ADB server binds loopback and USB device access is privileged. Reverse tunnel and install scripts: `scripts/quest_adb_reverse.sh`, `scripts/quest_install.sh`.
 - Base images and Android build toolchain are pinned. Apt transitive package versions are not locked. Android container installs NDK 26.3, but Gradle currently also installs/uses NDK 26.1 because project `ndkVersion` is not pinned; resolve this toolchain drift.
-- Added `src/franka_teleop_controller` as a verbatim copy of the legacy controller. It still consumes `PoseStamped`, publishes in its real-time callback, and lacks the agreed safety changes. Do not use it to control hardware yet.
+- Added `src/teleop_controllers` as a verbatim copy of the legacy controller. It still consumes `PoseStamped`, publishes in its real-time callback, and lacks the agreed safety changes. Do not use it to control hardware yet.
 - `src/panda_bringup` and `src/panda_demos` remain unchanged.
 
 ### Historical verification and hardware status (superseded by current snapshot)

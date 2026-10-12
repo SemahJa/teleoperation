@@ -26,7 +26,7 @@ source install/setup.bash
 In **container terminal 1**, launch the default single-right mock:
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single start_bridge:=false
 ```
 
@@ -39,20 +39,21 @@ host in `/home/jiachun/franka_teleoperation`** run:
 bash scripts/quest_adb_reverse.sh 45454
 ```
  The launch starts the controller, its pose mapper,
-separate Hand worker, and independent left Menu recorder. Neither homing,
-Hand calibration nor recording starts automatically.
+separate Hand worker, and independent left Menu recorder. Neither homing nor
+recording starts automatically. Starting Hand now calibrates its empty fingers
+once whenever `start_hand:=true`; no separate calibration launch option is needed.
 
 Stop that launch with Ctrl+C before trying **single-left**:
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single single_controller:=left start_bridge:=false
 ```
 
 Stop that launch before trying **dual** with the supplied two-arm fixture:
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=dual start_bridge:=false \
   arms_config:=/ws/src/quest_teleop/config/arms_two_mock.yaml
 ```
@@ -103,7 +104,7 @@ On the **headset**:
 - Normal launch shutdown finalizes an active bag. Wait for recording status
   `idle` with message `bag finalized` before starting the next episode.
 
-For **Hand mock calibration**, run in container terminal 2:
+For **deliberate Hand mock recalibration** after startup, run in container terminal 2:
 
 ```bash
 ros2 service call /panda_1/calibrate_gripper quest_teleop_interfaces/srv/CalibrateGripper \
@@ -117,7 +118,7 @@ specified. Mock-only example settings:
 
 ```bash
 mkdir -p /ws/log
-cp /ws/src/franka_teleop_controller/config/teleoperation_runtime.yaml /ws/log/mock_runtime.yaml
+cp /ws/src/teleop_bringup/config/teleoperation_runtime.yaml /ws/log/mock_runtime.yaml
 ```
 
 Edit the `hand` section of `/ws/log/mock_runtime.yaml` to set
@@ -128,7 +129,7 @@ post-calibration press opens; subsequent release/press grasps, then opens.
 
 ## Customize recording and inspect bags
 
-`recording_config` defaults to `quest_teleop/config/recording.yaml`. Its default
+`recording_config` defaults to `recording/config/recording.yaml`. Its default
 profile derives active-arm topics, plus independent left Menu input. Edit its
 `topics` list to extend selection, or set `include_default_topics: false` to
 replace it. At each start, the recorder selects only currently published topics
@@ -137,7 +138,7 @@ absent at start are omitted for that episode; a later episode re-evaluates the
 graph. A complete JSON override is also supported:
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single \
   recording_topics:='["/panda_1/controller_status","/panda_1/cbf_status","/panda_1/robot_state"]'
 ```

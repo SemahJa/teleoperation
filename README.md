@@ -11,6 +11,15 @@ The implementation handoff passed 81 individual robot-free cases; see
 compatibility, clearance and realtime timing remain deployment commissioning
 checks. Follow [docs/AGENTS.md](docs/AGENTS.md) for further development.
 
+The operator accepted Milestone 1 on 2026-10-12 after successful single-arm
+teleoperation with CBF disabled. The next work is single-arm asynchronous CBF-QP
+and controller tracking/smoothness comparisons; see the
+[Milestone 2 plan](docs/MILESTONE_2.md).
+
+Package responsibilities, standalone launches and migration instructions are in
+[PACKAGE_STRUCTURE.md](docs/PACKAGE_STRUCTURE.md). The combined entry point is
+`ros2 launch teleop_bringup teleoperation.launch.py`.
+
 ## Reading order, terminals and evidence
 
 1. [New-PC installation and build](#1-new-pc-installation-and-build).
@@ -111,7 +120,7 @@ cd ~/franka_teleoperation
 git status --short
 git rev-parse HEAD
 test -f docs/AGENTS.md
-test -f src/franka_teleop_controller/launch/cartesian_impedance_controller.launch.py
+test -f src/teleop_bringup/launch/teleoperation.launch.py
 test -f android/quest_teleop/app/src/main/cpp/openxr_program.cpp
 ```
 
@@ -192,26 +201,29 @@ cd /ws
 source /opt/ros/humble/setup.bash
 set -o pipefail
 bash scripts/fetch_teleop_dependencies.sh
+apt-get update
 rosdep update
 rosdep install --from-paths src --ignore-src --rosdistro humble -y \
   --skip-keys ament_cmake_clang_format
-colcon build --symlink-install --packages-select libfranka \
+colcon build --base-paths src --symlink-install --packages-select libfranka \
   --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF \
   2>&1 | tee /ws/log/commissioning/current/build-libfranka.txt
 source install/setup.bash
-colcon build --symlink-install \
-  --packages-skip quest_teleop_interfaces quest_teleop franka_teleop_controller \
+colcon build --base-paths src --symlink-install \
+  --packages-skip quest_teleop_interfaces quest_teleop recording safety_filter teleop_controllers teleop_gripper teleop_bringup \
   --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF -DBUILD_EXAMPLES=OFF \
   2>&1 | tee /ws/log/commissioning/current/build-workspace.txt
 source install/setup.bash
-colcon build --symlink-install \
-  --packages-select quest_teleop_interfaces quest_teleop franka_teleop_controller \
+colcon build --base-paths src --symlink-install \
+  --packages-select quest_teleop_interfaces quest_teleop recording safety_filter teleop_controllers teleop_gripper teleop_bringup \
   --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON \
   2>&1 | tee /ws/log/commissioning/current/build-teleoperation.txt
 source install/setup.bash
 ros2 pkg executables panda_bringup
 ros2 pkg executables panda_demos
-ros2 pkg executables franka_teleop_controller
+ros2 pkg executables teleop_controllers
+ros2 pkg executables teleop_gripper
+ros2 pkg executables recording
 ros2 pkg executables quest_teleop
 git -C src/third_party/libfranka_0_9_2 rev-parse HEAD \
   > /ws/log/commissioning/current/dependencies.txt
@@ -231,6 +243,25 @@ requires that unavailable key; the new packages have acceptance tests enabled.
 LCAS `lcas_0.9.2` and the pinned ROS driver are intentional, not interchangeable
 with current upstream libfranka. Verify physical protocol compatibility in 4.1.
 
+ROS builds discover packages under `src` explicitly. The tracked
+`android/COLCON_IGNORE` also excludes the Android tree from default colcon
+discovery. If a ROS build starts `quest_teleop_android` and fails to find
+`/sources/android/native_app_glue/android_native_app_glue.c`, use the build
+commands above with `--base-paths src`. The APK requires the separate Gradle/NDK
+container in section 2.1; the ROS container does not build it.
+
+`apt-get update` is required inside each fresh container: the Docker image
+removes `/var/lib/apt/lists/*` after installing its preinstalled packages.
+`rosdep update` refreshes ROS dependency mappings, not APT's package indexes.
+If `rosdep install` reports `Unable to locate package
+ros-humble-warehouse-ros-sqlite`, run `apt-get update` successfully in **C1**,
+then repeat the same `rosdep install` command. This dependency is declared by
+the bundled `franka_moveit_config`; do not add it to `--skip-keys`.
+If it still fails, check `cat /etc/os-release`, `dpkg --print-architecture`
+and `apt-cache policy ros-humble-warehouse-ros-sqlite`. Use Ubuntu 22.04
+(Jammy) and ensure `apt-get update` fetched the configured ROS 2 repository
+without repository, signature or network errors before continuing.
+
 **Pass:** no failed build packages. Executable lists include
 `cartesian_impedance_controller` in both controller packages,
 `cartesian_circle_publisher`, `franka_hand_worker`, and `quest_usb_bridge`.
@@ -245,10 +276,13 @@ In **two additional host terminals**, run this block separately. They become
 ```bash
 docker exec -it franka-guide-ros bash
 cd /ws
-source /opt/ros/humble/setup.bash
 source /ws/install/setup.bash
 set -o pipefail
 ```
+
+`install/setup.bash` is the standard workspace entry point and also sources
+ROS Humble. The temporary `install/reorganized` overlay is retired; open a new
+shell after migration so an earlier overlay does not remain in its environment.
 
 Every new container shell must source the workspace. Use one ROS domain
 consistently; these commands use the default domain. Do not run old mappers,
@@ -281,8 +315,9 @@ PY
 ```
 
 **Operator:** confirm approved starting pose/clearance, observer and stop;
-unlock/activate FCI in Desk according to the robot manual. **C1:**
+unlock/activate FCI in Desk according to the robot manual. 
 
+**C1:**
 ```bash
 ros2 run panda_bringup cartesian_impedance_controller --ros-args \
   --params-file /ws/log/commissioning/current/legacy_controller.yaml \
@@ -290,7 +325,6 @@ ros2 run panda_bringup cartesian_impedance_controller --ros-args \
 ```
 
 **C2:**
-
 ```bash
 ros2 topic echo /panda_cartesian_impedance_controller/initial_pose \
   --qos-durability transient_local --once \
@@ -504,7 +538,7 @@ mappers. Do not add a separate mock measured-pose publisher.
 python3 - <<'PY'
 from pathlib import Path
 import yaml
-r = yaml.safe_load(Path('/ws/src/franka_teleop_controller/config/teleoperation_runtime.yaml').read_text())
+r = yaml.safe_load(Path('/ws/src/teleop_bringup/config/teleoperation_runtime.yaml').read_text())
 r['hand'].update(grasp_width_m=0.006, epsilon_inner_m=0.001, epsilon_outer_m=0.002)
 Path('/ws/log/commissioning/current/mock_runtime.yaml').write_text(yaml.safe_dump(r))
 PY
@@ -513,7 +547,7 @@ PY
 These dimensions are mock examples, not real object settings. **C1:**
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single start_bridge:=true \
   runtime_config:=/ws/log/commissioning/current/mock_runtime.yaml \
   recording_output_root:=/ws/log/commissioning/current/mock_bags \
@@ -521,7 +555,8 @@ ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
 ```
 
 Controller, mapper, separate Hand worker, left Menu recorder and bridge start.
-No automatic home/calibration/grasp/recording occurs. **C2:**
+No automatic home/grasp/recording occurs. With `start_hand:=true`, the Hand
+worker automatically calibrates once at startup. **C2:**
 
 ```bash
 ros2 node list > /ws/log/commissioning/current/mock-nodes.txt
@@ -579,6 +614,9 @@ section 2's H1 reverse commands: holding trigger must not resume; release/press
 is required. Recenter also requires fresh reengagement. Record each fault/recovery.
 
 ### 3.3 Mock Hand calibration and toggle
+
+The launched Hand worker calibrates automatically. The service below is only
+for deliberate recalibration after startup or a calibration fault.
 
 Stop C2/C3 echoes. **C3:**
 
@@ -653,11 +691,11 @@ paths. Only selected topics published at start are included; absent topics
 are omitted for that episode. Record bag paths. Failures appear in status and
 adjacent `.recorder.log`.
 
-Selection is configurable through `src/quest_teleop/config/recording.yaml` or
+Selection is configurable through `src/recording/config/recording.yaml` or
 launch overrides. Example **C1**, after stopping the previous launch:
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single start_bridge:=true \
   recording_topics:='["/panda_1/controller_status","/panda_1/cbf_status","/panda_1/robot_state"]' \
   recording_output_root:=/ws/log/commissioning/current/mock_bags
@@ -669,7 +707,7 @@ Ctrl+C C1 and wait for exit before each new launch. Stop observers as needed.
 **C1, single-left:**
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single single_controller:=left start_bridge:=true \
   runtime_config:=/ws/log/commissioning/current/mock_runtime.yaml
 ```
@@ -679,7 +717,7 @@ left **X** held one second then released homes it; right A/trigger does not.
 Stop it. **C1, dual:**
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=dual start_bridge:=true \
   arms_config:=/ws/src/quest_teleop/config/arms_two_mock.yaml \
   runtime_config:=/ws/log/commissioning/current/mock_runtime.yaml \
@@ -702,7 +740,8 @@ Substitute `homing_status`, `gripper_events`, `cbf_status` or
 trigger enables only its arm; X homes left, A homes right independently;
 both filter statuses healthy; dual bag contains both active arms.
 
-For Hand, stop C2 echo and calibrate both explicitly:
+Both started Hand workers calibrate automatically. For deliberate
+recalibration, stop C2 echo, then calibrate both:
 
 ```bash
 # C2
@@ -723,7 +762,7 @@ After the initial major build, run acceptance once. Stop C1 launches and C2/C3
 observers first to avoid topic/port conflicts. **C1:**
 
 ```bash
-colcon test --packages-select quest_teleop franka_teleop_controller \
+colcon test --packages-select quest_teleop recording safety_filter teleop_controllers teleop_gripper teleop_bringup \
   --event-handlers console_direct+ \
   2>&1 | tee /ws/log/commissioning/current/mock-tests.txt
 colcon test-result --all --verbose \
@@ -738,7 +777,7 @@ aggregate counts need not equal the handoff's 81 individual cases.
 Optional explicit failure check, **C1, mock only**, no other owner:
 
 ```bash
-ros2 run franka_teleop_controller cartesian_impedance_controller --ros-args \
+ros2 run teleop_controllers cartesian_impedance_controller --ros-args \
   -r __ns:=/cbf_failure_check -p backend:=mock \
   -p cbf.table_height:=2.0 -p cbf.maximum_failures:=3 \
   2>&1 | tee /ws/log/commissioning/current/mock-cbf-failure.txt
@@ -849,6 +888,23 @@ Log out/in for limits. **Pass:** PREEMPT_RT running, `/sys/kernel/realtime` is
 `1`. Compose already grants `SYS_NICE`, `rtprio: 99`, unlimited memlock. Preserve
 that Docker configuration; it still depends on the actual host kernel.
 
+**H1, host terminal with controllers stopped:** inspect and set the CPU governor
+for realtime control, following [Franka's frequency-scaling guidance](https://frankarobotics.github.io/docs/troubleshooting.html#disabling-cpu-frequency-scaling).
+A realtime kernel alone does not prevent CPU frequency changes.
+
+```bash
+cat /sys/devices/system/cpu/cpufreq/policy*/scaling_governor \
+  | sort -u | tee log/commissioning/current/cpu-governor-before.txt
+printf '%s\n' performance | sudo tee \
+  /sys/devices/system/cpu/cpufreq/policy*/scaling_governor >/dev/null
+cat /sys/devices/system/cpu/cpufreq/policy*/scaling_governor \
+  | sort -u | tee log/commissioning/current/cpu-governor-after.txt
+```
+
+**Pass:** every policy reports `performance`. This setting may reset at reboot;
+recheck before hardware tests. The direct sysfs command avoids Ubuntu's
+`cpupower` wrapper requiring tools for the exact realtime kernel version.
+
 **C2, reopened/sourced container shell:**
 
 ```bash
@@ -917,7 +973,7 @@ s['robot_ip'] = 'REPLACE_WITH_FCI_IP'
 for k in ('reference_to_robot_xyzw','translation_scale','rotation_scale','feedforward_scale'):
     s[k] = None
 (p/'arms_single.yaml').write_text(yaml.safe_dump(a))
-r = yaml.safe_load(Path('src/franka_teleop_controller/config/teleoperation_runtime.yaml').read_text())
+r = yaml.safe_load(Path('src/teleop_bringup/config/teleoperation_runtime.yaml').read_text())
 for k in ('lambda_translation','lambda_rotation','gain_translation','gain_rotation',
           'maximum_torque_rate','homing_speed_factor'):
     r['controller'][k] = None
@@ -1007,14 +1063,14 @@ PY
 
 **Pass:** filled finite values, valid assignments/transforms and documented
 physical review/stop plan. Allowed keys are in
-`src/franka_teleop_controller/launch/cartesian_impedance_controller.launch.py`;
+`src/teleop_bringup/launch/teleoperation.launch.py`;
 unknown settings are rejected.
 
 Validate the commissioned basis/scales using **mock geometry**, not real FCI.
 Stop old launches. **C1:**
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=mock mode:=single start_bridge:=true start_hand:=false \
   arms_config:=/ws/log/commissioning/current/arms_single.yaml \
   runtime_config:=/ws/log/commissioning/current/mock_runtime.yaml
@@ -1038,6 +1094,83 @@ motion need their own acceptance. Stop legacy owners/demos and all mocks.
 One owner per physical arm is mandatory; do not launch separate homing/bringup
 controllers alongside this integrated runtime.
 
+### 5.0 Hardware recording test with the accepted teleoperation baseline
+
+Stop previous launches with Ctrl+C and wait for their processes to exit. In a
+new container terminal, source only `/ws/install/setup.bash`. A mock run does
+not change the robot configuration, but leftover mappers or mock measured-pose
+publishers can interfere with later hardware operation on the same topics.
+Before launching, `ros2 node list` should contain no `/panda_1/pose_mapper`, arm
+owner, `/quest_usb_bridge`, or previous recorder from a stopped teleop launch.
+Other application nodes may remain.
+
+**Operator:** activate FCI in Desk. **Headset:** run the existing connected
+Quest app and release the right index trigger. **C1:**
+
+```bash
+cd /ws
+source install/setup.bash
+mkdir -p log/commissioning/current
+set -o pipefail
+ros2 launch teleop_bringup teleoperation.launch.py \
+  backend:=hardware operator_confirm:=true mode:=single single_controller:=right \
+  start_controller:=true start_mapper:=true start_bridge:=true \
+  start_hand:=false homing_enabled:=false cbf_enabled:=false \
+  mock_measured_pose:=false recording_enabled:=true recording_mode:=menu \
+  arms_config:=/ws/log/commissioning/current/arms_single.yaml \
+  runtime_config:=/ws/log/commissioning/current/runtime_hardware.yaml \
+  recording_output_root:=/ws/log/commissioning/current/hardware_bags \
+  2>&1 | tee /ws/log/commissioning/current/hardware-recording.txt
+```
+
+This uses the accepted CBF-disabled hardware baseline. Input/model/actuator
+guards remain enforced. Homing and gripper motion are omitted from this recording
+test. The owner must report `hardware backend`, and the bridge must report
+`Quest TCP client connected`.
+
+**C2**, a second terminal in the same container:
+
+```bash
+source /ws/install/setup.bash
+ros2 topic info /panda_1/cartesian_teleop_command --verbose
+ros2 topic info /panda_1/teleop_anchor_pose --verbose
+ros2 topic echo /quest/recording_status --qos-durability transient_local
+```
+
+Expect one mapper publisher on the command topic and one arm-owner publisher
+on the measured-pose topic. Duplicate publishers indicate a leftover launch;
+stop it before testing. On Quest, release left Menu then press it once. Status
+must report `recording`, an output path and selected topics. Release the right
+trigger fully, then hold it and make the reviewed small motion. Verify the
+physical arm follows, then release the trigger. After about ten seconds,
+release/press left Menu again. Wait for `idle` with `bag finalized`.
+
+Stop the status echo with Ctrl+C and inspect the latest finalized episode:
+
+```bash
+BAG_DIR=$(python3 - <<'PY'
+from pathlib import Path
+root = Path('/ws/log/commissioning/current/hardware_bags')
+files = list(root.glob('*/metadata.yaml'))
+if not files:
+    raise SystemExit('No finalized hardware bag found')
+print(max(files, key=lambda p: p.stat().st_mtime).parent)
+PY
+)
+ros2 bag info "$BAG_DIR" \
+  | tee /ws/log/commissioning/current/hardware-bag-info.txt
+```
+
+**Pass:** duration approximately matches the episode; raw right input, mapped
+commands, target/measured pose and robot state have nonzero message counts.
+Compare target and measured pose during the physical motion. Only published
+topics are selected at episode start; Hand topics may be absent. Repeat Menu
+start/stop and verify a different output path with the first episode preserved.
+For shutdown finalization, start a further episode, then Ctrl+C C1 and wait for
+exit; its bag must contain `metadata.yaml` and be readable with `ros2 bag info`.
+If following fails, capture `bash scripts/teleop_diagnostics.sh /panda_1 30`
+in C2 while repeating trigger release/hold, rather than restarting more owners.
+
 ### 5.1 Single-arm measured hold, timing and stopping
 
 **Operator:** verify load/tool/start pose, cleared area, observer/stop and Desk
@@ -1045,7 +1178,7 @@ FCI activation. **Headset:** triggers/grips released; do not press A/X.
 **C1:**
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=hardware operator_confirm:=true mode:=single single_controller:=right \
   start_bridge:=true start_hand:=false \
   arms_config:=/ws/log/commissioning/current/arms_single.yaml \
@@ -1094,6 +1227,35 @@ Write results in `verification.md` before allowing movement.
 
 ### 5.2 Small single-arm motion and loss/recovery
 
+For an explicit diagnostic comparison without CBF constraints, add
+`cbf_enabled:=false` to the integrated launch command. The default is `true`.
+This disables joint position/velocity/acceleration and table/self/inter-arm/
+obstacle CBF constraints and the iterative QP. Trigger release/hold, tracking,
+freshness, workspace envelope, torque magnitude/slew limits, model validity,
+realtime deadlines and Franka's built-in protections remain in place. The
+controller logs the disabled mode and `/panda_1/cbf_status` reports
+`solver_status: disabled_actuator_bounds_only`. This is a diagnostic comparison
+with reduced software protection: use the already reviewed small single-arm
+test, Hand disabled, and operator stop arrangement. No homing or dual-arm
+collision acceptance can be inferred from this comparison. Remove the argument
+or set `cbf_enabled:=true` to restore CBF on the next launch.
+
+If the owner runs but the arm does not follow, collect the full input chain in
+another **sourced ROS container terminal** while the launch remains running:
+
+```bash
+bash /ws/scripts/teleop_diagnostics.sh /panda_1 15
+```
+
+During those 15 seconds, use the right index-trigger release/hold gesture and
+the already reviewed small displacement. The script only subscribes; it sends
+no robot commands. It saves right input, mapped command, measured pose,
+controller status and CBF status together under the printed commissioning
+directory. Inspect `input_valid`, `motion_enabled`, controller `reason`,
+`fallback_active`, `solver_status` and target/measured position changes. Empty
+files indicate missing samples in that terminal's ROS environment, not evidence
+that the arm is following. Preserve stderr files and the environment manifest.
+
 Restart the same C1 command after deliberate recovery/operator recheck.
 **C2:**
 
@@ -1135,7 +1297,10 @@ investigate rather than lowering safety thresholds.
 
 After reviewing actual object settings, pinch clearance and calibration stroke,
 restart the **5.1 C1 command** with `start_hand:=true` instead of false. Worker
-startup does not calibrate/move fingers. Keep arm trigger released.
+startup now calibrates automatically: keep the fingers empty and clear and
+the arm trigger released. Wait for `calibrated: true` and `busy: false` on
+`/panda_1/gripper_events` before testing grip toggles. Use the manual procedure
+below only when deliberate recalibration is needed.
 
 Stop C3's earlier observer with Ctrl+C, then **C3:**
 
@@ -1184,6 +1349,11 @@ ros2 topic echo /panda_1/cbf_status
 **Headset:** trigger released; hold A at least one second,
 release. **Pass:** one request, smooth approved motion, `succeeded` after
 settling, no stop failure/robot/CBF/timing fault or physical clearance violation.
+An arm that looks near home may still be in `homing`; pressing its trigger then
+cancels the request. Wait for `succeeded`, then release the trigger again and
+press/hold it to resume teleoperation. The owner remains connected. Cancellation
+decelerates and captures measured joint hold once velocity is low; it does not
+require reaching the unfinished home goal before returning to Cartesian hold.
 From an approved trajectory portion, test cancellation by trigger press or
 approved input loss: `stopping` then `cancelled`/measured hold, fresh release/
 press required, no automatic home restart. A stop-failed/fatal path ends FCI
@@ -1253,7 +1423,7 @@ PY
 For individual acceptance using the dual files, **C1** (one launch at a time):
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=hardware operator_confirm:=true mode:=single single_controller:=left \
   start_bridge:=true start_hand:=false \
   arms_config:=/ws/log/commissioning/current/arms_dual.yaml \
@@ -1268,7 +1438,7 @@ After single passes, shared geometry/timing review, both FCI activations and
 both triggers released, **C1** starts **one dual owner**:
 
 ```bash
-ros2 launch franka_teleop_controller cartesian_impedance_controller.launch.py \
+ros2 launch teleop_bringup teleoperation.launch.py \
   backend:=hardware operator_confirm:=true mode:=dual \
   start_bridge:=true start_hand:=false \
   arms_config:=/ws/log/commissioning/current/arms_dual.yaml \
@@ -1327,7 +1497,7 @@ finalization. **H1:** finish and archive the record/configs/logs/bags/traces:
 
 ```bash
 nano log/commissioning/current/verification.md
-cp src/franka_teleop_controller/config/teleoperation_runtime.yaml \
+cp src/teleop_bringup/config/teleoperation_runtime.yaml \
   log/commissioning/current/shipped-runtime-reference.yaml
 tar -czf "log/commissioning/commissioning-$(date +%Y%m%d-%H%M%S).tar.gz" \
   -C log/commissioning current

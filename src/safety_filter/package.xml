@@ -1,0 +1,17 @@
+<?xml version="1.0"?>
+<package format="3">
+  <name>safety_filter</name>
+  <version>0.1.0</version>
+  <description>Panda CBF-QP constraints, solver and coherent safety coordination.</description>
+  <maintainer email="maintainer@example.com">Franka Teleoperation</maintainer>
+  <license>Apache-2.0</license>
+  <buildtool_depend>ament_cmake</buildtool_depend>
+  <depend>eigen</depend>
+  <exec_depend>launch</exec_depend>
+  <exec_depend>launch_ros</exec_depend>
+  <exec_depend>ament_index_python</exec_depend>
+  <exec_depend>python3-yaml</exec_depend>
+  <exec_depend>quest_teleop</exec_depend>
+  <test_depend>ament_cmake_gtest</test_depend>
+  <export><build_type>ament_cmake</build_type></export>
+</package>

@@ -33,7 +33,23 @@ Both pass through the same filter before torque is returned.
   reported as fatal input faults. Invalid rows are never silently disabled.
   Solver failure returns a bounded fallback and explicit constraint violation;
   fallback is not presented as geometrically safe.
+- Legacy hardware end-effector rotations may include float-rounded `0.7071`
+  coefficients. The hardware adapter orthonormalizes only near-rigid measured
+  end-effector/model end-effector poses (finite homogeneous matrix, positive
+  determinant, determinant/orthogonality errors and correction bounded by
+  `1e-4`). Translation and Jacobians are preserved; joint/flange poses remain
+  raw. The strict filter rotation checks remain `1e-8`. Reflections, degenerate
+  and substantially distorted transforms still stop control. This follows the
+  pinned libfranka 0.9.1+ orthonormalized-rotation convention; it does not change
+  Desk's configured tool transform or load.
 - Fixed solver dimensions and numeric storage are allocated during configure.
+  The CSC matrix includes only structurally possible coefficients: one per
+  actuator row, seven for same-arm dynamics/geometry, and fourteen for coupled
+  inter-arm rows. Configured inactive-arm/disabled barriers have no solver
+  coefficients and are omitted from the solver's fixed row mapping. Logical
+  rows and their original bounds remain available for
+  independent feasibility checking; distance-activated rows keep their full
+  possible support. The pattern never changes in the realtime path.
   Runtime results use constant status strings, fixed model arrays and no heap
   allocation. Tests instrument both C++ allocation and solver malloc/calloc/
   realloc paths. OSQP signal handling/printing/MKL loading are disabled.
@@ -46,7 +62,26 @@ solver candidate is accepted only after an independent check of all current
 constraints within configured numerical tolerance. Parked-arm weighting
 changes the soft torque objective; it does not relax collision rows.
 
+After constructing and validating every current constraint, the filter first
+checks the nominal torque (with inactive-arm torques forced to zero). If its
+maximum violation is exactly zero, it is the exact optimum of the positive
+weighted squared-distance objective. Report `feasible_nominal`, zero solver
+iterations and zero violation, and seed OSQP's primal warm start. This path
+still validates the model, actuator bounds and all collision/joint rows and
+remains subject to the same runtime deadlines. Even violations smaller than
+the solver's feasibility tolerance require the normal iterative path.
+
 ## Runtime ownership, handoff and failure behavior
+
+The integrated launch defaults to `cbf_enabled:=true`. The explicitly requested
+diagnostic option `cbf_enabled:=false` sets `cbf.enabled=false`; the coordinator
+then uses the filter's actuator-bounds-only branch, without joint/collision
+barriers or QP iterations. All model/actuator validity, exact-cycle handoff,
+age/skew/deadline checks and consumer engagement gates remain. It reports
+`disabled_actuator_bounds_only` and a startup warning. This removes software
+collision and joint CBF protection; it is not normal commissioning acceptance
+and does not alter the robot's own protections or start physical control
+automatically. Runtime YAML cannot silently change this launch selection.
 
 One permanent owner per arm computes either Cartesian or homing nominal torque.
 A single coordinator owns the 14-variable QP and consumes fixed-size model
@@ -66,6 +101,22 @@ retains its own enforced realtime configuration. A bounded 25 microsecond wait
 lets the equally prioritized coordinator run even on a shared CPU. Thread
 placement, wakeup jitter and worst-case time must be measured on the deployment
 PC. No mutex or ROS work enters the torque/model/coordinator path.
+
+On a result/filter deadline stop, postmortem `CBF timing` lines report each
+owner's final cycle: callback-to-submit preparation, submit-to-owner-return wait,
+total elapsed time and the unchanged result deadline. A matching coordinator
+result adds submit-to-coordinator delay, coordinator work, filter duration and
+solver status. Missing or different-cycle results are marked unavailable (`-1`
+for times). Coordinator completion can occur after the owner has timed out;
+postmortem availability does not mean the torque was accepted. All formatting
+and logging occurs after the owner and coordinator threads have joined.
+Timing stops also report solver duration/iteration count and export a matching
+consumed model to `/tmp/franka-cbf-model-arm-N.txt` in the controller's container.
+The `CBF_MODEL_V1` text format contains arm index, cycle, period, then q, dq,
+coriolis, previous desired torque, nominal torque, mass, and each frame's pose
+and Jacobian. Matrices are column-major at 17-digit precision. Export is after
+all realtime threads have joined and never clears the stop. Each subsequent
+timing failure replaces that arm's file; copy it before another trial.
 
 The non-RT mock uses age/result limits of 100 ms, skew/filter limits of 50 ms.
 These fixture limits never apply to hardware. Its collision model follows Panda
@@ -118,4 +169,4 @@ current coding task.
 Sources: local thesis_ws `quest_fr3_controllers/{cbf_safety_filter,CBF_DESIGN}`,
 the pinned legacy `franka_description`/`franka_moveit_config` geometry and SRDF,
 and OSQP 0.6.3. Source copyright/license headers are retained. Packaged licenses
-and dependency notices are in `src/franka_teleop_controller/THIRD_PARTY_LICENSES`.
+and dependency notices are in `src/teleop_controllers/THIRD_PARTY_LICENSES`.

@@ -1,0 +1,2 @@
+# Built with Gradle and the Android NDK in the Android build container.
+# Exclude this tree from ROS workspace package discovery.

@@ -1,0 +1,10 @@
+# Topic profile; teleop_bringup controls whether recording is launched.
+# Derive raw state/command/monitor/measured pose/robot state/event topics per arm.
+# Robot/watchdog/gripper topics are included for later stages; absent publishers
+# do not prevent recording the topics that currently exist.
+include_default_topics: true
+# Add custom topics here. Set include_default_topics:false to replace the profile.
+topics: []
+# Absolute path inside the existing ROS container, mounted through /ws.
+output_root: /ws/log/quest_bags
+storage_id: sqlite3
