@@ -1,0 +1,21 @@
+# ninja log v5
+0	11	1791637531578210155	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-mkdir	338dde6bfcf585cb
+0	11	1791637531578210155	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-mkdir	338dde6bfcf585cb
+11	1851	1791637533418177965	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-download	9e14457df102303d
+11	1851	1791637533418177965	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-download	9e14457df102303d
+1851	1858	0	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-update	42a2adb8f3f17be1
+1851	1858	0	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-update	42a2adb8f3f17be1
+1858	1861	1791637533428177790	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-patch	98d9005ef7cd678a
+1858	1861	1791637533428177790	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-patch	98d9005ef7cd678a
+1861	1864	1791637533431177737	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-configure	c60857e1eb452c6
+1861	1864	1791637533431177737	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-configure	c60857e1eb452c6
+1864	1867	1791637533434177685	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-build	e6176d50e4c66df7
+1864	1867	1791637533434177685	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-build	e6176d50e4c66df7
+1867	1870	1791637533437177632	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-install	e428ffbe0582aa8e
+1867	1870	1791637533437177632	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-install	e428ffbe0582aa8e
+1870	1873	1791637533441177562	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-test	b34e930f5527aef3
+1870	1873	1791637533441177562	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-test	b34e930f5527aef3
+1873	1878	1791637533445177492	CMakeFiles/openxr_sdk-populate-complete	858ae58abf4e2d35
+1873	1878	1791637533445177492	openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-done	858ae58abf4e2d35
+1873	1878	1791637533445177492	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/openxr_sdk-populate-complete	858ae58abf4e2d35
+1873	1878	1791637533445177492	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-done	858ae58abf4e2d35

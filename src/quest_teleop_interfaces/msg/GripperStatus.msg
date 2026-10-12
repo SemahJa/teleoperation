@@ -1,0 +1,11 @@
+std_msgs/Header header
+string state
+string operation
+string message
+bool calibrated
+bool busy
+bool hardware_backend
+float64 width
+float64 maximum_width
+uint64 operations_started
+uint64 operations_completed

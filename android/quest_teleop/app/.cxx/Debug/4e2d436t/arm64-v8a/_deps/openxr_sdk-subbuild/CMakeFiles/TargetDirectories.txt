@@ -1,0 +1,3 @@
+/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/openxr_sdk-populate.dir
+/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/edit_cache.dir
+/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/rebuild_cache.dir

@@ -1,0 +1,14 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : [],
+		"files" : [],
+		"nodes" : []
+	},
+	"installers" : [],
+	"paths" : 
+	{
+		"build" : "_deps/openxr_sdk-build/include",
+		"source" : "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/include"
+	}
+}

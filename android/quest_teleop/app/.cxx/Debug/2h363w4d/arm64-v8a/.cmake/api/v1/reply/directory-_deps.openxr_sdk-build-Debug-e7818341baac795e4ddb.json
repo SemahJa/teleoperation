@@ -1,0 +1,43 @@
+{
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"install"
+		],
+		"files" : 
+		[
+			"/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 186,
+				"parent" : 0
+			}
+		]
+	},
+	"installers" : 
+	[
+		{
+			"backtrace" : 1,
+			"component" : "License",
+			"destination" : "share/doc/openxr",
+			"paths" : 
+			[
+				"/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/LICENSE"
+			],
+			"type" : "file"
+		}
+	],
+	"paths" : 
+	{
+		"build" : "_deps/openxr_sdk-build",
+		"source" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src"
+	}
+}

@@ -1,0 +1,39 @@
+{
+	"backtrace" : 1,
+	"backtraceGraph" : 
+	{
+		"commands" : 
+		[
+			"add_custom_target"
+		],
+		"files" : 
+		[
+			"/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/include/openxr/CMakeLists.txt"
+		],
+		"nodes" : 
+		[
+			{
+				"file" : 0
+			},
+			{
+				"command" : 0,
+				"file" : 0,
+				"line" : 39,
+				"parent" : 0
+			}
+		]
+	},
+	"folder" : 
+	{
+		"name" : "Generated"
+	},
+	"id" : "generate_openxr_header::@60d06cd59189445ad78f",
+	"name" : "generate_openxr_header",
+	"paths" : 
+	{
+		"build" : "_deps/openxr_sdk-build/include/openxr",
+		"source" : "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/include/openxr"
+	},
+	"sources" : [],
+	"type" : "UTILITY"
+}

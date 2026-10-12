@@ -1,4 +1,8 @@
 repositories:
+  osqp_0_6_3:
+    type: git
+    url: https://github.com/osqp/osqp.git
+    version: 0dd00a578cf1c2691c5c379965d504c75bf6cfad
   libfranka_0_9_2:
     type: git
     url: https://github.com/LCAS/libfranka.git

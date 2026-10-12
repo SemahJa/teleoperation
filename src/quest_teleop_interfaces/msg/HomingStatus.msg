@@ -1,0 +1,12 @@
+std_msgs/Header header
+string controller_id
+string phase
+string message
+uint64 request_id
+bool active
+bool stop_failed
+float64 elapsed_seconds
+float64 maximum_joint_position_error
+float64 maximum_joint_velocity
+float64[7] desired_joint_position
+float64[7] desired_joint_velocity

@@ -1,7 +1,7 @@
 # Container workflow
 
 The image preinstalls ROS 2 Humble desktop tools, RViz, PlotJuggler, and the legacy Panda build
-dependencies. The only rosdep key intentionally skipped below is the legacy repository's
+dependencies. Its ROS base image is pinned by digest. The only rosdep key intentionally skipped below is the legacy repository's
 unavailable lint-only `ament_cmake_clang_format` key.
 
 From the workspace root, build and enter the development container:
@@ -26,3 +26,17 @@ bring-up, boot the host into its PREEMPT_RT kernel. Docker shares the host kerne
 does not create realtime capability. This compose configuration grants `SYS_NICE`,
 realtime priority, and memory locking, but they are only effective after the host RT
 kernel and user limits are configured. Do not use Docker Desktop for FCI.
+
+## Quest Android build and ADB
+
+The native C++ OpenXR toolchain and USB ADB service are defined separately. Debug signing credentials persist in the `android-signing` Docker volume so APK updates keep the same signature:
+
+    docker compose -f docker/android-compose.yaml build
+    docker compose -f docker/android-compose.yaml run --rm android-build gradle assembleDebug
+
+For USB deployment, authorize the Quest over a physical cable, then:
+
+    docker compose -f docker/android-compose.yaml up -d quest-adb-server
+    docker compose -f docker/android-compose.yaml run --rm quest-adb adb devices
+
+The ADB server container has direct `/dev/bus/usb` access and is not exposed on a host port. Never use wireless ADB. USB permissions and device hotplug are host-dependent. See `docs/DEVELOPMENT.md` for details.

@@ -1,0 +1,200 @@
+{
+  "buildFiles": [
+    "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/CMakeLists.txt",
+    "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/include/CMakeLists.txt",
+    "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/include/openxr/CMakeLists.txt",
+    "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/src/CMakeLists.txt",
+    "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a/_deps/openxr_sdk-src/src/loader/CMakeLists.txt",
+    "/workspace/android/quest_teleop/app/src/main/cpp/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/opt/android-sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/opt/android-sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/workspace/android/quest_teleop/app/.cxx/Debug/4e2d436t/arm64-v8a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {
+    "Nightly::@5ec1d14edc184a6eb86f": {
+      "artifactName": "Nightly",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousSubmit::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousSubmit",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalMemCheck::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalMemCheck",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyBuild::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyBuild",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousStart::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousStart",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "xr_global_generated_files::@e0bf62111ef0d0b31703": {
+      "artifactName": "xr_global_generated_files",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "generate_openxr_header::@60d06cd59189445ad78f": {
+      "artifactName": "generate_openxr_header",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlySubmit::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlySubmit",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalStart::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalStart",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyMemoryCheck::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyMemoryCheck",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousMemCheck::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousMemCheck",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousUpdate::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousUpdate",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "Continuous::@5ec1d14edc184a6eb86f": {
+      "artifactName": "Continuous",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousBuild::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousBuild",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousTest::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousTest",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalUpdate::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalUpdate",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyMemCheck::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyMemCheck",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousConfigure::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousConfigure",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ContinuousCoverage::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ContinuousCoverage",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalBuild::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalBuild",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "Experimental::@5ec1d14edc184a6eb86f": {
+      "artifactName": "Experimental",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalTest::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalTest",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalConfigure::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalConfigure",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyTest::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyTest",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "quest_teleop_native::@6890427a1f51a3e7e1df": {
+      "artifactName": "quest_teleop_native",
+      "abi": "arm64-v8a",
+      "output": "/workspace/android/quest_teleop/app/build/intermediates/cxx/Debug/4e2d436t/obj/arm64-v8a/libquest_teleop_native.so",
+      "runtimeFiles": [
+        "/workspace/android/quest_teleop/app/build/intermediates/cxx/Debug/4e2d436t/obj/arm64-v8a/libopenxr_loader.so"
+      ]
+    },
+    "ExperimentalSubmit::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalSubmit",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "ExperimentalCoverage::@5ec1d14edc184a6eb86f": {
+      "artifactName": "ExperimentalCoverage",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyUpdate::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyUpdate",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "openxr_loader::@115de509452d5051769c": {
+      "artifactName": "openxr_loader",
+      "abi": "arm64-v8a",
+      "output": "/workspace/android/quest_teleop/app/build/intermediates/cxx/Debug/4e2d436t/obj/arm64-v8a/libopenxr_loader.so",
+      "runtimeFiles": []
+    },
+    "NightlyConfigure::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyConfigure",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyStart::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyStart",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "xr_common_generated_files::@e0bf62111ef0d0b31703": {
+      "artifactName": "xr_common_generated_files",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "NightlyCoverage::@5ec1d14edc184a6eb86f": {
+      "artifactName": "NightlyCoverage",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    },
+    "uninstall::@5ec1d14edc184a6eb86f": {
+      "artifactName": "uninstall",
+      "abi": "arm64-v8a",
+      "runtimeFiles": []
+    }
+  }
+}

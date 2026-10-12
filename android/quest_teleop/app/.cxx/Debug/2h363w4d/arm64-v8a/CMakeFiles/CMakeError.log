@@ -1,0 +1,289 @@
+Performing C++ SOURCE FILE Test HAVE_FILESYSTEM_IN_STD failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_297a7 && [1/2] Building CXX object CMakeFiles/cmTC_297a7.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_297a7.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_FILESYSTEM_IN_STD -I/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/src/common -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror -DCMAKE_CXX_STANDARD=14 -DCMAKE_CXX_STANDARD_REQUIRED=TRUE -fPIC -std=c++14 -MD -MT CMakeFiles/cmTC_297a7.dir/src.cxx.o -MF CMakeFiles/cmTC_297a7.dir/src.cxx.o.d -o CMakeFiles/cmTC_297a7.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:8:15: error: use of undeclared identifier 'is_regular_file'
+        (void)is_regular_file("/");
+              ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <stdfs_conditions.h>
+    
+    #if defined(USE_FINAL_FS) && USE_FINAL_FS
+    #include <filesystem>
+    using namespace std::filesystem;
+    #endif
+    int main() {
+        (void)is_regular_file("/");
+        return 0;
+    }
+    
+    
+Performing C++ SOURCE FILE Test HAVE_FILESYSTEM_IN_STDEXPERIMENTAL failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_5edf6 && [1/2] Building CXX object CMakeFiles/cmTC_5edf6.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_5edf6.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_FILESYSTEM_IN_STDEXPERIMENTAL -I/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/src/common -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror -DCMAKE_CXX_STANDARD=14 -DCMAKE_CXX_STANDARD_REQUIRED=TRUE -fPIC -std=c++14 -MD -MT CMakeFiles/cmTC_5edf6.dir/src.cxx.o -MF CMakeFiles/cmTC_5edf6.dir/src.cxx.o.d -o CMakeFiles/cmTC_5edf6.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:8:15: error: use of undeclared identifier 'is_regular_file'
+        (void)is_regular_file("/");
+              ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <stdfs_conditions.h>
+    
+    #if defined(USE_EXPERIMENTAL_FS) && USE_EXPERIMENTAL_FS
+    #include <experimental/filesystem>
+    using namespace std::experimental::filesystem;
+    #endif
+    int main() {
+        (void)is_regular_file("/");
+        return 0;
+    }
+    
+    
+Performing C++ SOURCE FILE Test HAVE_FILESYSTEM_IN_STD_17 failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_8ee34 && [1/2] Building CXX object CMakeFiles/cmTC_8ee34.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_8ee34.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_FILESYSTEM_IN_STD_17 -I/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/src/common -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror -DCMAKE_CXX_STANDARD=17 -DCMAKE_CXX_STANDARD_REQUIRED=TRUE -fPIC -std=c++14 -MD -MT CMakeFiles/cmTC_8ee34.dir/src.cxx.o -MF CMakeFiles/cmTC_8ee34.dir/src.cxx.o.d -o CMakeFiles/cmTC_8ee34.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:8:15: error: use of undeclared identifier 'is_regular_file'
+        (void)is_regular_file("/");
+              ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <stdfs_conditions.h>
+    
+    #if defined(USE_FINAL_FS) && USE_FINAL_FS
+    #include <filesystem>
+    using namespace std::filesystem;
+    #endif
+    int main() {
+        (void)is_regular_file("/");
+        return 0;
+    }
+    
+    
+Performing C++ SOURCE FILE Test HAVE_FILESYSTEM_WITHOUT_LIB failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_384ea && [1/2] Building CXX object CMakeFiles/cmTC_384ea.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_384ea.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_FILESYSTEM_WITHOUT_LIB -I/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/src/common -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror  -fPIE -std=c++14 -MD -MT CMakeFiles/cmTC_384ea.dir/src.cxx.o -MF CMakeFiles/cmTC_384ea.dir/src.cxx.o.d -o CMakeFiles/cmTC_384ea.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:12:15: error: use of undeclared identifier 'is_regular_file'
+        (void)is_regular_file("/");
+              ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <stdfs_conditions.h>
+    
+    #if defined(USE_FINAL_FS) && USE_FINAL_FS
+    #include <filesystem>
+    using namespace std::filesystem;
+    #endif
+    #if defined(USE_EXPERIMENTAL_FS) && USE_EXPERIMENTAL_FS
+    #include <experimental/filesystem>
+    using namespace std::experimental::filesystem;
+    #endif
+    int main() {
+        (void)is_regular_file("/");
+        return 0;
+    }
+    
+    
+Performing C++ SOURCE FILE Test HAVE_FILESYSTEM_NEEDING_LIBSTDCXXFS failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_ddb28 && [1/2] Building CXX object CMakeFiles/cmTC_ddb28.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_ddb28.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_FILESYSTEM_NEEDING_LIBSTDCXXFS -I/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/src/common -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror  -fPIE -std=c++14 -MD -MT CMakeFiles/cmTC_ddb28.dir/src.cxx.o -MF CMakeFiles/cmTC_ddb28.dir/src.cxx.o.d -o CMakeFiles/cmTC_ddb28.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:12:15: error: use of undeclared identifier 'is_regular_file'
+        (void)is_regular_file("/");
+              ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <stdfs_conditions.h>
+    
+    #if defined(USE_FINAL_FS) && USE_FINAL_FS
+    #include <filesystem>
+    using namespace std::filesystem;
+    #endif
+    #if defined(USE_EXPERIMENTAL_FS) && USE_EXPERIMENTAL_FS
+    #include <experimental/filesystem>
+    using namespace std::experimental::filesystem;
+    #endif
+    int main() {
+        (void)is_regular_file("/");
+        return 0;
+    }
+    
+    
+Performing C++ SOURCE FILE Test HAVE_FILESYSTEM_NEEDING_LIBCXXFS failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_ad647 && [1/2] Building CXX object CMakeFiles/cmTC_ad647.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_ad647.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_FILESYSTEM_NEEDING_LIBCXXFS -I/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-src/src/common -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror  -fPIE -std=c++14 -MD -MT CMakeFiles/cmTC_ad647.dir/src.cxx.o -MF CMakeFiles/cmTC_ad647.dir/src.cxx.o.d -o CMakeFiles/cmTC_ad647.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:12:15: error: use of undeclared identifier 'is_regular_file'
+        (void)is_regular_file("/");
+              ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <stdfs_conditions.h>
+    
+    #if defined(USE_FINAL_FS) && USE_FINAL_FS
+    #include <filesystem>
+    using namespace std::filesystem;
+    #endif
+    #if defined(USE_EXPERIMENTAL_FS) && USE_EXPERIMENTAL_FS
+    #include <experimental/filesystem>
+    using namespace std::experimental::filesystem;
+    #endif
+    int main() {
+        (void)is_regular_file("/");
+        return 0;
+    }
+    
+    
+Performing C++ SOURCE FILE Test HAVE_EGL failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_57531 && [1/2] Building CXX object CMakeFiles/cmTC_57531.dir/src.cxx.o
+FAILED: CMakeFiles/cmTC_57531.dir/src.cxx.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++ --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DHAVE_EGL  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -std=c++17 -Wall -Wextra -Werror  -fPIE -std=c++14 -MD -MT CMakeFiles/cmTC_57531.dir/src.cxx.o -MF CMakeFiles/cmTC_57531.dir/src.cxx.o.d -o CMakeFiles/cmTC_57531.dir/src.cxx.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:5:12: error: unused variable 'x' [-Werror,-Wunused-variable]
+    EGLint x = 0; EGLDisplay dpy = 0; EGLContext ctx = 0;
+           ^
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:4:14: error: unused parameter 'argc' [-Werror,-Wunused-parameter]
+int main(int argc, char *argv[]) {
+             ^
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.cxx:4:26: error: unused parameter 'argv' [-Werror,-Wunused-parameter]
+int main(int argc, char *argv[]) {
+                         ^
+3 errors generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+
+#include <EGL/egl.h>
+
+int main(int argc, char *argv[]) {
+    EGLint x = 0; EGLDisplay dpy = 0; EGLContext ctx = 0;
+    eglDestroyContext(dpy, ctx);
+}
+Performing C SOURCE FILE Test CMAKE_HAVE_LIBC_PTHREAD failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_860b9 && [1/2] Building C object CMakeFiles/cmTC_860b9.dir/src.c.o
+FAILED: CMakeFiles/cmTC_860b9.dir/src.c.o 
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -DCMAKE_HAVE_LIBC_PTHREAD  -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security   -fPIE -MD -MT CMakeFiles/cmTC_860b9.dir/src.c.o -MF CMakeFiles/cmTC_860b9.dir/src.c.o.d -o CMakeFiles/cmTC_860b9.dir/src.c.o -c /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.c
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.c:13:3: error: call to undeclared function 'pthread_cancel'; ISO C99 and later do not support implicit function declarations [-Wimplicit-function-declaration]
+  pthread_cancel(thread);
+  ^
+/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp/src.c:13:3: note: did you mean 'pthread_once'?
+/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot/usr/include/pthread.h:258:5: note: 'pthread_once' declared here
+int pthread_once(pthread_once_t* _Nonnull __once, void (* _Nonnull __init_routine)(void));
+    ^
+1 error generated.
+ninja: build stopped: subcommand failed.
+
+
+Source file was:
+#include <pthread.h>
+
+static void* test_func(void* data)
+{
+  return data;
+}
+
+int main(void)
+{
+  pthread_t thread;
+  pthread_create(&thread, NULL, test_func, NULL);
+  pthread_detach(thread);
+  pthread_cancel(thread);
+  pthread_join(thread, NULL);
+  pthread_atfork(NULL, NULL, NULL);
+  pthread_exit(NULL);
+
+  return 0;
+}
+
+Determining if the function pthread_create exists in the pthreads failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_3e1d4 && [1/2] Building C object CMakeFiles/cmTC_3e1d4.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_3e1d4
+FAILED: cmTC_3e1d4 
+: && /opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=pthread_create -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments CMakeFiles/cmTC_3e1d4.dir/CheckFunctionExists.c.o -o cmTC_3e1d4  -lpthreads  -latomic -lm && :
+ld.lld: error: unable to find library -lpthreads
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if the function pthread_create exists in the pthread failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_394af && [1/2] Building C object CMakeFiles/cmTC_394af.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_394af
+FAILED: cmTC_394af 
+: && /opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=pthread_create -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments CMakeFiles/cmTC_394af.dir/CheckFunctionExists.c.o -o cmTC_394af  -lpthread  -latomic -lm && :
+ld.lld: error: unable to find library -lpthread
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if the function secure_getenv exists failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_806ad && [1/2] Building C object CMakeFiles/cmTC_806ad.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_806ad
+FAILED: cmTC_806ad 
+: && /opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=secure_getenv -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments CMakeFiles/cmTC_806ad.dir/CheckFunctionExists.c.o -o cmTC_806ad  -latomic -lm && :
+ld.lld: error: undefined symbol: secure_getenv
+>>> referenced by CheckFunctionExists.c:17 (/opt/android-sdk/cmake/3.22.1/share/cmake-3.22/Modules/CheckFunctionExists.c:17)
+>>>               CMakeFiles/cmTC_806ad.dir/CheckFunctionExists.c.o:(main)
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+
+Determining if the function __secure_getenv exists failed with the following output:
+Change Dir: /workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/CMakeTmp
+
+Run Build Command(s):/opt/android-sdk/cmake/3.22.1/bin/ninja cmTC_a65a3 && [1/2] Building C object CMakeFiles/cmTC_a65a3.dir/CheckFunctionExists.c.o
+[2/2] Linking C executable cmTC_a65a3
+FAILED: cmTC_a65a3 
+: && /opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/bin/clang --target=aarch64-none-linux-android29 --sysroot=/opt/android-sdk/ndk/26.3.11579264/toolchains/llvm/prebuilt/linux-x86_64/sysroot -g -DANDROID -fdata-sections -ffunction-sections -funwind-tables -fstack-protector-strong -no-canonical-prefixes -D_FORTIFY_SOURCE=2 -Wformat -Werror=format-security  -DCHECK_FUNCTION_EXISTS=__secure_getenv -Wl,--build-id=sha1 -Wl,--no-rosegment -Wl,--no-undefined-version -Wl,--fatal-warnings -Wl,--no-undefined -Qunused-arguments CMakeFiles/cmTC_a65a3.dir/CheckFunctionExists.c.o -o cmTC_a65a3  -latomic -lm && :
+ld.lld: error: undefined symbol: __secure_getenv
+>>> referenced by CheckFunctionExists.c:17 (/opt/android-sdk/cmake/3.22.1/share/cmake-3.22/Modules/CheckFunctionExists.c:17)
+>>>               CMakeFiles/cmTC_a65a3.dir/CheckFunctionExists.c.o:(main)
+clang: error: linker command failed with exit code 1 (use -v to see invocation)
+ninja: build stopped: subcommand failed.
+
+
+

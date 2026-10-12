@@ -1,0 +1,46 @@
+{
+	"sources" : 
+	[
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/openxr_sdk-populate"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/openxr_sdk-populate.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/CMakeFiles/openxr_sdk-populate-complete.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-build.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-configure.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-download.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-install.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-mkdir.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-patch.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-test.rule"
+		},
+		{
+			"file" : "/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/_deps/openxr_sdk-subbuild/openxr_sdk-populate-prefix/src/openxr_sdk-populate-stamp/openxr_sdk-populate-update.rule"
+		}
+	],
+	"target" : 
+	{
+		"labels" : 
+		[
+			"openxr_sdk-populate"
+		],
+		"name" : "openxr_sdk-populate"
+	}
+}

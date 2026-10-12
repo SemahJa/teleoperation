@@ -1,0 +1,45 @@
+services:
+  android-build:
+    build:
+      context: ..
+      dockerfile: docker/android.Dockerfile
+    image: franka-teleop-android:api34-ndk26.3-gradle8.7
+    working_dir: /workspace/android/quest_teleop
+    volumes:
+      - ../android/quest_teleop:/workspace/android/quest_teleop:rw
+      - gradle-cache:/root/.gradle
+      - android-signing:/root/.android
+    command: bash
+    stdin_open: true
+    tty: true
+
+  quest-adb:
+    image: franka-teleop-android:api34-ndk26.3-gradle8.7
+    network_mode: host
+    working_dir: /workspace/android/quest_teleop
+    volumes:
+      - ../android/quest_teleop:/workspace/android/quest_teleop:rw
+      - /dev/bus/usb:/dev/bus/usb:rw
+      - adb-keys:/root/.android
+    environment:
+      ADB_SERVER_SOCKET: tcp:127.0.0.1:5037
+    depends_on:
+      - quest-adb-server
+    command: ["bash", "-lc", "adb start-server; exec bash"]
+    stdin_open: true
+    tty: true
+
+  quest-adb-server:
+    image: franka-teleop-android:api34-ndk26.3-gradle8.7
+    network_mode: host
+    privileged: true
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb:rw
+      - adb-keys:/root/.android
+    command: ["adb", "-P", "5037", "nodaemon", "server"]
+    restart: unless-stopped
+
+volumes:
+  gradle-cache:
+  android-signing:
+  adb-keys:

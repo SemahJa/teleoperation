@@ -1,0 +1,6 @@
+# Explicit command: this moves the fingers. Both confirmations are required.
+bool empty_hand_confirm
+bool operator_confirm
+---
+bool accepted
+string message

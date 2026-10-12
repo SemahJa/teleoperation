@@ -1,0 +1,11 @@
+std_msgs/Header header
+bool hardware_backend
+bool motion_enabled
+string reason
+uint64 source_time_pc_monotonic_ns
+uint64 sequence
+uint64 command_queue_overflows
+bool torque_rate_limited
+bool torque_magnitude_limited
+float64[7] nominal_torque
+float64[7] commanded_torque
