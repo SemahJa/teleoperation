@@ -18,7 +18,7 @@ def setup(context):
     value = lambda key: LaunchConfiguration(key).perform(context)
     arms = load_arms(value('arms_config'))
     settings = load_runtime(value('safety_config'), arms)
-    params = {'cbf.'+k:v for k,v in settings.get('cbf', {}).items()}
+    params = {'cbf.'+k:v for k,v in settings.get('cbf', {}).items() if v != []}
     params['cbf.enabled'] = launch_bool(value('cbf_enabled'))
     return [SetParameter(name=k, value=v) for k,v in params.items()] + [
         LogInfo(msg='Loaded safety_filter parameters for the embedded arm-owner coordinator')]

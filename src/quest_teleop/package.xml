@@ -14,7 +14,7 @@
   <exec_depend>python3-yaml</exec_depend>
   <depend>geometry_msgs</depend>
   <depend>quest_teleop_interfaces</depend>
-  <depend>nlohmann_json</depend>
+  <depend>nlohmann-json-dev</depend>
   <depend>tf2</depend>
   <depend>tf2_ros</depend>
   <exec_depend>launch</exec_depend>

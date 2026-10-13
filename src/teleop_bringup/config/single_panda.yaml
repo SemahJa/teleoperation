@@ -1,0 +1,107 @@
+# Single-Panda template for teleop_bringup/teleoperation.launch.py.
+# Pass this path explicitly as runtime_config; no overall file is selected by default.
+# Package-local YAML files remain the defaults for standalone feature launches.
+# Physical values are software references: replace them with installation settings.
+pipeline:
+  mode: single
+  single_controller: right
+  backend: mock
+  start_bridge: true
+  start_mapper: true
+  start_controller: true
+  start_hand: true           # One empty-hand calibration moves the fingers.
+  homing_enabled: true
+  cbf_enabled: true
+  recording_enabled: true
+  mock_measured_pose: false  # Requires start_controller: false.
+  # operator_confirm is deliberately launch-only; hardware needs explicit true.
+
+quest:
+  bridge:
+    namespace: /
+    listen_port: 45454       # Match the Quest app and ADB reverse.
+    bind_address: 127.0.0.1
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10
+    max_clock_sync_age_ms: 3000
+    max_source_future_ms: 10
+    client_receive_timeout_ms: 500
+
+# One entry per robot. Mapping and controller/Hand input identity come from here.
+arms:
+  panda_1:
+    robot_ip: ""            # Actual FCI IP required for hardware.
+    namespace: /panda_1
+    base_frame: panda_1/panda_link0
+    # Hand selection comes from pipeline.single_controller.
+    command_topic: cartesian_teleop_command
+    target_pose_topic: target_pose
+    measured_pose_topic: teleop_anchor_pose
+    state_topic: robot_state
+    # Omit controller_state_topic to derive it from bridge namespace + hand.
+    # controller_state_topic: /quest_usb_bridge/right/controller_state
+    reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
+    translation_scale: 1.0
+    rotation_scale: 1.0
+    feedforward_scale: 1.0
+    twist_filter_cutoff_hz: 10.0
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10.0
+    max_source_future_ms: 10.0
+    min_derivative_dt_ms: 1.0
+    max_derivative_dt_ms: 100.0
+    trigger_engage: 0.75
+    trigger_release: 0.25
+
+controller:
+  lambda_translation: 50.0
+  lambda_rotation: 40.0
+  gain_translation: 20.0
+  gain_rotation: 2.5
+  maximum_torque_rate: 900.0
+  torque_limits: [87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0]
+  tool_offset_m: 0.1034
+  envelope_margin_m: 0.001
+  envelope_center: [0.0, 0.0, 0.333]
+  homing_speed_factor: 0.15
+  homing_timeout_seconds: 30.0
+  homing_stop_duration_seconds: 0.5
+  homing_stop_acceleration: 0.75
+  homing_stop_timeout_seconds: 5.0
+  homing_stiffness: [300.0, 300.0, 300.0, 300.0, 120.0, 100.0, 50.0]
+  homing_damping: [30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 5.0]
+
+hand:
+  speed_mps: 0.02
+  grasp_force_n: 5.0
+  open_width_m: -1.0        # Use calibrated maximum width.
+  grasp_width_m: -1.0      # Unknown object settings refuse grasp.
+  epsilon_inner_m: -1.0
+  epsilon_outer_m: -1.0
+  grip_press: 0.75
+  grip_release: 0.25
+  grip_debounce_ms: 50.0
+  command_timeout_ms: 100.0
+  max_clock_uncertainty_ms: 10.0
+  mock_operation_duration_ms: 100.0
+
+cbf:
+  table_height: 0.0
+  table_minimum_clearance: 0.02
+  self_minimum_clearance: 0.03
+  maximum_failures: 20
+  obstacle_centers: []      # Flat [x,y,z,...] in surveyed world coordinates.
+  obstacle_radii: []       # One radius per sphere; empty disables obstacles.
+
+# The single-arm world defaults to its base frame. If a surveyed external
+# world is needed, add arm_settings.panda_1.world_from_base_xyz_xyzw.
+
+recording:
+  mode: menu               # menu or continuous
+  namespace: /quest
+  left_controller_state_topic: ""  # Derive from left assignment/bridge namespace.
+  menu_debounce_seconds: 0.35
+  include_default_topics: true
+  topics: []               # Extend defaults, or replace with include_default_topics:false.
+  output_root: /ws/log/quest_bags
+  storage_id: sqlite3

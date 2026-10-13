@@ -47,21 +47,20 @@ class TeleoperationLaunchTest(unittest.TestCase):
             arms={s:dict(namespace=prefix+'/'+s,controller=s,base_frame=prefix.lstrip('/')+'/'+s+'/base',
                 controller_state_topic=prefix+'/'+s+'/raw') for s in statuses}
             config=root/'arms.yaml'; config.write_text(yaml.safe_dump(dict(arms=arms)))
-            runtime=root/'runtime.yaml'; runtime.write_text((Path(__file__).parents[1]/'config/teleoperation_runtime.yaml').read_text())
+            runtime=root/'runtime.yaml'
+            combined=yaml.safe_load((Path(__file__).parents[1]/'config/single_panda.yaml').read_text())
+            combined['arms']=arms
+            combined['pipeline']['start_bridge']=False
             record_config=root/'record.yaml'; record_config.write_text(yaml.safe_dump(dict(
                 include_default_topics=False,output_root=str(root/'bags'),storage_id='sqlite3',topics=[
                     prefix+'/right/controller_status',prefix+'/right/cartesian_teleop_command',
                     prefix+'/left/foreign_published',prefix+'/unpublished'])))
-            args=['ros2','launch','teleop_bringup','teleoperation.launch.py',
-                'backend:=mock','arms_config:='+str(config),'runtime_config:='+str(runtime),
-                'start_hand:='+str(record).lower(),'recording_enabled:='+str(record).lower(),
-                'left_controller_state_topic:='+prefix+'/left/raw','recording_config:='+str(record_config)]
-            # Node action doesn't take global CLI remaps. Status is namespaced /quest,
-            # so query only this launched recorder by namespace remapping in launch.
-            args+=['recording_namespace:='+prefix]
-            if mode!='single': args+=['mode:='+mode]
-            if side!='right': args+=['single_controller:='+side]
-            if not cbf_enabled: args+=['cbf_enabled:=false']
+            combined['recording'].update(yaml.safe_load(record_config.read_text()))
+            combined['pipeline'].update(backend='mock',mode=mode,single_controller=side,
+                start_hand=record,recording_enabled=record,cbf_enabled=cbf_enabled)
+            combined['recording'].update(left_controller_state_topic=prefix+'/left/raw',namespace=prefix)
+            runtime.write_text(yaml.safe_dump(combined))
+            args=['ros2','launch','teleop_bringup','teleoperation.launch.py','runtime_config:='+str(runtime)]
             log_path=root/'launch.log'
             with log_path.open('w') as log:
                 proc=subprocess.Popen(args,stdout=log,stderr=subprocess.STDOUT,start_new_session=True)

@@ -5,13 +5,16 @@ from launch import LaunchDescription
 from launch.actions import DeclareLaunchArgument, OpaqueFunction
 from launch.substitutions import LaunchConfiguration
 from launch_ros.actions import Node
-from quest_teleop.configuration import load_arms, select_arms, launch_bool
+from quest_teleop.configuration import load_arms, select_arms, launch_bool, read_mapping
+from quest_teleop.runtime_configuration import unified_settings, bridge_controller_topic
 import json
 from launch.actions import ExecuteProcess, LogInfo
 from recording.configuration import recording_plan
 
 def setup(context):
     value = lambda key: LaunchConfiguration(key).perform(context)
+    source = read_mapping(value('recording_config'))
+    debounce = unified_settings(source)[2]['menu_debounce_seconds'] if 'pipeline' in source else source.get('menu_debounce_seconds', .35)
     configured = load_arms(value('arms_config'))
     mode = value('mode')
     active = configured if mode == 'all' else select_arms(configured, mode, value('single_controller'))
@@ -22,10 +25,10 @@ def setup(context):
     if value('recording_mode') != 'menu': raise ValueError('recording_mode must be menu/continuous')
     inactive = [a.namespace for a in configured if a.name not in {b.name for b in active}]
     left = value('left_controller_state_topic') or next((a.parameters['controller_state_topic'] for a in configured
-        if a.parameters['controller_id']=='left'), '/quest_usb_bridge/left/controller_state')
+        if a.parameters['controller_id']=='left'), bridge_controller_topic(source, 'left'))
     return [Node(package='recording', executable='menu_recorder', namespace=value('recording_namespace'),
         output='screen', parameters=[dict(controller_state_topic=left, topics_json=json.dumps(plan.topics),
-            inactive_namespaces_json=json.dumps(inactive), output_root=str(Path(plan.output).parent), storage_id=plan.command[4])])]
+            inactive_namespaces_json=json.dumps(inactive), menu_debounce_seconds=float(debounce), output_root=str(Path(plan.output).parent), storage_id=plan.command[4])])]
 
 
 def generate_launch_description():

@@ -7,7 +7,7 @@ import uuid
 from quest_teleop.configuration import full_topic, read_mapping, boolean, _TOKEN
 
 def default_recording_topics(arms):
-    topics = ['/quest_usb_bridge/left/controller_state']
+    topics = []
     for arm in arms:
         p = arm.parameters
         topics.extend([p['controller_state_topic'], p['command_topic'], p['monitor_topic'],
@@ -30,6 +30,13 @@ class RecordingPlan:
 
 def recording_plan(path, arms, topics_override='', output_root_override=''):
     config = read_mapping(path)
+    from quest_teleop.runtime_configuration import unified_settings, bridge_controller_topic
+    source = config
+    if 'pipeline' in config:
+        recording = unified_settings(config)[2]
+        config = {k:v for k,v in recording.items() if k not in ('mode','namespace','left_controller_state_topic','menu_debounce_seconds')}
+    config = dict(config)
+    config.pop('menu_debounce_seconds', None)
     if set(config) - {'include_default_topics', 'topics', 'output_root', 'storage_id'}:
         raise ValueError('unknown recording configuration key')
     if topics_override:
@@ -39,7 +46,7 @@ def recording_plan(path, arms, topics_override='', output_root_override=''):
         if not isinstance(topics, list):
             raise ValueError('recording topics must be a list')
         if boolean(config.get('include_default_topics', True), 'include_default_topics'):
-            topics = default_recording_topics(arms) + topics
+            topics = [bridge_controller_topic(source, 'left')] + default_recording_topics(arms) + topics
     if not isinstance(topics, list) or not topics:
         raise ValueError('enabled recording needs at least one explicitly selected topic')
     topics = list(dict.fromkeys(full_topic(topic) for topic in topics))

@@ -11,7 +11,7 @@ The workspace separates input, arm control, gripper control, safety and recordin
 | `teleop_controllers` | Arm runtime/FCI ownership, Cartesian impedance core, homing core and joint trajectory generator | `cartesian_impedance_controller.launch.py`, `homing.launch.py` | `controllers.yaml` |
 | `teleop_gripper` | Hand decision state machine and separate blocking-operation worker | `gripper.launch.py` | `gripper.yaml` |
 | `safety_filter` | CBF constraint geometry, OSQP filter, coordinator and fixed-size model/handoff utilities | `safety_filter.launch.py` | `safety.yaml` |
-| `teleop_bringup` | Feature composition and integration tests | `teleoperation.launch.py`, `robot_free.launch.py` | `teleoperation_runtime.yaml` |
+| `teleop_bringup` | Feature composition and integration tests | `teleoperation.launch.py`, `robot_free.launch.py` | `single_panda.yaml`, `dual_panda.yaml` |
 
 C++ public headers and namespaces follow their owning package. `safety_filter`
 exports its library and pinned OSQP dependency; `teleop_controllers` links that
@@ -69,10 +69,12 @@ The standard workspace uses `build/` and `install/`. Source
 are archived under `.workspace-artifacts-*` with `COLCON_IGNORE`;
 commissioning logs remain under `log/commissioning/current`.
 
-For a fresh rebuild, start from a shell sourced only from Humble. Build
-libfranka first because the legacy Panda package discovers its CMake library
-without declaring a colcon dependency. The full staged build is in README.md.
-To build the teleoperation packages and their declared dependencies:
+For a fresh rebuild, start from a shell sourced only from Humble. The new arm
+and Hand packages declare their libfranka dependency, so colcon builds it first
+within the same invocation. README.md contains the single-command pipeline build.
+Building the entire legacy workspace still requires libfranka to be available
+before `panda_bringup`, whose manifest omits that dependency. To build the
+teleoperation packages and their declared dependencies:
 
 ```bash
 cd /ws
@@ -92,41 +94,34 @@ Hand execution migrates to `teleop_gripper franka_hand_worker`.
 
 ## Combined launch
 
-Default backend is mock. This example starts all features, including the bridge:
-
-```bash
-ros2 launch teleop_bringup teleoperation.launch.py start_bridge:=true
-```
+Overall bringup has exactly two launch arguments:
 
 | Argument | Default | Effect |
 | --- | --- | --- |
-| `start_bridge` | `false` | Quest TCP/USB receiver |
-| `start_mapper` | `true` | Selected-arm pose mapping |
-| `start_controller` | `true` | Arm torque owner, including available homing |
-| `homing_enabled` | `true` | Accept guarded home gestures in the arm owner |
-| `start_hand` | `true` | Separate gripper workers |
-| `cbf_enabled` | `true` | Embedded CBF constraints/QP; false retains model and actuator checks |
-| `recording_enabled` | `true` | Recording feature |
-| `recording_mode` | `menu` | Menu episodes or `continuous` recording |
-| `mock_measured_pose` | `false` | Fixed pose fixture for mapping without an arm owner |
+| `runtime_config` | None; required | Select complete `single_panda.yaml`, `dual_panda.yaml` or an installation-specific runtime YAML |
+| `operator_confirm` | `false` | Required `true` for hardware; explicit authorization for FCI and enabled Hand startup calibration |
 
-Homing and CBF require the arm owner and have no effect when `start_controller`
-is false. Do not enable the measured-pose fixture alongside an arm owner; both
-would publish the mapper's measured-pose input. Single/dual mode and left/right
-selection retain the existing `mode` and `single_controller` arguments.
+The templates live under `teleop_bringup/config` and default to mock operation.
+Example:
 
-`arms_config` defines assignment, topics, frames and IPs. `runtime_config` retains
-the existing combined `controller`, `hand`, `cbf`, `arm_settings` YAML schema, so
-commissioning files remain usable. `controller_config`, `gripper_config` and
-`safety_config` optionally override the respective feature's file. Ownership,
-assignment and topic identities cannot be overridden through runtime settings.
-Recording has independent `recording_config`, `recording_topics` and
-`recording_output_root` arguments.
+```bash
+ros2 launch teleop_bringup teleoperation.launch.py \
+  runtime_config:=/ws/src/teleop_bringup/config/single_panda.yaml
+```
 
-For the existing operator hardware command, replace only its package and launch
-filename with `teleop_bringup teleoperation.launch.py`; keep explicit hardware
-confirmation, commissioning configurations and recording root. Physical trials
-remain operator actions.
+All pipeline switches, mode/backend, bridge settings, arm identities/mapping,
+controller/Hand/CBF settings, per-arm overrides and recording settings come from
+the selected YAML. No overall CLI feature overrides or separate config-file
+arguments remain. The old `teleoperation_runtime.yaml` template is replaced by
+explicit single/dual templates. Package-local config defaults remain unchanged
+for standalone launches.
+
+Hardware confirmation is launch-only and unnecessary for mock; selecting a
+hardware file alone cannot authorize physical operation. It is not a trigger
+arming command or a safety certificate. Enabling Hand retains one empty-hand
+startup calibration. Hardware dual still requires distinct IPs and both measured
+base transforms; these are deliberately not filled with mock spacing in the
+dual template. No synthetic measured-pose publisher may run alongside an owner.
 
 ## Standalone feature launches
 

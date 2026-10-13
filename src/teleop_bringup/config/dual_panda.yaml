@@ -1,0 +1,121 @@
+# Dual-Panda template. Pass this path explicitly as runtime_config.
+# Both left/right assignments come from `arms`; there is no single-hand selector.
+# Hardware needs distinct robot_ip values, operator_confirm:=true and surveyed
+# transforms for BOTH arm_settings entries:
+#   world_from_base_xyz_xyzw: [x,y,z,qx,qy,qz,qw]
+# The mock's internal spacing is not physical installation data.
+# Enabled Hands perform empty-hand startup calibration; -1.0 object values refuse grasp.
+pipeline:
+  mode: dual
+  backend: mock
+  start_bridge: true
+  start_mapper: true
+  start_controller: true
+  start_hand: true
+  homing_enabled: true
+  cbf_enabled: true
+  recording_enabled: true
+  mock_measured_pose: false
+quest:
+  bridge:
+    namespace: /
+    listen_port: 45454
+    bind_address: 127.0.0.1
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10
+    max_clock_sync_age_ms: 3000
+    max_source_future_ms: 10
+    client_receive_timeout_ms: 500
+arms:
+  panda_left:
+    robot_ip: ''
+    namespace: /panda_left
+    base_frame: panda_left/panda_link0
+    controller: left
+    command_topic: cartesian_teleop_command
+    target_pose_topic: target_pose
+    measured_pose_topic: teleop_anchor_pose
+    state_topic: robot_state
+    reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
+    translation_scale: 1.0
+    rotation_scale: 1.0
+    feedforward_scale: 1.0
+    twist_filter_cutoff_hz: 10.0
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10.0
+    max_source_future_ms: 10.0
+    min_derivative_dt_ms: 1.0
+    max_derivative_dt_ms: 100.0
+    trigger_engage: 0.75
+    trigger_release: 0.25
+  panda_right:
+    robot_ip: ''
+    namespace: /panda_right
+    base_frame: panda_right/panda_link0
+    controller: right
+    command_topic: cartesian_teleop_command
+    target_pose_topic: target_pose
+    measured_pose_topic: teleop_anchor_pose
+    state_topic: robot_state
+    reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
+    translation_scale: 1.0
+    rotation_scale: 1.0
+    feedforward_scale: 1.0
+    twist_filter_cutoff_hz: 10.0
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10.0
+    max_source_future_ms: 10.0
+    min_derivative_dt_ms: 1.0
+    max_derivative_dt_ms: 100.0
+    trigger_engage: 0.75
+    trigger_release: 0.25
+controller:
+  lambda_translation: 50.0
+  lambda_rotation: 40.0
+  gain_translation: 20.0
+  gain_rotation: 2.5
+  maximum_torque_rate: 900.0
+  torque_limits: [87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0]
+  tool_offset_m: 0.1034
+  envelope_margin_m: 0.001
+  envelope_center: [0.0, 0.0, 0.333]
+  homing_speed_factor: 0.15
+  homing_timeout_seconds: 30.0
+  homing_stop_duration_seconds: 0.5
+  homing_stop_acceleration: 0.75
+  homing_stop_timeout_seconds: 5.0
+  homing_stiffness: [300.0, 300.0, 300.0, 300.0, 120.0, 100.0, 50.0]
+  homing_damping: [30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 5.0]
+hand:
+  speed_mps: 0.02
+  grasp_force_n: 5.0
+  open_width_m: -1.0
+  grasp_width_m: -1.0
+  epsilon_inner_m: -1.0
+  epsilon_outer_m: -1.0
+  grip_press: 0.75
+  grip_release: 0.25
+  grip_debounce_ms: 50.0
+  command_timeout_ms: 100.0
+  max_clock_uncertainty_ms: 10.0
+  mock_operation_duration_ms: 100.0
+cbf:
+  table_height: 0.0
+  table_minimum_clearance: 0.02
+  self_minimum_clearance: 0.03
+  inter_arm_minimum_clearance: 0.05
+  maximum_failures: 20
+  obstacle_centers: []
+  obstacle_radii: []
+arm_settings:
+  panda_left: {}
+  panda_right: {}
+recording:
+  mode: menu
+  namespace: /quest
+  left_controller_state_topic: ''
+  menu_debounce_seconds: 0.35
+  include_default_topics: true
+  topics: []
+  output_root: /ws/log/quest_bags
+  storage_id: sqlite3

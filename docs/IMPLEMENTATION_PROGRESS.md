@@ -8,6 +8,65 @@ Physical FCI/device operations remain operator actions. Preserve Docker,
 
 ## Stages and evidence
 
+### Mode-specific template cleanup (2026-10-13)
+
+- Dual template omits `single_controller`; its left/right assignments remain
+  explicit under `arms`. Single template keeps the pipeline hand selector and
+  omits the redundant per-arm selector and inactive inter-arm clearance.
+- Both templates omit fixed false mapper activation/confirmation flags. Single
+  omits the empty per-arm override block, with a note for optional surveyed
+  external-world transforms; dual retains both required transform placeholders.
+  Reformatted dual arrays inline for consistent editable templates.
+- Five focused configuration checks pass, including left selection from the
+  reduced single template, dual assignments, missing physical geometry and
+  unchanged confirmation guards. No builds or hardware operations were needed.
+
+### Mandatory runtime selection and two overall arguments (2026-10-13)
+
+- Operator requests mandatory `runtime_config` with no default file and only
+  `operator_confirm` as the second overall argument. Removed every overall CLI
+  feature/mode/recording override; values come exclusively from the chosen YAML.
+  Standalone launch interfaces are unchanged.
+- Replaced the generic template with `config/single_panda.yaml` and
+  `config/dual_panda.yaml`. Both are complete mock-default templates; dual has
+  distinct left/right namespaces/frames and deliberately unset hardware IPs/
+  surveyed transforms. Hardware cannot use the mock's internal spacing implicitly.
+- `operator_confirm` defaults false and is required true only for hardware.
+  It authorizes real connections and enabled Hand startup calibration; it does
+  not arm the trigger or certify physical settings. Updated README, package
+  reference, mock guide and policy with explicit file selection.
+- One two-package build passed; all 40 affected robot-free cases pass (27 Quest,
+  13 bringup). Actual launch help exposes exactly the two arguments; omission of
+  runtime_config fails, obsolete overrides are rejected, YAML-only single/dual
+  execution and standalone compatibility pass. No Docker/legacy/C++ controller
+  edits, Android rebuild or hardware/USB operation occurred.
+
+### Unified overall configuration (2026-10-13)
+
+- Implemented the operator's requested separation: standalone launches retain
+  package-local defaults, while combined bringup defaults to one complete
+  `teleop_bringup/config/teleoperation_runtime.yaml`. It contains feature switches,
+  arm identities/mapping, bridge settings, controller/Hand/CBF settings, per-arm
+  overrides and recording profile/Menu settings. CLI switch overrides remain
+  optional; hardware operator confirmation remains explicit and launch-only.
+- Removed combined `arms_config`, `recording_config`, `controller_config`,
+  `gripper_config` and `safety_config` file arguments. Strict readers select
+  their portions of the unified document while preserving standalone schemas.
+  Namespaced bridge input derivation, all exposed bridge settings and configurable
+  Menu debounce reach their nodes. Empty optional obstacle arrays are omitted
+  from ROS parameter declarations when unused.
+- README now edits the unified source YAML directly, with no workspace-level
+  config copies. Updated package/runtime guides and policy. Installed config is
+  symlinked to source; `runtime_config` can select a different complete YAML.
+- One focused Docker build passed for the four changed launch/config packages.
+  All 43 affected robot-free cases pass (26 Quest, 5 recording, 12 bringup),
+  including YAML-only feature selection and node parameter values, removed-file
+  rejection, hardware confirmation rejection, standalone defaults, mock
+  single/dual control and bags. One test-only ROS API compatibility fix was
+  checked by rerunning only launch-options acceptance. Verified installed
+  argument help/default path. No Docker/legacy Panda/C++ controller changes,
+  Android rebuild, USB/device operation or physical FCI operation occurred.
+
 ### Hand startup calibration without a launch switch (2026-10-12)
 
 - Operator requests that `start_hand:=true` alone enables automatic calibration.

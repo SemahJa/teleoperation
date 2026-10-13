@@ -46,6 +46,17 @@ class ConfigurationTest(unittest.TestCase):
         with self.assertRaises(ValueError):
             recording_plan(config, arms, output_root_override='relative')
 
+    def test_unified_recording_profile_and_namespaced_menu_input(self):
+        data = dict(self.config, pipeline={}, quest={'bridge':{'namespace':'/input'}},
+            recording={'include_default_topics':True,'topics':['/custom'],
+                'output_root':str(self.root),'mode':'menu','namespace':'/episodes','menu_debounce_seconds':.4})
+        path = self.write('runtime.yaml',data)
+        plan = recording_plan(path,load_arms(path))
+        self.assertIn('/input/quest_usb_bridge/left/controller_state',plan.topics)
+        self.assertIn('/input/quest_usb_bridge/right/controller_state',plan.topics)
+        self.assertNotIn('/quest_usb_bridge/left/controller_state',plan.topics)
+        self.assertIn('/custom',plan.topics)
+
 
 if __name__ == '__main__':
     unittest.main()

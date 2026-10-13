@@ -1,5 +1,30 @@
 # Teleoperation implementation policy
 
+## Explicit runtime selection and minimal overall arguments (2026-10-13)
+
+The operator requests exactly two overall arguments: mandatory `runtime_config`
+with no default path, and launch-only `operator_confirm` (default false, required
+true only for hardware). Replace the generic overall template with
+`teleop_bringup/config/single_panda.yaml` and `dual_panda.yaml`. All pipeline and
+feature parameters come from the selected YAML; no overall CLI overrides remain.
+Keep standalone package defaults, explicit hardware authorization and enabled
+Hand startup calibration. Dual hardware requires surveyed transforms, not mock
+spacing. This supersedes the default-file/optional-overrides design below.
+Templates should contain only configurable settings relevant to their mode:
+no single-hand selector in dual, no inter-arm clearance in single, and no fixed
+false activation/confirmation guard fields in either template.
+
+## Unified configuration override (2026-10-13)
+
+The operator explicitly requests package-local defaults for standalone launches
+and one complete `teleop_bringup/config/teleoperation_runtime.yaml` for combined
+bringup. Overall settings include pipeline, bridge, arms/mapping, controller,
+Hand, CBF, per-arm overrides and recording. Combined bringup uses configurable
+`runtime_config` only for file selection; separate feature/arm/recording file
+arguments are removed. README must edit that file directly, without copying
+package configs to workspace `/config`. Preserve launch-only physical operator
+confirmation and the existing Hand startup-calibration policy.
+
 ## Startup Hand calibration override (2026-10-12)
 
 The operator explicitly requests automatic calibration when `start_hand:=true`.

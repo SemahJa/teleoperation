@@ -13,6 +13,7 @@ def generate_launch_description():
         DeclareLaunchArgument('max_clock_uncertainty_ms', default_value='10'),
         DeclareLaunchArgument('max_clock_sync_age_ms', default_value='3000'),
         DeclareLaunchArgument('max_source_future_ms', default_value='10'),
+        DeclareLaunchArgument('client_receive_timeout_ms', default_value='500'),
         Node(
             package='quest_teleop',
             executable='quest_usb_bridge',
@@ -26,6 +27,7 @@ def generate_launch_description():
                 'max_clock_uncertainty_ms': LaunchConfiguration('max_clock_uncertainty_ms'),
                 'max_clock_sync_age_ms': LaunchConfiguration('max_clock_sync_age_ms'),
                 'max_source_future_ms': LaunchConfiguration('max_source_future_ms'),
+                'client_receive_timeout_ms': LaunchConfiguration('client_receive_timeout_ms'),
             }],
         ),
     ])

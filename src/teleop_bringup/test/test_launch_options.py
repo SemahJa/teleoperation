@@ -29,17 +29,16 @@ class LaunchOptionsTest(unittest.TestCase):
         with tempfile.TemporaryDirectory() as directory:
             root=Path(directory)
             arms=root/'arms.yaml'
-            arms.write_text(yaml.safe_dump({'arms':{'arm':dict(namespace=prefix, controller='right',
-                controller_state_topic=prefix+'/raw', base_frame=prefix.lstrip('/')+'/base')}}))
             with socket.socket() as sock:
                 sock.bind(('127.0.0.1',0)); port=sock.getsockname()[1]
-            args=['ros2','launch','teleop_bringup','teleoperation.launch.py', 'backend:=mock',
-                  'arms_config:='+str(arms), 'recording_namespace:='+prefix, 'listen_port:='+str(port),
-                  'recording_output_root:='+str(root/'bags')]
             switches=dict(start_controller=False,start_mapper=False,start_bridge=False,start_hand=False,
                           recording_enabled=False,mock_measured_pose=False,homing_enabled=False,cbf_enabled=False)
             switches.update(enabled)
-            args += [k+':='+str(v).lower() for k,v in switches.items()]
+            arms.write_text(yaml.safe_dump(dict(pipeline=dict(switches,backend='mock'),
+                arms={'arm':dict(namespace=prefix,controller='right',controller_state_topic=prefix+'/raw',
+                    base_frame=prefix.lstrip('/')+'/base')},quest={'bridge':{'listen_port':port}},
+                recording=dict(namespace=prefix,output_root=str(root/'bags')))))
+            args=['ros2','launch','teleop_bringup','teleoperation.launch.py','runtime_config:='+str(arms)]
             with (root/'launch.log').open('w') as log:
                 proc=subprocess.Popen(args, stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
                 try:
@@ -78,15 +77,31 @@ class LaunchOptionsTest(unittest.TestCase):
                           ['pose_mapper','franka_hand_worker','menu_recorder','mock_measured_pose'],True)
 
     def test_empty_selection_and_conflicting_fixture(self):
-        disabled=['start_controller:=false','start_mapper:=false','start_hand:=false',
-                  'start_bridge:=false','recording_enabled:=false']
-        result=subprocess.run(['ros2','launch','teleop_bringup','teleoperation.launch.py',*disabled],
+        with tempfile.TemporaryDirectory() as directory:
+            config=Path(directory)/'runtime.yaml'
+            data=dict(pipeline=dict(start_controller=False,start_mapper=False,start_hand=False,
+                start_bridge=False,recording_enabled=False),arms={'arm':{'namespace':'/empty'}})
+            config.write_text(yaml.safe_dump(data))
+            command=['ros2','launch','teleop_bringup','teleoperation.launch.py','runtime_config:='+str(config)]
+            result=subprocess.run(command,capture_output=True,text=True,timeout=10)
+            self.assertEqual(result.returncode,0,result.stdout+result.stderr)
+            data['pipeline'].update(start_controller=True,mock_measured_pose=True)
+            config.write_text(yaml.safe_dump(data))
+            result=subprocess.run(command,capture_output=True,text=True,timeout=10)
+            self.assertNotEqual(result.returncode,0)
+            self.assertIn('avoid competing pose publishers',result.stdout+result.stderr)
+
+    def test_runtime_file_is_required_and_only_two_arguments_are_exposed(self):
+        result=subprocess.run(['ros2','launch','teleop_bringup','teleoperation.launch.py'],
+            capture_output=True,text=True,timeout=10)
+        self.assertNotEqual(result.returncode,0)
+        self.assertIn('runtime_config',result.stdout+result.stderr)
+        result=subprocess.run(['ros2','launch','teleop_bringup','teleoperation.launch.py','--show-args'],
             capture_output=True,text=True,timeout=10)
         self.assertEqual(result.returncode,0,result.stdout+result.stderr)
-        result=subprocess.run(['ros2','launch','teleop_bringup','teleoperation.launch.py',
-            'mock_measured_pose:=true'],capture_output=True,text=True,timeout=10)
-        self.assertNotEqual(result.returncode,0)
-        self.assertIn('avoid competing pose publishers',result.stdout+result.stderr)
+        import re
+        self.assertEqual(set(re.findall(r"^    '([^']+)':",result.stdout,re.M)),
+            {'runtime_config','operator_confirm'})
 
     def test_mapping_without_owners(self):
         self.run_features({'start_mapper':True,'mock_measured_pose':True,'start_bridge':True},
@@ -95,6 +110,64 @@ class LaunchOptionsTest(unittest.TestCase):
     def test_gripper_and_recording_without_arm_or_mapper(self):
         self.run_features({'start_hand':True,'recording_enabled':True},['franka_hand_worker','menu_recorder'],
                           ['panda_cartesian_impedance_controller','pose_mapper','mock_measured_pose'])
+
+    def test_yaml_drives_features_bridge_and_recording_without_overrides(self):
+        prefix='/yaml_'+uuid.uuid4().hex
+        node=Node('test_'+uuid.uuid4().hex)
+        with tempfile.TemporaryDirectory() as directory:
+            root=Path(directory)
+            with socket.socket() as sock:
+                sock.bind(('127.0.0.1',0));port=sock.getsockname()[1]
+            config=root/'runtime.yaml'
+            config.write_text(yaml.safe_dump(dict(pipeline=dict(start_controller=False,start_mapper=False,
+                start_hand=True,start_bridge=True,recording_enabled=True),
+                quest={'bridge':dict(namespace=prefix,listen_port=port,client_receive_timeout_ms=777)},
+                arms={'arm':dict(namespace=prefix,controller='right',base_frame=prefix.lstrip('/')+'/base')},
+                hand={'grasp_force_n':6.0},recording=dict(namespace=prefix,output_root=str(root/'bags'),menu_debounce_seconds=.4))))
+            with (root/'launch.log').open('w') as log:
+                proc=subprocess.Popen(['ros2','launch','teleop_bringup','teleoperation.launch.py',
+                    'runtime_config:='+str(config)],stdout=log,stderr=subprocess.STDOUT,start_new_session=True)
+                try:
+                    end=time.monotonic()+12
+                    while time.monotonic()<end:
+                        rclpy.spin_once(node,timeout_sec=.05)
+                        names={n for n,ns in node.get_node_names_and_namespaces() if ns==prefix}
+                        if {'franka_hand_worker','quest_usb_bridge','menu_recorder'}<=names: break
+                        if proc.poll() is not None: break
+                    self.assertIsNone(proc.poll(),(root/'launch.log').read_text())
+                    self.assertTrue({'franka_hand_worker','quest_usb_bridge','menu_recorder'}<=names)
+                    self.assertNotIn('pose_mapper',names)
+                    from rcl_interfaces.srv import GetParameters
+                    for target,keys,expected in [
+                        ('quest_usb_bridge',['listen_port','client_receive_timeout_ms'],[port,777]),
+                        ('franka_hand_worker',['grasp_force_n'],[6.0]),
+                        ('menu_recorder',['controller_state_topic','menu_debounce_seconds'],
+                         [prefix+'/quest_usb_bridge/left/controller_state',.4])]:
+                        client=node.create_client(GetParameters,prefix+'/'+target+'/get_parameters')
+                        self.assertTrue(client.wait_for_service(timeout_sec=4))
+                        future=client.call_async(GetParameters.Request(names=keys))
+                        rclpy.spin_until_future_complete(node,future,timeout_sec=4)
+                        self.assertTrue(future.done())
+                        self.assertEqual([v.string_value if v.type==4 else v.integer_value if v.type==2 else v.double_value for v in future.result().values],expected)
+                        node.destroy_client(client)
+                finally:
+                    if proc.poll() is None: os.killpg(proc.pid,signal.SIGINT)
+                    try: proc.wait(timeout=15)
+                    except subprocess.TimeoutExpired: os.killpg(proc.pid,signal.SIGKILL);proc.wait()
+                    node.destroy_node()
+                self.assertEqual(proc.returncode,0,(root/'launch.log').read_text())
+
+    def test_hardware_confirmation_and_removed_file_arguments(self):
+        with tempfile.TemporaryDirectory() as directory:
+            config=Path(directory)/'runtime.yaml'
+            for backend,extra,expected in [('hardware',[],'operator_confirm:=true'),
+                    ('mock',['controller_config:=/unused'],'accepts only runtime_config and operator_confirm'),
+                    ('mock',['backend:=mock'],'accepts only runtime_config and operator_confirm')]:
+                config.write_text(yaml.safe_dump(dict(pipeline={'backend':backend},arms={'arm':{}})))
+                result=subprocess.run(['ros2','launch','teleop_bringup','teleoperation.launch.py',
+                    'runtime_config:='+str(config),*extra],capture_output=True,text=True,timeout=10)
+                self.assertNotEqual(result.returncode,0)
+                self.assertIn(expected,result.stdout+result.stderr)
 
 
 class StandaloneLaunchTest(unittest.TestCase):

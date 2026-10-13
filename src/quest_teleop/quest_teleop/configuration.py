@@ -65,6 +65,11 @@ _DEFAULTS = dict(translation_scale=1.0, rotation_scale=1.0, feedforward_scale=1.
 
 def load_arms(path):
     data = read_mapping(path)
+    from quest_teleop.runtime_configuration import unified_settings, bridge_controller_topic
+    source = data
+    if 'pipeline' in data:
+        unified_settings(data)
+        data = {'arms': data['arms']}
     if set(data) != {'arms'} or not isinstance(data['arms'], dict) or not data['arms']:
         raise ValueError('arms configuration must contain one nonempty arms mapping')
     result = []
@@ -134,7 +139,7 @@ def load_arms(path):
                 outputs.add(topic)
             p[key] = topic
         p['controller_state_topic'] = full_topic(raw.get('controller_state_topic',
-            f'/quest_usb_bridge/{controller}/controller_state'), namespace)
+            bridge_controller_topic(source, controller)), namespace)
         result.append(ArmConfig(name, namespace, p, ip,
                                 full_topic(raw.get('state_topic', 'robot_state'), namespace)))
     if outputs & inputs:
@@ -163,8 +168,8 @@ def select_arms(arms, mode='single', single_controller='right'):
     params = dict(arm.parameters)
     old = params['controller_id']
     params['controller_id'] = single_controller
-    if params['controller_state_topic'] == f'/quest_usb_bridge/{old}/controller_state':
-        params['controller_state_topic'] = f'/quest_usb_bridge/{single_controller}/controller_state'
+    if params['controller_state_topic'].endswith(f'/quest_usb_bridge/{old}/controller_state'):
+        params['controller_state_topic'] = params['controller_state_topic'].rsplit(f'/{old}/',1)[0] + f'/{single_controller}/controller_state'
     elif old != single_controller:
         raise ValueError('set the custom controller_state_topic for the selected single controller in arms_config')
     return [replace(arm, parameters=params)]
