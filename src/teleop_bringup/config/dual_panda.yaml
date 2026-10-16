@@ -74,6 +74,10 @@ controller:
   lambda_rotation: 40.0
   gain_translation: 20.0
   gain_rotation: 2.5
+  # Release trigger: capture measured joints once and hold the whole arm.
+  hold_stiffness: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 75.0]  # Nm/rad
+  hold_damping: [50.0, 50.0, 50.0, 50.0, 20.0, 15.0, 10.0]        # Nm s/rad
+  hold_stiffness_ramp_seconds: 0.25
   maximum_torque_rate: 900.0
   torque_limits: [87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0]
   tool_offset_m: 0.1034
@@ -100,6 +104,9 @@ hand:
   max_clock_uncertainty_ms: 10.0
   mock_operation_duration_ms: 100.0
 cbf:
+  # Actuator scales apply even with cbf_enabled:false. Controller caps can tighten them.
+  torque_limit_scale: 0.35       # -> joints 1-4: 30.45 Nm; joints 5-7: 4.2 Nm
+  torque_rate_limit_scale: 0.35  # -> 350 Nm/s; restart bringup after editing
   table_height: 0.0
   table_minimum_clearance: 0.02
   self_minimum_clearance: 0.03

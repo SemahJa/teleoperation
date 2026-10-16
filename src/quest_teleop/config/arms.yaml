@@ -1,12 +1,12 @@
 # One entry per physical robot. Keep arm namespaces and FCI addresses unique.
-# Milestone 1: one configured arm, assigned to the Quest right controller.
+# Standalone mapping default: one arm assigned to the Quest right controller.
 arms:
   panda_1:
     robot_ip: ""
     namespace: "/panda_1"
     base_frame: "panda_1/panda_link0"
     controller: "right"
-    # Robot-free launch only; hardware activation remains a later stage.
+    # Mapping-only guards. Combined bringup selects hardware separately.
     controller_enabled: false
     operator_confirm: false
     command_topic: "cartesian_teleop_command"

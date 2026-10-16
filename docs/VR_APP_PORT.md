@@ -1,5 +1,11 @@
 # Quest app port review — 2026-10-10
 
+This document records the headset port and its verification. The native OpenXR
+app remains the current implementation; it does not require Unity. Use the
+[main README](../README.md) for build/install and USB commands. Current ROS
+controller behavior is documented separately in
+[PACKAGE_STRUCTURE.md](PACKAGE_STRUCTURE.md).
+
 Reviewed both repositories' VR apps, transport/message contracts, mapping
 and gripper behavior, container definitions, and this repository's
 `docs/AGENTS.md`. Existing uncommitted changes were preserved. The source
@@ -16,7 +22,7 @@ workspace contains several repositories; the relevant source app is under
 | Velocity | Native values with pose-derived fallback | Independent native validity flags retained. No on-headset differentiation; invalid remains invalid. |
 | Inputs | Per-hand primary/secondary actions, aim/thumbstick | Source per-hand bindings adopted; A/B and X/Y/menu still serialize separately with activity flags. Thumbstick/aim/HMD remain local diagnostics. |
 | Recovery | FR3 mapper can re-anchor during brief tracking recovery | Current Panda mapper's release/re-engagement policy retained; no mapper changes. |
-| Robot backend | ROS Jazzy, dual FR3, centralized CBF-QP, continuous gripper width, guarded dual homing | Current Humble/Panda backend, grip-toggle requirements, deferred homing, and implementation order retained. No backend packages copied. |
+| Robot backend | ROS Jazzy, dual FR3, centralized CBF-QP, continuous gripper width, guarded dual homing | Kept Humble/Panda ownership and discrete grip toggles. Homing and CBF were implemented later in ROS; no FR3 backend packages were copied. |
 | Build/deployment | Different APK identity, Gradle/NDK, Maven loader, host build instructions | Existing APK identity, pinned OpenXR SDK loader, container/toolchain/signing and scripts retained. Gradle now selects the existing container's NDK 26.3.11579264 explicitly. |
 
 The port preserves the source app's main headset functionality while adapting
@@ -73,5 +79,6 @@ Quest check. No APK was installed or headset/robot connection made by this task.
 4. Unplug/reconnect USB and interrupt tracking/focus; verify invalid telemetry,
    clock gating, and release/re-engagement with the robot-free mapper.
 
-All later controller/gripper work and separately approved hardware commissioning
-remain in the order specified by `docs/AGENTS.md`.
+Later ROS controller/gripper work is now implemented; see the
+[implementation record](IMPLEMENTATION_PROGRESS.md). The port checks above are
+historical evidence and do not authorize hardware operation.

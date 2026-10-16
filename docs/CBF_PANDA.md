@@ -1,5 +1,12 @@
 # Panda adaptation of the thesis_ws CBF-QP
 
+The safety layer receives seven nominal torques per arm and returns bounded
+commands. With control barrier functions (CBF) enabled, it solves a quadratic
+program (QP) to stay close to nominal torque while satisfying modeled joint
+and collision constraints. With CBF disabled, actuator magnitude/rate bounds
+still apply. Start with the editable settings below; the later sections explain
+the model, threading and failure behavior for controller developers.
+
 Current status: the filter is connected to the actual single/dual arm executable.
 Robot-free core/coordinator/process tests pass. Hardware callbacks collect one
 RobotState's mass, coriolis, poses and Jacobians; physical execution and timing
@@ -17,8 +24,10 @@ law, and the separate joint homing law supplies another nominal torque source.
 Both pass through the same filter before torque is returned.
 
 - Uses FER/Panda joint/velocity/acceleration/torque ceilings, not FR3 values.
-  Initial `7 rad/s²`, torque `[80,80,80,80,10,10,10] Nm` and `900 Nm/s` settings
-  are software reference bounds, not physical commissioning approval.
+  The acceleration reference remains `7 rad/s²`. Actuator defaults are now
+  35% of published FCI torque/rate ceilings: joints 1--4 `30.45 Nm`, joints
+  5--7 `4.2 Nm` and all joints `350 Nm/s`. These are software bounds, not
+  physical commissioning approval.
 - Rate constraints intersect magnitude limits using each arm's actual
   `tau_J_d`, rather than the filter's previous requested output. Each slew
   interval is capped at one millisecond even after a delayed callback.
@@ -54,6 +63,62 @@ Both pass through the same filter before torque is returned.
   allocation. Tests instrument both C++ allocation and solver malloc/calloc/
   realloc paths. OSQP signal handling/printing/MKL loading are disabled.
 
+## Editable actuator limits, including CBF-disabled operation
+
+Combined bringup reads these settings from the selected
+`teleop_bringup/config/single_panda.yaml` or `dual_panda.yaml`. Standalone
+controller launch reads them from `safety_filter/config/safety.yaml` by default
+(or the file selected by `safety_config`). These are alternative launch inputs;
+changing the standalone safety file does not override a selected combined YAML.
+
+```yaml
+cbf:
+  torque_limit_scale: 0.35
+  torque_rate_limit_scale: 0.35
+```
+
+Both fractions must be finite and in `(0, 1]`. Edit the selected YAML and restart
+bringup; the bounds are configured before control starts, without live retuning.
+They belong to the `cbf` configuration block for organization but are always
+enforced, including `pipeline.cbf_enabled: false` / ROS `cbf.enabled=false`.
+The former top-level `safety` block and `safety.*` scale parameters are replaced
+by these `cbf.*` keys; old parameter overrides are rejected with a migration error
+instead of silently ignoring a potentially stricter cap.
+The scale is applied once to the Panda FCI ceilings, not to a previously reduced
+software limit:
+
+| Bound | FCI ceiling | At scale 0.35 |
+| --- | --- | --- |
+| Torque, joints 1--4 | 87 Nm | 30.45 Nm |
+| Torque, joints 5--7 | 12 Nm | 4.2 Nm |
+| Torque rate, all joints | 1000 Nm/s | 350 Nm/s |
+
+At 1 ms, the torque-rate limit allows at most `0.35 Nm` change per cycle, anchored
+to incoming `tau_J_d`. The interval is capped at 1 ms after a delayed callback.
+Existing `controller.torque_limits` and `controller.maximum_torque_rate` are
+additional absolute caps: the effective limit is the minimum of the scaled FCI
+ceiling and those caps, never their product. In dual mode, the existing shared
+filter uses the stricter configured cap from either arm for both arms.
+
+Cartesian teleoperation, joint position hold, homing, fault damping and bounded
+safety fallback all use the same actuator limits. With CBF disabled the output
+is clipped into the magnitude/rate intersection; with CBF enabled the same
+bounds also constrain the QP. Startup logs print the effective bounds, and
+`TrackingSample.torque_limits`/`maximum_torque_rate` retain their actual values.
+Manager preflight uses those same final bounds. An empty intersection with the
+incoming robot torque still terminates control rather than violating either
+bound to enter the new limits.
+
+Nominal torque is recorded before clipping and can exceed these limits.
+The bounds apply to commanded joint torque; they do not cap robot-side gravity
+compensation, total measured torque, the Hand's grasp force, or Cartesian contact
+force. They do not change manufacturer protections or collision thresholds.
+Lower torque/rate bounds can reduce holding strength and slow transitions.
+Joint/Cartesian velocity and acceleration constraints remain CBF constraints;
+this change does not add them to CBF-disabled operation.
+
+## Collision constraints
+
 Collision rows use closest capsule points, interpolated point Jacobians,
 finite-difference `Jdot*dq` history and curvature terms. Coincident points
 retain the previous separation direction or choose a controllable axis.
@@ -73,17 +138,19 @@ the solver's feasibility tolerance require the normal iterative path.
 
 ## Runtime ownership, handoff and failure behavior
 
-The integrated launch defaults to `cbf_enabled:=true`. The explicitly requested
-diagnostic option `cbf_enabled:=false` sets `cbf.enabled=false`; the coordinator
+Combined bringup selects CBF through `pipeline.cbf_enabled` in the chosen
+runtime YAML. The current single-arm configuration disables it; the dual
+template enables it. Standalone arm launch also exposes `cbf_enabled`.
+Setting it false routes `cbf.enabled=false` to the owner; the coordinator
 then uses the filter's actuator-bounds-only branch, without joint/collision
 barriers or QP iterations. All model/actuator validity, exact-cycle handoff,
 age/skew/deadline checks and consumer engagement gates remain. It reports
 `disabled_actuator_bounds_only` and a startup warning. This removes software
 collision and joint CBF protection; it is not normal commissioning acceptance
 and does not alter the robot's own protections or start physical control
-automatically. Runtime YAML cannot silently change this launch selection.
+automatically. Combined bringup has no separate CBF command-line override.
 
-One permanent owner per arm computes either Cartesian or homing nominal torque.
+One permanent owner per arm computes Cartesian, joint-hold, homing or damping nominal torque.
 A single coordinator owns the 14-variable QP and consumes fixed-size model
 snapshots through independent SPSC latest-snapshot lanes. Each owner waits only
 for a reply carrying its exact cycle and model timestamp; earlier-cycle results

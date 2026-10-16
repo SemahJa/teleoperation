@@ -4,30 +4,29 @@
 #include <poll.h>
 #include <sys/socket.h>
 #include <sys/time.h>
+#include <time.h>
 #include <unistd.h>
 
-#include <array>
 #include <algorithm>
+#include <array>
 #include <atomic>
 #include <cerrno>
 #include <chrono>
 #include <cmath>
 #include <cstdint>
 #include <cstring>
-#include <memory>
 #include <limits>
+#include <memory>
 #include <mutex>
+#include <nlohmann/json.hpp>
+#include <quest_teleop_interfaces/msg/quest_button_state.hpp>
+#include <quest_teleop_interfaces/msg/quest_controller_state.hpp>
+#include <rclcpp/rclcpp.hpp>
 #include <stdexcept>
 #include <string>
 #include <thread>
-#include <time.h>
 #include <unordered_map>
 #include <vector>
-
-#include <nlohmann/json.hpp>
-#include <rclcpp/rclcpp.hpp>
-#include <quest_teleop_interfaces/msg/quest_controller_state.hpp>
-#include <quest_teleop_interfaces/msg/quest_button_state.hpp>
 
 namespace {
 using json = nlohmann::json;
@@ -39,9 +38,11 @@ bool read_all(int fd, void* destination, size_t size) {
   size_t received = 0;
   while (received < size) {
     const ssize_t count = recv(fd, bytes + received, size - received, 0);
-    if (count == 0) return false;
+    if (count == 0)
+      return false;
     if (count < 0) {
-      if (errno == EINTR) continue;
+      if (errno == EINTR)
+        continue;
       return false;
     }
     received += static_cast<size_t>(count);
@@ -51,58 +52,72 @@ bool read_all(int fd, void* destination, size_t size) {
 
 uint64_t pc_monotonic_ns() {
   timespec value{};
-  if (clock_gettime(CLOCK_MONOTONIC, &value) != 0) throw std::runtime_error("clock_gettime failed");
+  if (clock_gettime(CLOCK_MONOTONIC, &value) != 0)
+    throw std::runtime_error("clock_gettime failed");
   return static_cast<uint64_t>(value.tv_sec) * 1'000'000'000ULL +
          static_cast<uint64_t>(value.tv_nsec);
 }
 
 int64_t decimal_i64(const json& value, const char* field) {
-  if (!value.is_string()) throw std::runtime_error(std::string(field) + " must be a decimal string");
+  if (!value.is_string())
+    throw std::runtime_error(std::string(field) + " must be a decimal string");
   const std::string text = value.get<std::string>();
-  if (text.empty() || text.size() > 20) throw std::runtime_error(std::string(field) + " has invalid length");
+  if (text.empty() || text.size() > 20)
+    throw std::runtime_error(std::string(field) + " has invalid length");
   const size_t first_digit = text.front() == '-' ? 1 : 0;
-  if (first_digit == text.size() || !std::all_of(text.begin() + first_digit, text.end(),
-      [](char digit) { return digit >= '0' && digit <= '9'; })) {
+  if (first_digit == text.size() ||
+      !std::all_of(text.begin() + first_digit, text.end(),
+                   [](char digit) { return digit >= '0' && digit <= '9'; })) {
     throw std::runtime_error(std::string(field) + " is not a signed decimal");
   }
   size_t consumed = 0;
   const int64_t result = std::stoll(text, &consumed, 10);
-  if (consumed != text.size()) throw std::runtime_error(std::string(field) + " is not decimal");
+  if (consumed != text.size())
+    throw std::runtime_error(std::string(field) + " is not decimal");
   return result;
 }
 
 uint64_t decimal_u64(const json& value, const char* field) {
-  if (!value.is_string()) throw std::runtime_error(std::string(field) + " must be a decimal string");
+  if (!value.is_string())
+    throw std::runtime_error(std::string(field) + " must be a decimal string");
   const std::string text = value.get<std::string>();
-  if (text.empty() || text.size() > 20) throw std::runtime_error(std::string(field) + " has invalid length");
-  if (!std::all_of(text.begin(), text.end(), [](char digit) { return digit >= '0' && digit <= '9'; })) {
+  if (text.empty() || text.size() > 20)
+    throw std::runtime_error(std::string(field) + " has invalid length");
+  if (!std::all_of(text.begin(), text.end(),
+                   [](char digit) { return digit >= '0' && digit <= '9'; })) {
     throw std::runtime_error(std::string(field) + " is not an unsigned decimal");
   }
   size_t consumed = 0;
   const uint64_t result = std::stoull(text, &consumed, 10);
-  if (consumed != text.size()) throw std::runtime_error(std::string(field) + " is not decimal");
+  if (consumed != text.size())
+    throw std::runtime_error(std::string(field) + " is not decimal");
   return result;
 }
 
 template <size_t N>
 std::array<double, N> finite_array(const json& value, const char* field) {
-  if (!value.is_array() || value.size() != N) throw std::runtime_error(std::string(field) + " has wrong length");
+  if (!value.is_array() || value.size() != N)
+    throw std::runtime_error(std::string(field) + " has wrong length");
   std::array<double, N> result{};
   for (size_t i = 0; i < N; ++i) {
-    if (!value[i].is_number()) throw std::runtime_error(std::string(field) + " contains non-number");
+    if (!value[i].is_number())
+      throw std::runtime_error(std::string(field) + " contains non-number");
     result[i] = value[i].get<double>();
-    if (!std::isfinite(result[i])) throw std::runtime_error(std::string(field) + " contains non-finite value");
+    if (!std::isfinite(result[i]))
+      throw std::runtime_error(std::string(field) + " contains non-finite value");
   }
   return result;
 }
 
 bool boolean(const json& value, const char* field) {
-  if (!value.is_boolean()) throw std::runtime_error(std::string(field) + " must be boolean");
+  if (!value.is_boolean())
+    throw std::runtime_error(std::string(field) + " must be boolean");
   return value.get<bool>();
 }
 
 float scalar(const json& value, const char* field) {
-  if (!value.is_number()) throw std::runtime_error(std::string(field) + " must be numeric");
+  if (!value.is_number())
+    throw std::runtime_error(std::string(field) + " must be numeric");
   const double result = value.get<double>();
   if (!std::isfinite(result) || result < 0.0 || result > 1.0) {
     throw std::runtime_error(std::string(field) + " must be finite and in [0,1]");
@@ -114,7 +129,8 @@ class QuestUsbBridge final : public rclcpp::Node {
  public:
   QuestUsbBridge() : Node("quest_usb_bridge") {
     const int port = declare_parameter<int>("listen_port", 45454);
-    if (port < 1 || port > 65535) throw std::invalid_argument("listen_port must be in [1,65535]");
+    if (port < 1 || port > 65535)
+      throw std::invalid_argument("listen_port must be in [1,65535]");
     const std::string bind_address = declare_parameter<std::string>("bind_address", "127.0.0.1");
     const int command_timeout_ms = declare_parameter<int>("command_timeout_ms", 100);
     const int max_uncertainty_ms = declare_parameter<int>("max_clock_uncertainty_ms", 10);
@@ -123,7 +139,8 @@ class QuestUsbBridge final : public rclcpp::Node {
     const int client_receive_timeout_ms = declare_parameter<int>("client_receive_timeout_ms", 500);
     if (command_timeout_ms <= 0 || max_uncertainty_ms <= 0 || max_sync_age_ms <= 0 ||
         max_future_ms < 0 || client_receive_timeout_ms <= 0) {
-      throw std::invalid_argument("clock/freshness limits must be positive (future allowance may be zero)");
+      throw std::invalid_argument(
+          "clock/freshness limits must be positive (future allowance may be zero)");
     }
     command_timeout_ns_ = static_cast<uint64_t>(command_timeout_ms) * 1'000'000ULL;
     max_clock_uncertainty_ns_ = static_cast<uint64_t>(max_uncertainty_ms) * 1'000'000ULL;
@@ -131,11 +148,14 @@ class QuestUsbBridge final : public rclcpp::Node {
     max_future_ns_ = static_cast<uint64_t>(max_future_ms) * 1'000'000ULL;
     client_receive_timeout_ms_ = client_receive_timeout_ms;
     publisher_ = create_publisher<Message>("~/controller_state", rclcpp::QoS(10));
-    controller_publishers_[0] = create_publisher<Message>("~/left/controller_state", rclcpp::QoS(10));
-    controller_publishers_[1] = create_publisher<Message>("~/right/controller_state", rclcpp::QoS(10));
+    controller_publishers_[0] =
+        create_publisher<Message>("~/left/controller_state", rclcpp::QoS(10));
+    controller_publishers_[1] =
+        create_publisher<Message>("~/right/controller_state", rclcpp::QoS(10));
     listener_fd_ = create_listener(bind_address, port);
     worker_ = std::thread([this] { accept_loop(); });
-    RCLCPP_INFO(get_logger(), "Quest USB TCP bridge listening on %s:%d", bind_address.c_str(), port);
+    RCLCPP_INFO(get_logger(), "Quest USB TCP bridge listening on %s:%d", bind_address.c_str(),
+                port);
   }
 
   ~QuestUsbBridge() override {
@@ -145,14 +165,17 @@ class QuestUsbBridge final : public rclcpp::Node {
       close(listener_fd_);
       listener_fd_ = -1;
     }
-    if (client_fd_.load() >= 0) shutdown(client_fd_.load(), SHUT_RDWR);
-    if (worker_.joinable()) worker_.join();
+    if (client_fd_.load() >= 0)
+      shutdown(client_fd_.load(), SHUT_RDWR);
+    if (worker_.joinable())
+      worker_.join();
   }
 
  private:
   int create_listener(const std::string& address, int port) {
     const int fd = socket(AF_INET, SOCK_STREAM | SOCK_CLOEXEC, 0);
-    if (fd < 0) throw std::runtime_error("socket() failed");
+    if (fd < 0)
+      throw std::runtime_error("socket() failed");
     int reuse = 1;
     if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &reuse, sizeof(reuse)) != 0) {
       close(fd);
@@ -165,7 +188,8 @@ class QuestUsbBridge final : public rclcpp::Node {
       close(fd);
       throw std::invalid_argument("bind_address must be an IPv4 address");
     }
-    if (bind(fd, reinterpret_cast<sockaddr*>(&endpoint), sizeof(endpoint)) != 0 || listen(fd, 1) != 0) {
+    if (bind(fd, reinterpret_cast<sockaddr*>(&endpoint), sizeof(endpoint)) != 0 ||
+        listen(fd, 1) != 0) {
       close(fd);
       throw std::runtime_error("bind()/listen() failed");
     }
@@ -176,16 +200,21 @@ class QuestUsbBridge final : public rclcpp::Node {
     while (!stopping_.load()) {
       pollfd listener{listener_fd_, POLLIN, 0};
       const int ready = poll(&listener, 1, 250);
-      if (ready == 0) continue;
+      if (ready == 0)
+        continue;
       if (ready < 0) {
-        if (errno == EINTR) continue;
-        if (!stopping_.load()) RCLCPP_ERROR(get_logger(), "poll() failed: %s", std::strerror(errno));
+        if (errno == EINTR)
+          continue;
+        if (!stopping_.load())
+          RCLCPP_ERROR(get_logger(), "poll() failed: %s", std::strerror(errno));
         break;
       }
       const int client = accept4(listener_fd_, nullptr, nullptr, SOCK_CLOEXEC);
       if (client < 0) {
-        if (errno == EINTR) continue;
-        if (!stopping_.load()) RCLCPP_ERROR(get_logger(), "accept() failed: %s", std::strerror(errno));
+        if (errno == EINTR)
+          continue;
+        if (!stopping_.load())
+          RCLCPP_ERROR(get_logger(), "accept() failed: %s", std::strerror(errno));
         break;
       }
       timeval receive_timeout{};
@@ -194,7 +223,8 @@ class QuestUsbBridge final : public rclcpp::Node {
       setsockopt(client, SOL_SOCKET, SO_RCVTIMEO, &receive_timeout, sizeof(receive_timeout));
       const int no_delay = 1;
       if (setsockopt(client, IPPROTO_TCP, TCP_NODELAY, &no_delay, sizeof(no_delay)) != 0) {
-        RCLCPP_WARN(get_logger(), "Could not disable TCP_NODELAY buffering: %s", std::strerror(errno));
+        RCLCPP_WARN(get_logger(), "Could not disable TCP_NODELAY buffering: %s",
+                    std::strerror(errno));
       }
       client_fd_.store(client);
       RCLCPP_INFO(get_logger(), "Quest TCP client connected");
@@ -213,39 +243,48 @@ class QuestUsbBridge final : public rclcpp::Node {
     while (sent < size) {
       const ssize_t count = send(fd, bytes + sent, size - sent, MSG_NOSIGNAL);
       if (count < 0) {
-        if (errno == EINTR) continue;
+        if (errno == EINTR)
+          continue;
         return false;
       }
-      if (count == 0) return false;
+      if (count == 0)
+        return false;
       sent += static_cast<size_t>(count);
     }
     return true;
   }
 
   void reply_clock_sync(int fd, const json& request) {
-    if (request.at("version").get<int>() != 1) throw std::runtime_error("unsupported sync version");
+    if (request.at("version").get<int>() != 1)
+      throw std::runtime_error("unsupported sync version");
     const std::string sync_id = request.at("sync_id").get<std::string>();
-    if (sync_id.empty() || sync_id.size() > 32) throw std::runtime_error("invalid sync_id");
-    const uint64_t quest_send_ns = decimal_u64(request.at("quest_send_time_ns"), "quest_send_time_ns");
+    if (sync_id.empty() || sync_id.size() > 32)
+      throw std::runtime_error("invalid sync_id");
+    const uint64_t quest_send_ns =
+        decimal_u64(request.at("quest_send_time_ns"), "quest_send_time_ns");
     const uint64_t pc_receive_ns = pc_monotonic_ns();
-    json response = {
-        {"version", 1}, {"type", "clock_sync_reply"}, {"sync_id", sync_id},
-        {"quest_send_time_ns", std::to_string(quest_send_ns)},
-        {"pc_receive_time_ns", std::to_string(pc_receive_ns)},
-        {"pc_send_time_ns", "0"}};
+    json response = {{"version", 1},
+                     {"type", "clock_sync_reply"},
+                     {"sync_id", sync_id},
+                     {"quest_send_time_ns", std::to_string(quest_send_ns)},
+                     {"pc_receive_time_ns", std::to_string(pc_receive_ns)},
+                     {"pc_send_time_ns", "0"}};
     std::string payload = response.dump();
     const uint64_t pc_send_ns = pc_monotonic_ns();
     const std::string placeholder = "\"pc_send_time_ns\":\"0\"";
     const size_t send_time_field = payload.find(placeholder);
-    if (send_time_field == std::string::npos) throw std::runtime_error("clock response serialization failed");
+    if (send_time_field == std::string::npos)
+      throw std::runtime_error("clock response serialization failed");
     payload.replace(send_time_field, placeholder.size(),
                     "\"pc_send_time_ns\":\"" + std::to_string(pc_send_ns) + "\"");
-    if (payload.empty() || payload.size() > kMaxPayload) throw std::runtime_error("clock reply too large");
+    if (payload.empty() || payload.size() > kMaxPayload)
+      throw std::runtime_error("clock reply too large");
     const uint32_t length = htonl(static_cast<uint32_t>(payload.size()));
     std::string frame(sizeof(length), '\0');
     std::memcpy(frame.data(), &length, sizeof(length));
     frame += payload;
-    if (!send_all(fd, frame.data(), frame.size())) throw std::runtime_error("clock reply send failed");
+    if (!send_all(fd, frame.data(), frame.size()))
+      throw std::runtime_error("clock reply send failed");
     RCLCPP_INFO(get_logger(), "Clock sync reply sent: sync_id=%s", sync_id.c_str());
   }
 
@@ -258,23 +297,25 @@ class QuestUsbBridge final : public rclcpp::Node {
     std::unordered_map<std::string, std::pair<uint64_t, uint64_t>> last_controller_times;
     while (!stopping_.load()) {
       uint32_t wire_length = 0;
-      if (!read_all(fd, &wire_length, sizeof(wire_length))) return;
+      if (!read_all(fd, &wire_length, sizeof(wire_length)))
+        return;
       const uint32_t length = ntohl(wire_length);
       if (length == 0 || length > kMaxPayload) {
         RCLCPP_ERROR(get_logger(), "Rejected invalid Quest frame length: %u", length);
         return;
       }
       std::string payload(length, '\0');
-      if (!read_all(fd, payload.data(), length)) return;
+      if (!read_all(fd, payload.data(), length))
+        return;
       try {
         const json packet = json::parse(payload);
         if (packet.is_object() && packet.value("type", std::string()) == "clock_sync_request") {
           reply_clock_sync(fd, packet);
           continue;
         }
-        auto message = decode(packet, active_session, last_sequence, have_sequence,
-                              reference_generation, have_reference_generation,
-                              last_controller_times);
+        auto message =
+            decode(packet, active_session, last_sequence, have_sequence, reference_generation,
+                   have_reference_generation, last_controller_times);
         publish_state(message);
       } catch (const std::exception& error) {
         RCLCPP_WARN(get_logger(), "Rejected Quest frame; closing connection: %s", error.what());
@@ -292,33 +333,45 @@ class QuestUsbBridge final : public rclcpp::Node {
       throw std::runtime_error("unsupported packet version/type");
     }
     const std::string session = packet.at("session_id").get<std::string>();
-    if (session.empty() || session.size() > 128) throw std::runtime_error("invalid session_id");
+    if (session.empty() || session.size() > 128)
+      throw std::runtime_error("invalid session_id");
     const uint64_t sequence = decimal_u64(packet.at("sequence"), "sequence");
-    const uint64_t acquisition_ns = decimal_u64(packet.at("acquisition_time_ns"), "acquisition_time_ns");
-    const uint64_t location_ns = decimal_u64(packet.at("openxr_location_time_ns"), "openxr_location_time_ns");
+    const uint64_t acquisition_ns =
+        decimal_u64(packet.at("acquisition_time_ns"), "acquisition_time_ns");
+    const uint64_t location_ns =
+        decimal_u64(packet.at("openxr_location_time_ns"), "openxr_location_time_ns");
     const bool reported_clock_sync = boolean(packet.at("clock_sync_valid"), "clock_sync_valid");
-    const int64_t clock_offset = decimal_i64(packet.at("clock_offset_pc_minus_quest_ns"), "clock_offset_pc_minus_quest_ns");
-    const uint64_t clock_uncertainty = decimal_u64(packet.at("clock_uncertainty_ns"), "clock_uncertainty_ns");
-    const uint64_t clock_sync_age = decimal_u64(packet.at("clock_sync_age_ns"), "clock_sync_age_ns");
-    const uint64_t generation = decimal_u64(packet.at("reference_space_generation"), "reference_space_generation");
+    const int64_t clock_offset =
+        decimal_i64(packet.at("clock_offset_pc_minus_quest_ns"), "clock_offset_pc_minus_quest_ns");
+    const uint64_t clock_uncertainty =
+        decimal_u64(packet.at("clock_uncertainty_ns"), "clock_uncertainty_ns");
+    const uint64_t clock_sync_age =
+        decimal_u64(packet.at("clock_sync_age_ns"), "clock_sync_age_ns");
+    const uint64_t generation =
+        decimal_u64(packet.at("reference_space_generation"), "reference_space_generation");
     const std::string controller_id = packet.at("controller_id").get<std::string>();
-    if (controller_id != "left" && controller_id != "right") throw std::runtime_error("invalid controller_id");
-    if (active_session.empty()) active_session = session;
-    if (session != active_session) throw std::runtime_error("session changed without reconnect");
-    if (have_sequence && sequence <= last_sequence) throw std::runtime_error("duplicate/out-of-order sequence");
+    if (controller_id != "left" && controller_id != "right")
+      throw std::runtime_error("invalid controller_id");
+    if (active_session.empty())
+      active_session = session;
+    if (session != active_session)
+      throw std::runtime_error("session changed without reconnect");
+    if (have_sequence && sequence <= last_sequence)
+      throw std::runtime_error("duplicate/out-of-order sequence");
     if (have_reference_generation && generation < reference_generation) {
       throw std::runtime_error("reference-space generation moved backwards");
     }
     const auto previous_time = last_times.find(controller_id);
-    if (previous_time != last_times.end() &&
-        (acquisition_ns <= previous_time->second.first || location_ns <= previous_time->second.second)) {
+    if (previous_time != last_times.end() && (acquisition_ns <= previous_time->second.first ||
+                                              location_ns <= previous_time->second.second)) {
       throw std::runtime_error("controller timestamp duplicate/out-of-order");
     }
 
     Message out;
     out.header.stamp = now();
     out.header.frame_id = packet.at("reference_space").get<std::string>();
-    if (out.header.frame_id != "LOCAL") throw std::runtime_error("unsupported reference space");
+    if (out.header.frame_id != "LOCAL")
+      throw std::runtime_error("unsupported reference space");
     out.session_id = session;
     out.sequence = sequence;
     out.acquisition_time_ns = acquisition_ns;
@@ -329,9 +382,10 @@ class QuestUsbBridge final : public rclcpp::Node {
     out.clock_sync_valid = reported_clock_sync && clock_uncertainty <= max_clock_uncertainty_ns_ &&
                            clock_sync_age <= max_clock_sync_age_ns_;
     if (out.clock_sync_valid) {
-      const long double converted = static_cast<long double>(acquisition_ns) +
-                                    static_cast<long double>(clock_offset);
-      if (converted >= 0.0L && converted <= static_cast<long double>(std::numeric_limits<uint64_t>::max())) {
+      const long double converted =
+          static_cast<long double>(acquisition_ns) + static_cast<long double>(clock_offset);
+      if (converted >= 0.0L &&
+          converted <= static_cast<long double>(std::numeric_limits<uint64_t>::max())) {
         out.source_time_pc_monotonic_ns = static_cast<uint64_t>(converted);
         const uint64_t pc_now = pc_monotonic_ns();
         if (out.source_time_pc_monotonic_ns <= pc_now) {
@@ -362,9 +416,11 @@ class QuestUsbBridge final : public rclcpp::Node {
     out.orientation_valid = boolean(pose.at("orientation_valid"), "orientation_valid");
     out.position_tracked = boolean(pose.at("position_tracked"), "position_tracked");
     out.orientation_tracked = boolean(pose.at("orientation_tracked"), "orientation_tracked");
-    const double qnorm = std::sqrt(orientation[0] * orientation[0] + orientation[1] * orientation[1] +
-                                   orientation[2] * orientation[2] + orientation[3] * orientation[3]);
-    if (out.orientation_valid && (qnorm < 0.99 || qnorm > 1.01)) throw std::runtime_error("invalid orientation norm");
+    const double qnorm =
+        std::sqrt(orientation[0] * orientation[0] + orientation[1] * orientation[1] +
+                  orientation[2] * orientation[2] + orientation[3] * orientation[3]);
+    if (out.orientation_valid && (qnorm < 0.99 || qnorm > 1.01))
+      throw std::runtime_error("invalid orientation norm");
 
     const auto& twist = packet.at("native_twist");
     const auto linear = finite_array<3>(twist.at("linear"), "native_twist.linear");
@@ -379,9 +435,11 @@ class QuestUsbBridge final : public rclcpp::Node {
     out.angular_velocity_valid = boolean(twist.at("angular_valid"), "angular_valid");
 
     const auto& inputs = packet.at("inputs");
-    if (!inputs.is_object()) throw std::runtime_error("inputs must be an object");
+    if (!inputs.is_object())
+      throw std::runtime_error("inputs must be an object");
     const std::vector<std::string> button_names = controller_id == "right"
-        ? std::vector<std::string>{"a", "b"} : std::vector<std::string>{"x", "y", "menu"};
+                                                      ? std::vector<std::string>{"a", "b"}
+                                                      : std::vector<std::string>{"x", "y", "menu"};
     std::vector<std::string> input_fields{"trigger", "trigger_active", "grip", "grip_active"};
     for (const auto& name : button_names) {
       const std::string key = name == "menu" ? "menu_button" : "button_" + name;
@@ -395,7 +453,8 @@ class QuestUsbBridge final : public rclcpp::Node {
     }
     for (auto field = inputs.begin(); field != inputs.end(); ++field) {
       if (std::find(input_fields.begin(), input_fields.end(), field.key()) == input_fields.end()) {
-        throw std::runtime_error("unexpected input for " + controller_id + " controller: " + field.key());
+        throw std::runtime_error("unexpected input for " + controller_id +
+                                 " controller: " + field.key());
       }
     }
     out.trigger_value = scalar(inputs.at("trigger"), "trigger");
@@ -412,8 +471,10 @@ class QuestUsbBridge final : public rclcpp::Node {
 
   void publish_state(const Message& message) {
     publisher_->publish(message);
-    if (message.controller_id == "left") controller_publishers_[0]->publish(message);
-    else if (message.controller_id == "right") controller_publishers_[1]->publish(message);
+    if (message.controller_id == "left")
+      controller_publishers_[0]->publish(message);
+    else if (message.controller_id == "right")
+      controller_publishers_[1]->publish(message);
   }
 
   void publish_disconnect() {

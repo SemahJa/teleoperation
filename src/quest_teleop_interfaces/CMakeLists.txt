@@ -11,6 +11,7 @@ rosidl_generate_interfaces(${PROJECT_NAME}
   "msg/QuestControllerState.msg"
   "msg/CartesianTeleopCommand.msg"
   "msg/ControllerStatus.msg"
+  "msg/TrackingSample.msg"
   "msg/GripperStatus.msg"
   "msg/HomingStatus.msg"
   "msg/CbfStatus.msg"

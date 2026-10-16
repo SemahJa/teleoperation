@@ -1,12 +1,244 @@
-# Revised implementation procedure
+# Implementation record
 
-Current scope: complete the requested package reorganization before Milestone 2
-asynchronous CBF-QP and performance work; see [PACKAGE_STRUCTURE.md](PACKAGE_STRUCTURE.md)
-and [MILESTONE_2.md](MILESTONE_2.md).
-Physical FCI/device operations remain operator actions. Preserve Docker,
-`panda_bringup`, `panda_demos` and the working nominal controller baseline.
+Current implementation: separated runtime/manager/torque laws, normal-release
+joint position hold, shared CBF-independent actuator caps, homing, Hand control,
+recording, full-cycle tracking telemetry and MATLAB report tools. The owner
+still waits for the current cycle's safety reply; asynchronous reuse and pose
+interpolation remain planned in [MILESTONE_2.md](MILESTONE_2.md).
+
+Use the [documentation guide](README.md) for current operating instructions.
+The dated entries below are historical evidence; older paths, test counts and
+descriptions of release behavior do not override the current implementation.
+Physical FCI/device operations remain operator actions.
 
 ## Stages and evidence
+
+### Maintenance cleanup, formatting and documentation (2026-10-16)
+
+- With explicit owner approval, removed all existing raw episode bags,
+  diagnostic captures, build/test logs, exported CSVs and MATLAB reports under
+  `log/`: 802,822,317 file bytes, approximately 803 MB. Retained the ignored
+  output root and reusable MATLAB source. Validation logs for this pass are in
+  `/tmp`, so the repository output directory remains empty apart from
+  `COLCON_IGNORE`. Removed two obsolete generated XML results for the deleted
+  controller cores to prevent double-counting in future test summaries.
+- Formatted maintained ROS C++/Python and scripts with clang-format 14 and
+  Black 24.10.0; expanded MATLAB compound statements and normalized indentation
+  with MISS_HIT 0.9.44. Added scoped `scripts/format_code.py`, check mode and
+  pinned optional developer dependencies. Android, vendored dependencies,
+  legacy Panda packages and existing Docker definitions were left outside the
+  code cleanup. Operator YAML values were preserved.
+- Cached constant Cartesian gain vectors at controller construction, flattened
+  each exported message once, and reused request energy in MATLAB lag searches.
+  Removed the unused lag sample counter. These are small efficiency/readability
+  changes; no hardware timing improvement is claimed.
+- Added a documentation index and architecture diagram. Reworked package and
+  development guides; corrected old configuration paths, combined-launch flags,
+  release behavior, backend assumptions, recording/export instructions and
+  container build steps. Marked proposed asynchronous CBF work and historical
+  stage records explicitly.
+- Nine-package Release build passes. All 132 current robot-free cases pass:
+  28 Quest, 7 recording/export, 25 safety, 47 controller/runtime, 12 Hand and
+  13 bringup; zero failures/errors. Used ROS domain 137 and localhost-only
+  discovery. Colcon's aggregate is 152 including test-wrapper suites; the
+  individual case count is 132. Scoped formatting check and MATLAB syntax/style checks pass.
+  MATLAB numeric/figure tests remain unexecuted by the agent because the
+  existing separate batch process could not obtain a license in the preceding
+  stage. No physical robot/Hand operation was performed.
+  Shell syntax, all local documentation links/heading anchors, and single/dual
+  PlotJuggler layout generation also pass; the single-arm generator reproduces
+  the checked-in XML exactly.
+
+### CBF scale configuration and explicit MATLAB legends (2026-10-16)
+
+- Moved both actuator scales from the separate `safety` YAML section/ROS prefix
+  to `cbf.torque_limit_scale` and `cbf.torque_rate_limit_scale` in standalone
+  safety configuration and both combined runtime templates. Updated shared
+  schema validation, launch routing, runtime parameters, tests and current
+  documentation. The 0.35 defaults and CBF-independent enforcement are unchanged.
+  Old YAML sections are rejected; old ROS scale overrides produce a migration
+  error before control rather than silently dropping an intended stricter cap.
+- Added visible, explicit legends to all 38 MATLAB plot panels, including every
+  pose/velocity/derivative axis, each joint's four torque stages, single-signal
+  diagnostics and Joint 1--7 in both residual plots. Residual joint colors are
+  consistent. Empty requested trajectories retain an unavailable placeholder
+  so their legend entry remains distinct from measured/reference curves.
+- Extended the MATLAB report round-trip self-test to inspect the legends in
+  all saved FIG panels and exercise unavailable torque/readback/request cases.
+  Documented that existing figures must be regenerated. Clarified that grasp
+  width is the full gap between opposing fingers, epsilon permits width
+  deviation, and force is sent in the grasp request rather than in a second
+  command after a success flag. No Hand operation behavior was changed.
+- The nine-package Humble build and all 132 current robot-free cases pass:
+  28 Quest, 7 recording/export, 25 safety, 47 controller/runtime, 12 Hand and
+  13 bringup. Runs used ROS domain 137 and localhost-only discovery. The eight
+  MATLAB source files pass syntax parsing. Attempted MATLAB self-tests using a
+  separate batch process in the existing R2024b container; license checkout
+  failed with error -1 before executing tests. Numeric/render/export validation
+  remains for the licensed browser session; its authentication was not modified.
+  No physical robot/Hand command was issued, and operator values/generated
+  Android files, existing Docker definitions and legacy packages were preserved.
+
+### Editable 35%-of-FCI actuator limits and Hand grasp diagnostics (2026-10-16)
+
+- Added `safety.torque_limit_scale` and `safety.torque_rate_limit_scale`, both
+  defaulting to 0.35, in standalone safety configuration and both combined
+  runtime templates. These scale the published Panda FCI ceilings once:
+  `[30.45,30.45,30.45,30.45,4.2,4.2,4.2]` Nm and `350` Nm/s. Additional controller
+  absolute caps remain minima, including the existing stricter shared dual-arm
+  cap policy. The scales are independent of CBF enablement and validated in
+  `(0,1]` before startup; changes require a launch restart.
+- Centralized the defaults/helpers in `safety_filter/actuator_limits.hpp` and
+  applied them to filter defaults, runtime setup, manager preflight and reported
+  actuator limits. Startup logs show the effective bounds. The same magnitude/
+  rate intersections constrain Cartesian, holding, homing, damping and fallback
+  torque, including actuator-only clipping with CBF disabled. Gravity compensation,
+  Hand grasp force, freshness gates and geometric/kinematic CBF thresholds are
+  not rescaled. No manufacturer protection settings were modified.
+- Added Hand startup/request/result logs showing requested width, force, speed,
+  epsilon tolerances, completion width, success and `is_grasped`. Force is still
+  passed unchanged to `Gripper::grasp`; there is no force readback or continuous
+  slip detector. No grasp parameters, retry behavior or operation semantics were
+  changed. Added setup/diagnostic guidance for thin cables and parameter reloads.
+- Read only the existing `quest_20261016T142129Z_2bfae179` bag's Hand events:
+  one grasp failed at 17.509 s with measured gap 9.8244 mm; a later grasp
+  completed at 34.480 s with gap 8.1085 mm. The successful gap is incompatible
+  with a 1 mm target and the narrow tolerances in the edited YAML, so that older
+  recording does not verify that the current settings were loaded. The bag
+  contains no issued-force field, and no physical cause of slipping is inferred.
+- Added regression coverage for default/custom scales, invalid scale rejection,
+  positive/negative magnitude and rate bounds with CBF enabled/disabled, actual
+  single/dual YAML routing, full-rate bound telemetry, stricter user caps and
+  propagation/logging of a 30 N Hand request.
+- The nine-package Humble Docker build passed. All 131 current robot-free cases
+  pass: 28 Quest, 7 recording/export, 25 safety, 46 controller/runtime, 12 Hand
+  and 13 bringup. Tests ran in ROS domain 137 with localhost-only discovery.
+  Two coordinator assertions initially compared the computed per-cycle slew
+  directly to the decimal literal 0.35; they now compute the same 350 Nm/s *
+  1 ms bound, avoiding a floating-point representation mismatch. The eight
+  affected coordinator cases passed on rerun; no production limit was relaxed.
+- Syntax/configuration checks and `git diff --check` pass. No physical robot or
+  Hand commands were issued. Existing robot Docker definitions, legacy packages,
+  Android generated changes and operator Hand values were preserved, including
+  the epsilon edits made during implementation. Physical holding/grasp behavior
+  under these new arm limits remains unverified.
+
+### Joint position holding after trigger release (2026-10-16)
+
+- Replaced normal released-trigger damping with `PositionHoldController`, a
+  separate seven-joint impedance law using the common torque interface. The
+  manager captures measured joints once on entry, sets zero desired joint
+  velocity and preserves that reference across repeated release messages.
+  This restores arm posture as well as the end-effector location under finite
+  stiffness. It never pursues an old Quest target or re-anchors every cycle.
+- Startup captures the initial configuration. Re-engagement selects the
+  unchanged Cartesian law and the mapper's existing measured-pose anchors.
+  Homing retains exclusive priority and returns to measured joint hold when
+  input is fresh/released. Input faults, stale commands, safety fallback and
+  shutdown retain damping; homing arbitration cannot erase the fault gate.
+- Added configurable seven-element `hold_stiffness` and `hold_damping`, plus
+  `hold_stiffness_ramp_seconds` in standalone and single/dual runtime configs,
+  including per-arm override routing. Default stiffness is
+  `[600,600,600,600,250,150,75]` Nm/rad, damping
+  `[50,50,50,50,20,15,10]` Nm s/rad and the smooth stiffness ramp is 0.25 s.
+  Physical gain/transition performance remains unverified and requires
+  commissioning; actuator/CBF bounds remain authoritative.
+- Status/tracking report `reason: position_hold` with Quest
+  `motion_enabled=false`, preserving ROS message schemas and old recording
+  compatibility. MATLAB's diagnostic mode plot includes holding; pose/velocity
+  and torque still record while active teleoperation metrics exclude holds.
+  The dual-arm filter retains parked-arm priority for a holding arm.
+- Added robot-free checks for one-time capture, displacement of the redundant
+  seventh joint, release/re-engagement ownership, stiffness ramp/reset, invalid
+  gains/references, homing return and fault-triggered reference removal. Updated
+  the actual mapper/mock process and single/dual launch acceptance checks.
+- The nine-package Humble Docker build passed. All 127 current robot-free cases
+  pass: 27 Quest, 7 recording/export, 23 safety, 45 controller/runtime, 12 Hand
+  and 13 bringup. Tests used isolated ROS domain 137 and localhost-only discovery.
+  Corrected a launch-test readiness assumption: startup hold alone does not
+  prove an accepted trigger release; readiness now also requires a consumed
+  source command. The affected four launch cases passed on rerun.
+- MATLAB source syntax parsing, Python/configuration checks and `git diff
+  --check` pass. No physical FCI/device operation occurred. Existing robot
+  Docker definitions, legacy Panda packages, Android generated changes and
+  operator configuration values were preserved; only the requested hold keys
+  were added to the editable runtime YAML. Physical hold gains/transitions and
+  the updated MATLAB mode plot have not been exercised by this agent.
+
+### Trajectory monitoring and licensed MATLAB reports (2026-10-16)
+
+- Added coherent per-arm `TrackingSample` messages: mapped requested,
+  controller-reference and measured pose/twist; four torque stages; effective
+  gains, modes, safety intervention, clock identities and sample-loss counters.
+  Requested twist is captured before mapper low-pass filtering; measured twist
+  uses the same-state `J*dq`. No Android change or raw IMU claim is involved.
+- The torque callback hands fixed-size samples to a bounded SPSC queue. A
+  separate non-realtime consumer publishes full-rate `tracking_samples` for
+  recording and latest `tracking_status` for the 100 Hz live dashboard. Invalid
+  Cartesian references and unavailable mock torque readbacks are NaN. Hardware
+  desired/measured torque retain their distinct gravity conventions and incoming
+  state timestamps; previous outputs are alignment candidates, not acknowledgements.
+- Extended the default recording profile and added a tested rosbag2-to-CSV
+  exporter with integer-clock preservation, per-arm files and a schema manifest.
+  Added generated single/dual-arm PlotJuggler layouts for pose, velocity, all
+  seven joints' four torque stages and diagnostic context.
+- Added base-MATLAB experiment reports with vector PDF, 600 DPI PNG and editable
+  figures; time-weighted tracking metrics; descriptive velocity-lag analysis;
+  and supporting local-fit acceleration/jerk estimates. Analysis separates
+  engagement/session/reference changes and gaps, and excludes idle, homing and
+  fallback from tracking metrics. It does not alter control/filter settings.
+- Added a separate optional official MATLAB R2024b Compose environment, preserving
+  existing robot Docker definitions. The [monitoring guide](TRAJECTORY_MONITORING.md)
+  documents browser first use, account/network licensing, batch execution,
+  release entitlement and handover after personal license expiration. No ROS or
+  Signal Processing Toolbox is required; credentials are never packaged.
+- The Humble Docker build passed. All 121 current robot-free cases pass: 27 Quest,
+  7 recording/export, 23 safety, 39 controller/runtime, 12 Hand and 13 bringup.
+  Coverage includes real mapper/mock-controller monitoring, full/live streams,
+  torque conventions, inactive validity, clock precision and two-arm bag export.
+  Runs used isolated ROS domain 137 and localhost-only discovery. An initial
+  test run overlapped the schema rebuild; affected failures passed after the
+  rebuild completed. The editable runtime YAML's hardware choice was preserved.
+- MATLAB's eight source/test files pass syntax parsing; Compose configuration,
+  Python/shell syntax and generated layout structure pass checks. MATLAB numeric
+  tests and figure export have **not** run here because no activated MATLAB
+  runtime/license is available. Seven MATLAB self-tests, including synthetic CSV
+  analysis and headless figure export, are provided for the documented licensed
+  first run. The PlotJuggler GUI and physical robot behavior remain untested.
+  Existing operator YAML and Android generated-file changes remain untouched.
+
+### Shared controller runtime and torque-law architecture (2026-10-16)
+
+- Moved ROS/configuration, threading, telemetry, model/backend adapters and
+  permanent FCI ownership to `controller_runtime.cpp`. Retained the existing
+  executable, ROS node names, launch interfaces and YAML keys for compatibility.
+- Replaced `ControlCore` with `ControllerManager`: command validity/freshness,
+  session/order and release/engagement gates, state/actuator-interval checks,
+  lifecycle reset and exclusive nominal-source selection now live in
+  `controller_manager.cpp`. Homing/controlled stopping, armed teleoperation and
+  disarmed damping select exactly one torque computation per cycle.
+- Added a fixed-size `TorqueController` interface with typed Cartesian/joint
+  references, seven nominal joint torques, lifecycle reset and explicit faults.
+  Separate Cartesian impedance, damping and homing implementations preserve the
+  baseline formulas. Homing advances references independently of torque
+  computation; the synchronized `joint_motion_generator` remains unchanged.
+- Removed the discarded intermediate torque clamp. Every nominal law still
+  passes through the existing shared safety coordinator, which owns final
+  actuator bounds with CBF enabled or disabled. Retained `tau_J_d` anchors,
+  controlled homing cancellation, fresh release/press after faults/home and
+  one permanent libfranka owner per arm. Torque limit telemetry uses the final
+  safety layer's shared limits.
+- One Docker build of `safety_filter`, `teleop_controllers` and `teleop_bringup`
+  passed. All 72 individual robot-free cases passed: 23 safety/coordinator,
+  36 controller/law/homing/runtime and 13 bringup cases. Coverage includes
+  injected-law selection/reset/faults, homing priority and cancellation,
+  actuator-only CBF-disabled execution, mapper watchdog/re-engagement,
+  single-left/right and dual launches, recording and standalone compatibility.
+  Tests ran in isolated ROS domain 137 with localhost-only discovery.
+- Updated README and package architecture/extension documentation. No physical
+  FCI/device operation, Android rebuild, Docker change or legacy Panda edit.
+  Existing operator changes in the single-arm YAML and Android generated files
+  were preserved.
 
 ### Mode-specific template cleanup (2026-10-13)
 

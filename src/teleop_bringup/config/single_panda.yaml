@@ -5,13 +5,13 @@
 pipeline:
   mode: single
   single_controller: right
-  backend: mock
+  backend: hardware
   start_bridge: true
   start_mapper: true
   start_controller: true
   start_hand: true           # One empty-hand calibration moves the fingers.
   homing_enabled: true
-  cbf_enabled: true
+  cbf_enabled: false
   recording_enabled: true
   mock_measured_pose: false  # Requires start_controller: false.
   # operator_confirm is deliberately launch-only; hardware needs explicit true.
@@ -30,7 +30,7 @@ quest:
 # One entry per robot. Mapping and controller/Hand input identity come from here.
 arms:
   panda_1:
-    robot_ip: ""            # Actual FCI IP required for hardware.
+    robot_ip: 192.168.3.101            # Actual FCI IP required for hardware.
     namespace: /panda_1
     base_frame: panda_1/panda_link0
     # Hand selection comes from pipeline.single_controller.
@@ -40,10 +40,10 @@ arms:
     state_topic: robot_state
     # Omit controller_state_topic to derive it from bridge namespace + hand.
     # controller_state_topic: /quest_usb_bridge/right/controller_state
-    reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
-    translation_scale: 1.0
-    rotation_scale: 1.0
-    feedforward_scale: 1.0
+    reference_to_robot_xyzw: [0.5, 0.5, 0.5, 0.5]
+    translation_scale: 0.75
+    rotation_scale: 0.33
+    feedforward_scale: 0.0
     twist_filter_cutoff_hz: 10.0
     command_timeout_ms: 100
     max_clock_uncertainty_ms: 10.0
@@ -54,10 +54,14 @@ arms:
     trigger_release: 0.25
 
 controller:
-  lambda_translation: 50.0
-  lambda_rotation: 40.0
-  gain_translation: 20.0
+  lambda_translation: 30.0
+  lambda_rotation: 30.0
+  gain_translation: 30.0
   gain_rotation: 2.5
+  # Release trigger: capture measured joints once and hold the whole arm.
+  hold_stiffness: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 75.0]  # Nm/rad
+  hold_damping: [50.0, 50.0, 50.0, 50.0, 20.0, 15.0, 10.0]        # Nm s/rad
+  hold_stiffness_ramp_seconds: 0.25
   maximum_torque_rate: 900.0
   torque_limits: [87.0, 87.0, 87.0, 87.0, 12.0, 12.0, 12.0]
   tool_offset_m: 0.1034
@@ -73,11 +77,11 @@ controller:
 
 hand:
   speed_mps: 0.02
-  grasp_force_n: 5.0
-  open_width_m: -1.0        # Use calibrated maximum width.
-  grasp_width_m: -1.0      # Unknown object settings refuse grasp.
-  epsilon_inner_m: -1.0
-  epsilon_outer_m: -1.0
+  grasp_force_n: 30.0
+  open_width_m: 0.025        # Use calibrated maximum width.
+  grasp_width_m: 0.007      # Unknown object settings refuse grasp.
+  epsilon_inner_m: 0.00005
+  epsilon_outer_m: 0.00005
   grip_press: 0.75
   grip_release: 0.25
   grip_debounce_ms: 50.0
@@ -86,6 +90,9 @@ hand:
   mock_operation_duration_ms: 100.0
 
 cbf:
+  # Actuator scales apply even with cbf_enabled:false. Controller caps can tighten them.
+  torque_limit_scale: 0.35       # -> joints 1-4: 30.45 Nm; joints 5-7: 4.2 Nm
+  torque_rate_limit_scale: 0.35  # -> 350 Nm/s; restart bringup after editing
   table_height: 0.0
   table_minimum_clearance: 0.02
   self_minimum_clearance: 0.03

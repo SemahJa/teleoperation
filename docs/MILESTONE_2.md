@@ -1,5 +1,16 @@
 # Milestone 2: asynchronous CBF and teleoperation performance
 
+This is a design plan, not a description of available runtime switches.
+As of 2026-10-16, the controller-law separation, release position holding,
+pose/velocity/four-torque telemetry, PlotJuggler layout and MATLAB report tools
+are implemented. Asynchronous CBF result reuse, pose interpolation and
+controller-comparison experiments remain pending. The owner still waits for
+the current cycle's safety result. Use [PACKAGE_STRUCTURE.md](PACKAGE_STRUCTURE.md)
+for the implemented architecture and [TRAJECTORY_MONITORING.md](TRAJECTORY_MONITORING.md)
+for available analysis. Earlier requirements to preserve trial logs below are
+historical; the owner authorized removing existing logs and recordings during
+the 2026-10-16 maintenance cleanup.
+
 ## Milestone 1 acceptance
 
 The operator accepted Milestone 1 on 2026-10-12 after successful single-right-arm

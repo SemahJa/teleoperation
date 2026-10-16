@@ -1,4 +1,8 @@
+# Actuator limits remain enforced even with CBF disabled. Fractions of Panda
+# FCI ceilings: [87,87,87,87,12,12,12] Nm and 1000 Nm/s. Restart to apply edits.
 cbf:
+  torque_limit_scale: 0.35       # -> [30.45,30.45,30.45,30.45,4.2,4.2,4.2] Nm
+  torque_rate_limit_scale: 0.35  # -> 350 Nm/s (0.35 Nm per 1 ms cycle)
   table_height: 0.0
   table_minimum_clearance: 0.02
   self_minimum_clearance: 0.03

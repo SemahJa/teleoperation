@@ -6,3 +6,6 @@ panda_cartesian_impedance_controller:
     gain_translation: 30.0        # 30 * 50 = 1500 N/m
     lambda_rotation: 40.0
     gain_rotation: 4.5            # 4.5 * 40 = 180 Nm/rad
+    hold_stiffness: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 75.0]
+    hold_damping: [50.0, 50.0, 50.0, 50.0, 20.0, 15.0, 10.0]
+    hold_stiffness_ramp_seconds: 0.25

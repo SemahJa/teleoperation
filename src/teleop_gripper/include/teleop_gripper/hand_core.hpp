@@ -1,6 +1,6 @@
 #pragma once
-#include <cmath>
 #include <array>
+#include <cmath>
 #include <cstdint>
 
 namespace teleop_gripper {
@@ -27,8 +27,8 @@ class HandCore {
   explicit HandCore(const HandParameters& parameters) : p_(parameters) {}
   HandRequest input(const GripInput& input, uint64_t now_ns) noexcept;
   HandRequest calibrate(bool empty_hand, bool operator_confirm) noexcept;
-  void complete(HandOperation operation, bool success, bool communication_ok,
-                double width, double max_width) noexcept;
+  void complete(HandOperation operation, bool success, bool communication_ok, double width,
+                double max_width) noexcept;
   void watchdog(uint64_t now_ns) noexcept;
   bool busy() const noexcept { return busy_; }
   bool calibrated() const noexcept { return calibrated_; }
@@ -36,8 +36,12 @@ class HandCore {
   double width() const noexcept { return width_; }
   double maximum_width() const noexcept { return maximum_width_; }
   const char* message() const noexcept { return message_; }
+
  private:
-  void reset_input() noexcept { need_release_ = true; press_start_ns_ = 0; }
+  void reset_input() noexcept {
+    need_release_ = true;
+    press_start_ns_ = 0;
+  }
   HandParameters p_;
   GripInput last_{};
   bool identity_{false}, need_release_{true}, calibrated_{false}, busy_{false};

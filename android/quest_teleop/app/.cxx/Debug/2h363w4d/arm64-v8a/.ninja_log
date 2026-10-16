@@ -25,3 +25,6 @@
 1	2314	1791798155888583502	_deps/openxr_sdk-build/src/loader/CMakeFiles/openxr_loader.dir/manifest_file.cpp.o	5ad8004dbbc9a9ed
 2314	2361	1791798155942584202	/workspace/android/quest_teleop/app/build/intermediates/cxx/Debug/2h363w4d/obj/arm64-v8a/libopenxr_loader.so	db9cc136a8862b5b
 2361	2382	1791798155966584514	/workspace/android/quest_teleop/app/build/intermediates/cxx/Debug/2h363w4d/obj/arm64-v8a/libquest_teleop_native.so	41f38b8a7c2a2d1c
+3	13	0	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/cmake.verify_globs	5e2fd78ef881d145
+1	3	0	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/cmake.verify_globs	5e2fd78ef881d145
+1	3	0	/workspace/android/quest_teleop/app/.cxx/Debug/2h363w4d/arm64-v8a/CMakeFiles/cmake.verify_globs	5e2fd78ef881d145

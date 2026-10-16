@@ -3,6 +3,9 @@ controller:
   lambda_rotation: 40.0
   gain_translation: 20.0
   gain_rotation: 2.5
+  hold_stiffness: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 75.0]
+  hold_damping: [50.0, 50.0, 50.0, 50.0, 20.0, 15.0, 10.0]
+  hold_stiffness_ramp_seconds: 0.25
   maximum_torque_rate: 900.0
   homing_speed_factor: 0.15
 arm_settings: {}

@@ -1,0 +1,18 @@
+# Separate, optional licensed analysis environment. No robot/USB access.
+# See docs/TRAJECTORY_MONITORING.md for first-use activation and handover.
+services:
+  matlab:
+    image: mathworks/matlab:${MATLAB_RELEASE:-r2024b}
+    init: true
+    shm_size: 512m
+    working_dir: /work/matlab
+    ports:
+      - "127.0.0.1:${MATLAB_BROWSER_PORT:-8888}:8888"
+    environment:
+      MLM_LICENSE_FILE: ${MLM_LICENSE_FILE:-}
+    volumes:
+      - ../analysis/matlab:/work/matlab:ro
+      - ../log:/work/log:rw
+    command: ["-browser"]
+    stdin_open: true
+    tty: true

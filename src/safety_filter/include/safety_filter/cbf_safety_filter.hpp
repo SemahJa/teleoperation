@@ -3,16 +3,16 @@
 
 #pragma once
 
+#include <osqp.h>
+
 #include <array>
 #include <cstddef>
 #include <string>
 #include <utility>
 #include <vector>
 
-#include <osqp.h>
-
+#include "safety_filter/actuator_limits.hpp"
 #include "safety_filter/cbf_types.hpp"
-
 
 namespace safety_filter::cbf {
 
@@ -27,21 +27,18 @@ struct SafetyParameters {
   bool inter_arm_collision_enabled{true};
   bool obstacle_collision_enabled{false};
   Vector7d minimum_joint_position{
-      (Vector7d() << -2.8973, -1.7628, -2.8973, -3.0718,
-       -2.8973, -0.0175, -2.8973).finished()};
+      (Vector7d() << -2.8973, -1.7628, -2.8973, -3.0718, -2.8973, -0.0175, -2.8973).finished()};
   Vector7d maximum_joint_position{
-      (Vector7d() << 2.8973, 1.7628, 2.8973, -0.0698,
-       2.8973, 3.7525, 2.8973).finished()};
+      (Vector7d() << 2.8973, 1.7628, 2.8973, -0.0698, 2.8973, 3.7525, 2.8973).finished()};
   Vector7d maximum_joint_velocity{
       (Vector7d() << 2.175, 2.175, 2.175, 2.175, 2.61, 2.61, 2.61).finished()};
   Vector7d maximum_joint_acceleration{Vector7d::Constant(7.0)};
-  Vector7d maximum_joint_torque{
-      (Vector7d() << 80.0, 80.0, 80.0, 80.0, 10.0, 10.0, 10.0).finished()};
+  Vector7d maximum_joint_torque{safety_filter::panda_torque_limits()};
   Vector7d objective_weight{Vector7d::Ones()};
   bool asymmetric_inter_arm_priority_enabled{true};
   double parked_arm_weight_multiplier{12.0};
   double priority_release_clearance{0.20};
-  double maximum_torque_rate{900.0};
+  double maximum_torque_rate{safety_filter::panda_torque_rate_limit()};
   double joint_position_margin{0.10};
   double joint_velocity_scale{0.90};
   double joint_cbf_frequency{8.0};
@@ -105,12 +102,10 @@ class CbfSafetyFilter {
   CbfSafetyFilter& operator=(const CbfSafetyFilter&) = delete;
 
   bool configure(const SafetyParameters& parameters,
-                 const std::array<ArmIdentity, kArmCount>& identities,
-                 std::string* error);
+                 const std::array<ArmIdentity, kArmCount>& identities, std::string* error);
   void reset();
-  SafetyResult filter(const Vector14d& nominal_torque,
-                      const DualArmState& state, double period_seconds,
-                      const std::array<bool, kArmCount>& motion_active,
+  SafetyResult filter(const Vector14d& nominal_torque, const DualArmState& state,
+                      double period_seconds, const std::array<bool, kArmCount>& motion_active,
                       bool activity_valid = true);
   [[nodiscard]] bool configured() const { return workspace_ != nullptr; }
   [[nodiscard]] size_t solverConstraintCount() const { return solver_logical_rows_.size(); }
@@ -145,33 +140,25 @@ class CbfSafetyFilter {
   void cleanupSolver();
   bool setupSolver(std::string* error);
   void clearRows();
-  void setRow(int row, const Vector14d& coefficients, double lower,
-              double upper);
+  void setRow(int row, const Vector14d& coefficients, double lower, double upper);
   void disableRow(int row);
-  void addLowerConstraint(int row, const Vector14d& coefficients,
-                          double lower, bool active, int* active_counter);
-  WorldCapsule worldCapsule(int arm, const Capsule& capsule,
-                            const ArmState& state) const;
-  Endpoint endpoint(int arm, int frame_index,
-                    const Eigen::Vector3d& local_point,
+  void addLowerConstraint(int row, const Vector14d& coefficients, double lower, bool active,
+                          int* active_counter);
+  WorldCapsule worldCapsule(int arm, const Capsule& capsule, const ArmState& state) const;
+  Endpoint endpoint(int arm, int frame_index, const Eigen::Vector3d& local_point,
                     const ArmState& state) const;
-  static std::pair<double, double> closestSegmentParameters(
-      const Eigen::Vector3d& p1, const Eigen::Vector3d& q1,
-      const Eigen::Vector3d& p2, const Eigen::Vector3d& q2);
-  static double pointSegmentParameter(const Eigen::Vector3d& point,
-                                      const Eigen::Vector3d& first,
+  static std::pair<double, double> closestSegmentParameters(const Eigen::Vector3d& p1,
+                                                            const Eigen::Vector3d& q1,
+                                                            const Eigen::Vector3d& p2,
+                                                            const Eigen::Vector3d& q2);
+  static double pointSegmentParameter(const Eigen::Vector3d& point, const Eigen::Vector3d& first,
                                       const Eigen::Vector3d& second);
   static bool selfPairExcluded(int first_link, int second_link);
-  Eigen::Vector3d jacobianDerivativeVelocity(int row,
-                                             const PointJacobian& jacobian,
-                                             const Vector14d& velocity,
-                                             double period_seconds);
-  void buildConstraints(const DualArmState& state, double period_seconds,
-                        SafetyResult* result);
-  Vector14d boundedFallback(const DualArmState& state,
-                            double period_seconds) const;
-  Vector14d clampToActuatorBounds(const Vector14d& requested,
-                                  double period_seconds) const;
+  Eigen::Vector3d jacobianDerivativeVelocity(int row, const PointJacobian& jacobian,
+                                             const Vector14d& velocity, double period_seconds);
+  void buildConstraints(const DualArmState& state, double period_seconds, SafetyResult* result);
+  Vector14d boundedFallback(const DualArmState& state, double period_seconds) const;
+  Vector14d clampToActuatorBounds(const Vector14d& requested, double period_seconds) const;
 
   SafetyParameters parameters_{};
   std::array<ArmIdentity, kArmCount> identities_{};

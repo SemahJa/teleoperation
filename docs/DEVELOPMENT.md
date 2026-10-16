@@ -1,47 +1,104 @@
-# Reproducible development environments
+# Development and verification
 
-## ROS 2 workspace
+Use the existing Ubuntu 22.04 / ROS 2 Humble container described in the
+[main README](../README.md). The repository is mounted at `/ws`; builds go to
+`build/` and `install/`. Docker shares the host kernel, so the deployment host
+must supply PREEMPT_RT for physical FCI control.
 
-Use the existing ROS container on Ubuntu 22.04 with ROS 2 Humble. The robot-control process must run on the deployment host's PREEMPT_RT kernel; Docker does not provide the kernel. Do not launch the physical controller until the new controller's hardware-safety acceptance gate is complete.
+## Build the maintained pipeline
 
-The package boundaries and launch commands are described in [PACKAGE_STRUCTURE.md](PACKAGE_STRUCTURE.md): `quest_teleop_interfaces`, `quest_teleop`, `recording`, `teleop_controllers`, `teleop_gripper`, `safety_filter` and `teleop_bringup`. The legacy `panda_bringup` and `panda_demos` packages are intentionally unchanged. Build the new workspace with the existing Humble container workflow after importing pinned third-party dependencies.
-
-The USB listener is available as `ros2 launch quest_teleop quest_usb_bridge.launch.py`. Start the ADB reverse mapping with `scripts/quest_adb_reverse.sh`. Wire framing and JSON schema are documented in `docs/quest-usb-protocol.md`. The headset application now uses the OpenXR app/HUD port from `thesis_ws`, with optional passthrough, controller aim rays, and readable per-hand pose/native twist/input diagnostics. It sends the existing versioned framed telemetry over USB/ADB. The HUD reports USB connection, clock validity/uncertainty, and right-controller local trigger/deadman state; robot arming is explicitly unknown. The bridge publishes raw telemetry and source-time validity after clock synchronization. Mapping is implemented and tested against mock measured poses; the atomic arm consumer, Hand worker, independent homing and Panda CBF runtime now pass robot-free acceptance. Integrated single/dual launch and left Menu recording commands are in `docs/TELEOPERATION_RUNTIME.md`. Physical commissioning remains separate. See `docs/VR_APP_PORT.md` for port details and runtime checks.
-
-## Android / ADB toolchain
-
-Build the Android toolchain image and enter its build container:
+In the ROS container, start with a shell sourced from Humble:
 
 ```bash
-docker compose -f docker/android-compose.yaml build
-docker compose -f docker/android-compose.yaml run --rm android-build gradle assembleDebug
+cd /ws
+source /opt/ros/humble/setup.bash
+bash scripts/fetch_teleop_dependencies.sh
+colcon build --base-paths src --packages-up-to teleop_bringup --symlink-install \
+  --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DBUILD_EXAMPLES=OFF
+source install/setup.bash
 ```
 
-The image pins Android API 34, build tools 34.0.0, NDK 26.3.11579264, JDK 17, and Gradle 8.7. The Quest APK executes on the headset; the container only provides build and deployment tools.
+The dependency helper imports pinned sources and initializes their submodules.
+The build selects the teleoperation dependency graph; it excludes the legacy
+Panda demos. Install dependencies as described in the main README on first
+setup. A message saying libfranka did not use `BUILD_TESTING` is harmless;
+the option controls tests in the ROS packages.
 
-For USB ADB, connect the authorized Quest over USB and run the ADB service with access to `/dev/bus/usb`. The ADB and ROS services use Linux host networking so ADB reverse reaches the loopback-bound ROS listener; the ADB server listens only on host loopback and has no published port.
+## Run robot-free tests
+
+In the same container shell:
 
 ```bash
-docker compose -f docker/android-compose.yaml up -d quest-adb-server
-docker compose -f docker/android-compose.yaml run --rm quest-adb adb devices
+export ROS_DOMAIN_ID=137 ROS_LOCALHOST_ONLY=1
+colcon test --base-paths src --executor sequential \
+  --packages-select quest_teleop recording safety_filter teleop_controllers teleop_gripper teleop_bringup \
+  --event-handlers console_direct+ --return-code-on-test-failure
+colcon test-result --test-result-base build --verbose
 ```
 
-Authorize the host key in the Quest headset. Never enable wireless ADB. USB permissions and hotplug behavior depend on the deployment host and must be verified there. Install and start the APK with `scripts/quest_install.sh`.
+These tests use synthetic input, mock backends and temporary recordings. The
+isolated domain keeps their publishers separate from a running operator session.
+They cover mapping, command gates, torque laws, hold transitions, homing, Hand
+decisions, safety/coordinator behavior, launch configuration and CSV export.
+Mocks do not establish physical tracking performance, grasp quality, collision
+clearance or worst-case realtime timing. Test MATLAB separately in a licensed
+session using the [monitoring guide](TRAJECTORY_MONITORING.md).
 
-## Recording
+## Keep formatting consistent
 
-`ros2 launch teleop_bringup robot_free.launch.py` loads validated per-arm mapper configuration and optional recording. Recording is disabled by default; enable it with `recording_enabled:=true`. Replace its topics via `recording_topics:='["/selected/topic"]'` or a custom `recording_config` YAML file. Bags default to `/ws/log/quest_bags` inside the existing mounted workspace. See `docs/ROBOT_FREE_MAPPING.md` for complete commands, two-arm mock configuration, and manual calibration conventions.
+Optional developer tools are pinned in `requirements-dev.txt`. In a host or
+development container with Python 3.10+ and clang-format 14, from the repository
+root:
 
-## Verification status
+```bash
+python3 -m venv /tmp/teleop-dev
+source /tmp/teleop-dev/bin/activate
+python -m pip install -r requirements-dev.txt
+python scripts/format_code.py
+python scripts/format_code.py --check
+```
 
-Verified 2026-10-10: the adapted Android APK builds in the existing Docker environment using the explicitly pinned NDK 26.3.11579264; mapper and robot-free bridge integration tests pass; the actual C++ headset adapter/USB sender passes a mock TCP regression test. The user confirms successful Quest display/passthrough/recenter/aim-ray and USB reconnection checks. Supplied samples show stable held right A and pressed left Y, with valid native twist and clock uncertainty below 1.4 ms. The ROS button schema now lists only each hand's physical buttons; restart bridge/subscriber processes after rebuilding interfaces. The validated APK remains compatible. Deployment hardware was not inspected and no FCI connection was made.
+Install `clang-format-14` through your system package manager if needed and
+ensure `clang-format` resolves to version 14. C++ uses `.clang-format`; Python
+uses Black settings in `pyproject.toml`; MATLAB uses
+`analysis/matlab/miss_hit.cfg`. MISS_HIT parses the supported R2022a syntax subset;
+the report runtime remains MATLAB R2024b. Fix mode expands compressed statements
+and normalizes indentation and spacing. Check mode reports drift without edits.
 
+The script selects the seven maintained teleoperation packages, `scripts/` and
+`analysis/matlab/`. It excludes Android, third-party sources, legacy
+`panda_bringup`/`panda_demos`, generated build files and installed overlays.
+Shell scripts use two-space indentation; check them with
+`for script in scripts/*.sh; do bash -n "$script"; done`.
+CMake and ROS interface definitions retain their package conventions.
 
-The integrated controller launch defaults to a single right-controlled mock,
-with independent left Menu recording. Use single-left or dual configuration as
-documented in `docs/TELEOPERATION_RUNTIME.md`. The original robot-free mapper
-launch retains its explicit launch-time recording option. Controller runtime
-and Hand settings are in `config/teleoperation_runtime.yaml`; CBF design and
-physical limitations are in `docs/CBF_PANDA.md`. The combined robot-free suite
-passes 81 individual cases; physical compatibility/RT/clearance/stop acceptance
-has not been performed.
+Formatting improves readability; it is not evidence of faster control. Preserve
+control equations and fixed-size realtime handoffs when optimizing. Torque
+laws must not allocate, block, call ROS or perform I/O during `compute()` or
+`reset()`. Build and run the affected tests after a coherent implementation change.
+
+## Generated data and cleanup
+
+`log/` is ignored by Git and contains disposable build/test logs, diagnostic
+captures, raw episode bags, CSV exports and MATLAB reports. The 2026-10-16
+maintenance cleanup removed the existing contents at the owner's request,
+including raw recordings. New runs create directories as needed.
+`analysis/matlab/` is maintained source and must remain when removing reports.
+Keep experiments you need to reproduce, together with their actual runtime
+YAML, outside a cleanup target.
+
+To keep development logs outside the repository, put the colcon global option
+before the verb: `colcon --log-base /tmp/teleop-build-logs build ...` or
+`colcon --log-base /tmp/teleop-test-logs test ...`.
+
+## Android and containers
+
+Android build/ADB commands are in the main README and
+[container guide](../docker/README.md). Reuse the validated APK unless Android
+source or its wire contract changes. ROS-only tracking fields do not require
+a headset reinstall. The native app uses OpenXR, JDK 17, Gradle 8.7, API 34,
+build tools 34.0.0 and NDK 26.3.11579264. Host networking lets USB ADB reverse
+reach the loopback ROS listener; the ADB server remains bound to loopback.
+
+The optional MATLAB container has independent licensing and no robot/USB access.
+See [MATLAB setup and handover](TRAJECTORY_MONITORING.md#first-time-matlab-docker-setup-and-licensing).

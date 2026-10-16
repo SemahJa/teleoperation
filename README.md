@@ -5,6 +5,11 @@ Humble. Use Ubuntu 22.04 with native Docker Engine/Compose v2; real FCI control
 requires a PREEMPT_RT host, compatible robot firmware and a wired robot network.
 Use your installation's configured robot IPs, mapping, gains and geometry.
 
+New to the repository? The [documentation guide](docs/README.md) links the
+architecture, operation, monitoring and development instructions. The current
+pipeline holds measured joint position after normal trigger release and uses
+35% default torque/rate caps even with CBF disabled.
+
 | Terminal | Where commands run |
 | --- | --- |
 | **Host 1** | PC host: clone and open the ROS container |
@@ -81,13 +86,15 @@ restart the launch after changing settings.
 | `arms.<arm_name>` | Actual `robot_ip`, controller assignment, namespace/base frame, input/output topics, calibrated basis, scales, trigger thresholds and mapper timing |
 | `controller` | Impedance gains, actuator limits/rate, tool envelope and homing speed/gains/stop settings |
 | `hand` | Finger speed/force, object grasp width/tolerances, open width and input debounce; `-1.0` object values refuse grasp |
-| `cbf` | Surveyed table height, table/self/inter-arm clearance, obstacle spheres and solver failure limit |
+| `cbf` | Torque/rate scales (always enforced), surveyed table height, clearances, obstacle spheres and solver failure limit |
 | `arm_settings.<arm_name>` | Per-arm controller/Hand overrides and `world_from_base_xyz_xyzw` transforms; names must match `arms` |
 | `recording` | `mode: menu/continuous`, namespace, Menu input/debounce, selected topics, output folder and storage plugin |
 
-For your accepted single-arm baseline, set `pipeline.cbf_enabled: false`.
-The file defaults to CBF enabled; enable it on hardware only with commissioned
-geometry and realtime timing. Set `pipeline.start_hand: false` to omit fingers,
+The single-arm working configuration currently selects hardware with
+`pipeline.cbf_enabled: false`; the dual template selects mock with CBF enabled.
+Inspect the selected file and set `pipeline.backend: mock` for robot-free work.
+Enable CBF on hardware only with commissioned geometry and realtime timing.
+Set `pipeline.start_hand: false` to omit fingers,
 or `pipeline.homing_enabled: false` to omit home gestures.
 
 Hardware authorization is the explicit `operator_confirm:=true` launch argument;
@@ -151,13 +158,31 @@ launches. The existing package name is `teleop_bringup`.
 | Quest action | Operation |
 | --- | --- |
 | Release trigger, then hold above its engage threshold (default 0.75) | Engage assigned arm at measured pose; controller motion changes its target |
-| Release below its release threshold (default 0.25) | Disengage into measured-pose hold |
+| Release below its release threshold (default 0.25) | Capture measured joints once and hold the whole arm configuration |
 | Fresh grip presses, releasing between presses | First post-calibration press opens; later presses alternate grasp/open |
 | Right A / left X held at least one second, then released | Home assigned arm with trigger released and homing enabled |
 | Fresh left Menu presses | Start/stop an episode with `recording.mode: menu` |
 
 Ctrl+C stops bringup. Input loss/recenter requires trigger release/press before
 resuming. The manufacturer stop remains the physical emergency-stop mechanism.
+
+Normal trigger release selects joint position holding (`reason: position_hold`,
+`motion_enabled: false`). Hold stiffness ramps up over 0.25 s; joint damping
+acts immediately, and all output still passes through the shared torque limits.
+Tune `controller.hold_stiffness` [Nm/rad], `hold_damping` [Nm s/rad] and
+`hold_stiffness_ramp_seconds` in the selected runtime YAML. These are finite
+impedance gains, not a mechanical lock; physical response needs commissioning.
+Invalid/stale input, safety fallback and shutdown retain damping rather than
+continuing an old hold target. Startup captures the initial configuration, and
+normal homing completion returns to measured hold with fresh input.
+
+Arm torque/rate caps default to **35% of Panda FCI ceilings**, with CBF enabled
+or disabled. Edit `cbf.torque_limit_scale` and `cbf.torque_rate_limit_scale`
+in the selected runtime YAML and restart: defaults give `30.45 Nm` for joints
+1--4, `4.2 Nm` for joints 5--7 and `350 Nm/s`. Existing controller absolute caps
+can tighten these further. Standalone safety settings live in
+`src/safety_filter/config/safety.yaml`; combined bringup uses its selected YAML.
+See [actuator limit settings](docs/CBF_PANDA.md#editable-actuator-limits-including-cbf-disabled-operation).
 
 For dual, edit `src/teleop_bringup/config/dual_panda.yaml`: set actual distinct
 IPs, calibrate each controller mapping, supply both surveyed base transforms
@@ -224,7 +249,47 @@ Command form: `ros2 launch <package> <launch_file> argument:=value`.
 Show complete arguments for any launch in **CONTAINER 2**:
 
 ```bash
-ros2 launch teleop_bringup teleoperation.launch.py --show-args
+ros2 launch teleop_bringup teleoperation.launch.py \
+  runtime_config:=/ws/src/teleop_bringup/config/single_panda.yaml --show-args
 ```
 
-For additional configuration details, see [docs/PACKAGE_STRUCTURE.md](docs/PACKAGE_STRUCTURE.md).
+The arm controller separates `controller_runtime.cpp` (ROS, mock/hardware and
+FCI ownership), `controller_manager.cpp` (arming and nominal-source selection),
+and the Cartesian impedance, position hold, fault damping and homing implementations.
+All laws share a joint-torque interface and final safety path;
+`joint_motion_generator.cpp` remains the homing reference generator. Existing
+launch commands and configuration keys are unchanged.
+
+For configuration and controller extension details, see
+[docs/PACKAGE_STRUCTURE.md](docs/PACKAGE_STRUCTURE.md#arm-runtime-and-controller-structure).
+
+## Trajectory monitoring and experiment reports
+
+The controller publishes a coherent pose/velocity tracking stream and all four
+torque stages: nominal, after safety, robot-reported desired and measured
+link-side torque. The latest live view is `/<arm>/tracking_status`; the default
+recording profile captures `/<arm>/tracking_samples` at the control-cycle rate
+through a bounded non-realtime publishing handoff. Unavailable/idle references
+and mock torque readbacks are explicitly marked rather than treated as tracking
+measurements.
+
+In a second ROS container terminal, run
+`bash scripts/plotjuggler_tracking.sh /panda_1` and subscribe to
+`/panda_1/tracking_status`. The dashboard has pose, velocity, four-torque and
+diagnostic tabs. For recorded reports, export bags to CSV with
+`ros2 run recording export_tracking BAG OUTPUT_DIRECTORY`.
+
+MATLAB analysis runs in the separate optional `docker/matlab-compose.yaml`
+container and exports vector PDFs, high-resolution PNGs, metrics and estimated
+acceleration/jerk. It requires base MATLAB with an eligible license; no host
+installation, ROS Toolbox or Signal Processing Toolbox is required. First-time
+account/network activation, batch/browser commands and license handover are
+documented in [docs/TRAJECTORY_MONITORING.md](docs/TRAJECTORY_MONITORING.md).
+Every plot panel includes an explicit legend identifying its signals, including
+the seven-joint diagnostic residuals. Regenerate reports to update older figures.
+
+Generated recordings, exports, reports and runtime logs live under ignored
+`log/`. The existing experiment data was removed during the requested cleanup;
+new recordings create their directories automatically. The reusable analysis
+code remains in `analysis/matlab/`. For formatting and robot-free validation,
+see [DEVELOPMENT.md](docs/DEVELOPMENT.md).

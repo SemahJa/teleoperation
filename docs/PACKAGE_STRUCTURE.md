@@ -1,168 +1,144 @@
-# Teleoperation package structure
+# Teleoperation architecture
 
-The workspace separates input, arm control, gripper control, safety and recording.
-`quest_teleop_interfaces` remains the shared ROS message/service package.
-`panda_bringup` and `panda_demos` are unchanged. The Android application is unchanged.
+The Quest app measures hand motion; ROS maps it into a robot reference; an arm
+owner computes seven joint torques and sends them through the safety layer to
+libfranka. The Hand and recorder run in separate processes.
 
-| Package | Implementation | Launch entry points | Configuration |
-| --- | --- | --- | --- |
-| `quest_teleop` | C++ Quest USB bridge; Python pose mapper, arm configuration and measured-pose fixture | `quest_teleop.launch.py`, `quest_usb_bridge.launch.py`, `pose_mapper.launch.py` | `arms.yaml`; mapper/bridge launch parameters |
-| `recording` | Menu episode state machine, rosbag process management and recording topic plans | `recording.launch.py` | `recording.yaml` |
-| `teleop_controllers` | Arm runtime/FCI ownership, Cartesian impedance core, homing core and joint trajectory generator | `cartesian_impedance_controller.launch.py`, `homing.launch.py` | `controllers.yaml` |
-| `teleop_gripper` | Hand decision state machine and separate blocking-operation worker | `gripper.launch.py` | `gripper.yaml` |
-| `safety_filter` | CBF constraint geometry, OSQP filter, coordinator and fixed-size model/handoff utilities | `safety_filter.launch.py` | `safety.yaml` |
-| `teleop_bringup` | Feature composition and integration tests | `teleoperation.launch.py`, `robot_free.launch.py` | `single_panda.yaml`, `dual_panda.yaml` |
-
-C++ public headers and namespaces follow their owning package. `safety_filter`
-exports its library and pinned OSQP dependency; `teleop_controllers` links that
-library. The gripper has no arm-controller or CBF dependency. Recording consumes
-Quest messages and shared arm configuration, but its implementation is entirely
-in `recording`. No runtime behavior or nominal control equation is changed by
-moving these implementations.
-
-## Ownership and execution
-
-The arm process selects impedance or homing nominal torque, then invokes the
-safety coordinator/filter. Homing never creates another FCI connection. The
-safety package is a linked library with its existing coordinator thread, not a
-ROS service exchanging torque at 1 kHz. Its launch loads scoped `cbf.*`
-parameters for the arm owner; it intentionally starts no robot process by itself.
-Asynchronous CBF execution remains a separate Milestone 2 task.
-
-The Hand process owns only the gripper connection. Its launch performs one
-empty-hand startup calibration whenever it starts; combined bringup enables it
-with `start_hand:=true`. There is no calibration launch switch. The manual
-service remains available for deliberate recalibration after startup. Startup calibration
-moves fingers, requires empty fingers, and does not automatically grasp or retry.
-Menu recording runs in its own process; continuous
-recording starts rosbag directly. Neither belongs to the Quest mapper package.
-
-## Arm runtime and future controller structures
-
-`teleop_controllers/src/cartesian_impedance_controller.cpp` is the executable
-runtime and hardware adapter. It loads parameters, consumes atomic Quest
-commands and raw homing buttons, owns the exclusive libfranka arm connection,
-prepares state/model snapshots, selects Cartesian or homing nominal torque,
-hands torque to the safety coordinator, and publishes non-realtime telemetry.
-Mock operation uses the same control cores without an FCI connection. It also
-manages startup, controlled shutdown and fault diagnostics.
-
-The Cartesian control law is implemented in `control_core.cpp`; the joint
-homing law and trajectory are in `homing_core.cpp` and
-`joint_motion_generator.cpp`. The Hand worker belongs to `teleop_gripper`.
-
-Future controller structures can reuse this runtime, but it currently selects
-one Cartesian law and has no general controller plugin/selection interface.
-Before adding alternatives, separate command engagement, freshness and actuator
-checks from the nominal torque calculation. A preselected controller strategy
-should consume a fixed-size arm state and validated reference and produce
-nominal joint torque without allocation or blocking in the 1 kHz callback.
-All strategies should retain common homing arbitration, safety filtering,
-telemetry and FCI ownership. This is the planned extension, not an implemented
-runtime switch.
-
-## Build after migration
-
-The standard workspace uses `build/` and `install/`. Source
-`/ws/install/setup.bash` in each new container terminal. The temporary
-`install/reorganized` overlay has been retired. Previous generated artifacts
-are archived under `.workspace-artifacts-*` with `COLCON_IGNORE`;
-commissioning logs remain under `log/commissioning/current`.
-
-For a fresh rebuild, start from a shell sourced only from Humble. The new arm
-and Hand packages declare their libfranka dependency, so colcon builds it first
-within the same invocation. README.md contains the single-command pipeline build.
-Building the entire legacy workspace still requires libfranka to be available
-before `panda_bringup`, whose manifest omits that dependency. To build the
-teleoperation packages and their declared dependencies:
-
-```bash
-cd /ws
-source /opt/ros/humble/setup.bash
-colcon build --base-paths src --symlink-install --packages-up-to teleop_bringup \
-  --cmake-args -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=ON -DBUILD_EXAMPLES=OFF
-source /ws/install/setup.bash
-colcon test \
-  --packages-select quest_teleop recording safety_filter teleop_controllers teleop_gripper teleop_bringup
-colcon test-result --test-result-base build --verbose
+```mermaid
+flowchart LR
+  Q[Quest native OpenXR app] -->|USB / ADB reverse TCP| B[Quest USB bridge]
+  B --> M[Pose mapper per arm]
+  M -->|Atomic pose and twist command| R[Controller runtime]
+  R --> C[Controller manager]
+  C --> L[Selected torque law]
+  L --> S[Shared safety coordinator]
+  S --> F[libfranka / robot]
+  F -->|Measured state| R
+  R -->|Measured pose anchor| M
+  B --> H[Separate Hand worker]
+  B --> E[Menu recorder]
+  R --> T[Tracking publisher]
+  T --> P[PlotJuggler]
+  T --> E
+  E --> CSV[Bag to CSV export]
+  CSV --> A[MATLAB reports]
 ```
 
-The old `franka_teleop_controller` package no longer exists in source. Combined
-launch commands migrate to `teleop_bringup teleoperation.launch.py`; direct arm
-execution migrates to `teleop_controllers cartesian_impedance_controller`; direct
-Hand execution migrates to `teleop_gripper franka_hand_worker`.
+## Package responsibilities
 
-## Combined launch
-
-Overall bringup has exactly two launch arguments:
-
-| Argument | Default | Effect |
+| Package | Responsibility | Main launch / config |
 | --- | --- | --- |
-| `runtime_config` | None; required | Select complete `single_panda.yaml`, `dual_panda.yaml` or an installation-specific runtime YAML |
-| `operator_confirm` | `false` | Required `true` for hardware; explicit authorization for FCI and enabled Hand startup calibration |
+| `quest_teleop_interfaces` | Shared messages and calibration service | `msg/`, `srv/` |
+| `quest_teleop` | C++ USB bridge; Python mapping and configuration validation | `quest_teleop.launch.py`, `config/arms.yaml` |
+| `teleop_controllers` | Arm ownership, mode arbitration and joint torque laws | `cartesian_impedance_controller.launch.py`, `config/controllers.yaml` |
+| `safety_filter` | Actuator bounds, CBF geometry/QP and coupled coordinator | `safety_filter.launch.py`, `config/safety.yaml` |
+| `teleop_gripper` | Hand input decisions and blocking gripper operations | `gripper.launch.py`, `config/gripper.yaml` |
+| `recording` | Menu/continuous rosbag recording and tracking CSV export | `recording.launch.py`, `config/recording.yaml` |
+| `teleop_bringup` | Composes features using one complete runtime YAML | `teleoperation.launch.py`, `config/single_panda.yaml` or `dual_panda.yaml` |
 
-The templates live under `teleop_bringup/config` and default to mock operation.
-Example:
+Legacy `panda_bringup` and `panda_demos` are separate reference packages. Pinned
+third-party libraries live in `src/third_party`; do not format or refactor them
+as part of changes to the active teleoperation code.
 
-```bash
-ros2 launch teleop_bringup teleoperation.launch.py \
-  runtime_config:=/ws/src/teleop_bringup/config/single_panda.yaml
+## Arm runtime and controller structure
+
+| File in `teleop_controllers` | Owns |
+| --- | --- |
+| `src/controller_runtime.cpp` | ROS parameters/subscriptions, command handoff, backend adapters, permanent FCI ownership, shared safety and non-realtime telemetry |
+| `src/controller_manager.cpp` | Freshness/session/order gates, arming, state validation, reference capture and selection of one nominal torque law |
+| `include/teleop_controllers/torque_controller.hpp` | Common fixed-size state/reference to seven-joint nominal torque interface |
+| `src/cartesian_impedance_controller.cpp` | Cartesian filtered-error impedance law |
+| `src/position_hold_controller.cpp` | Joint PD holding with stiffness ramp |
+| `src/damping_controller.cpp` | Cartesian damping plus Coriolis for faults and shutdown |
+| `src/homing_controller.cpp` | Guarded home gesture, trajectory/controlled-stop state and joint torque law |
+| `src/joint_motion_generator.cpp` | Synchronized homing joint references |
+| `include/teleop_controllers/control_types.hpp` | Transport-neutral commands, state and statuses |
+| `include/teleop_controllers/tracking.hpp` | Fixed-size monitoring snapshots |
+
+The executable retains the name `cartesian_impedance_controller`; it contains
+the whole runtime, not just the Cartesian equation. Each arm has one permanent
+libfranka owner. Homing and position holding select another law inside that
+owner and do not open another arm connection.
+
+The manager chooses homing while active, Cartesian control while engaged,
+joint holding after normal trigger release, or damping after faults/shutdown.
+Hold entry captures all seven measured joints once; subsequent release samples
+do not move the target. Startup also captures the initial configuration.
+`motion_enabled=false` means Quest teleoperation is disengaged; joint holding
+can still produce restoring torque. Re-engagement captures fresh mapping
+anchors. See [runtime behavior](TELEOPERATION_RUNTIME.md).
+
+The Cartesian law uses measured pose error `e`, measured Jacobian `J` and mapped
+reference twist `v_ref`:
+
+```text
+r = J*dq - v_ref + lambda .* e
+tau_nominal = -transpose(J) * (gain .* r) + coriolis
 ```
 
-All pipeline switches, mode/backend, bridge settings, arm identities/mapping,
-controller/Hand/CBF settings, per-arm overrides and recording settings come from
-the selected YAML. No overall CLI feature overrides or separate config-file
-arguments remain. The old `teleoperation_runtime.yaml` template is replaced by
-explicit single/dual templates. Package-local config defaults remain unchanged
-for standalone launches.
+`.*` denotes componentwise Cartesian multiplication before the Jacobian
+transpose maps the wrench to joints. Gains are fixed at startup. Gravity follows
+libfranka's torque-interface convention; the law adds no extra gravity term.
 
-Hardware confirmation is launch-only and unnecessary for mock; selecting a
-hardware file alone cannot authorize physical operation. It is not a trigger
-arming command or a safety certificate. Enabling Hand retains one empty-hand
-startup calibration. Hardware dual still requires distinct IPs and both measured
-base transforms; these are deliberately not filled with mock spacing in the
-dual template. No synthetic measured-pose publisher may run alongside an owner.
+All laws return nominal torque before actuator clipping. The runtime sends it
+to one shared safety coordinator and accepts only the matching current-cycle
+result. Both CBF-enabled QP constraints and CBF-disabled clipping enforce the
+same effective magnitude/rate bounds, anchored to incoming `tau_J_d`.
+`cbf.torque_limit_scale` and `cbf.torque_rate_limit_scale` default to 0.35;
+absolute controller caps can tighten them. In dual mode the stricter configured
+arm cap applies to both. Joint holding counts as parked for dual objective
+weighting while still passing through every enabled constraint.
 
-## Standalone feature launches
+The coordinator runs on another thread, but the owner waits for its result on
+each cycle. Asynchronous result reuse is still a
+[planned extension](MILESTONE_2.md), not current runtime behavior.
 
-```bash
-# Transport and selected-arm mapping; no arm or gripper connection
-ros2 launch quest_teleop quest_teleop.launch.py
+## Add another controller design
 
-# Arm owner only; defaults to mock, loads controller and safety configuration
-ros2 launch teleop_controllers cartesian_impedance_controller.launch.py
+Implement `TorqueController` in a separate source/header. Its `compute()` takes
+`ArmState`, a typed `CartesianReference` or `JointReference`, and the callback
+period, and returns `NominalTorque` with seven torques and a fault status.
+Use `reset()` to initialize controller state from measured state. Neither
+method may allocate, block, perform I/O or call ROS in realtime.
 
-# Same exclusive owner with guarded homing available; no startup home motion
-ros2 launch teleop_controllers homing.launch.py
+Construct the design in the runtime before control starts and inject it into
+`ControllerManager` in place of the baseline Cartesian law. Register its source
+in CMake and add parameter validation and focused tests. A new command type
+also needs a validated reference adapter. Ownership, homing arbitration, release
+holding, fault behavior, safety and monitoring remain shared. Dynamic plugin
+loading and live design switching are not implemented.
 
-# Gripper only; defaults to mock and calibrates once at startup
-ros2 launch teleop_gripper gripper.launch.py
+## Hand, monitoring and recording
 
-# Independent Menu recorder
-ros2 launch recording recording.launch.py
+The Hand worker owns only the gripper connection. Blocking calibration, grasp
+and open calls execute outside the torque thread. Enabling Hand requests one
+empty-hand startup calibration. The manual calibration service remains available.
+The first deliberate grip after calibration opens; later presses alternate
+grasp/open. See the [Hand guide](TELEOPERATION_RUNTIME.md#diagnosing-a-slipping-cable-grasp).
 
-# Independent continuous recording
-ros2 launch recording recording.launch.py recording_mode:=continuous
+The torque thread copies fixed-size snapshots to a bounded queue. A dedicated
+non-realtime thread publishes full-cycle `tracking_samples`; `tracking_status`
+provides the latest live view at up to 100 Hz. Overflow drops monitoring samples
+with a counter. PlotJuggler consumes the live view; the recorder captures the
+full stream; `recording export_tracking` creates CSVs for MATLAB. Clock, validity
+and torque conventions are in [trajectory monitoring](TRAJECTORY_MONITORING.md).
 
-# Load embedded safety parameters (normally included by the arm launch)
-ros2 launch safety_filter safety_filter.launch.py
+## Configuration and launch entry points
 
-# All configured mappers and optional recording, without arm/gripper owners
-ros2 launch teleop_bringup robot_free.launch.py mock_measured_pose:=true
-```
+Combined bringup accepts exactly `runtime_config` (required path) and
+`operator_confirm` (default false, required true for hardware). Everything else
+comes from the selected runtime YAML. Package-local configs apply only to
+standalone launches. Inspect the backend before launching an edited file.
 
-Feature launches accept their necessary parameter files. Defaults live in the
-owning package. Arm and gripper launches accept `runtime_config`; safety accepts
-`safety_config`; recording accepts `recording_config`; Quest accepts `arms_config`
-and its bridge/mapper arguments. Future controller implementations belong under
-`teleop_controllers`, while constraint verification and asynchronous solver work
-belong under `safety_filter`.
+Standalone feature launches include `quest_usb_bridge.launch.py`,
+`pose_mapper.launch.py`, `homing.launch.py`, `gripper.launch.py` and
+`recording.launch.py`. `safety_filter.launch.py` includes parameters for the arm
+owner; it does not start an independent robot process.
+`teleop_bringup robot_free.launch.py` starts mapping and optional recording
+without an arm or Hand owner. It has its own launch arguments and supports an
+explicit synthetic measured-pose publisher. Never run that publisher beside
+an arm owner on the same measured-pose topic.
 
-## Verification
-
-On 2026-10-12, an isolated Humble build passed all nine packages in the new
-bringup dependency graph. All 97 individual robot-free cases passed across the
-six feature packages, including standalone feature launches, custom safety
-configuration, single/dual operation, feature switches and finalized bags.
-The nine legacy Panda package files match their pre-migration SHA-256 hashes.
-Physical control and Milestone 2 algorithm changes were not part of this check.
+Use the [main README](../README.md) for setup/launch, the
+[development guide](DEVELOPMENT.md) for builds/tests and the
+[implementation record](IMPLEMENTATION_PROGRESS.md) for verification limits.

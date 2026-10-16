@@ -23,7 +23,14 @@ struct ArmState {
   Matrix7d mass{Matrix7d::Identity()};
   std::array<Eigen::Affine3d, kModelFrames> frame_pose{};
   std::array<Jacobian, kModelFrames> frame_jacobian{};
-  ArmState() { for (auto& pose : frame_pose) pose.setIdentity(); for (auto& j : frame_jacobian) j.setZero(); }
+  ArmState() {
+    for (auto& pose : frame_pose)
+      pose.setIdentity();
+    for (auto& j : frame_jacobian)
+      j.setZero();
+  }
 };
-struct DualArmState { std::array<ArmState, kArmCount> arm{}; };
-}
+struct DualArmState {
+  std::array<ArmState, kArmCount> arm{};
+};
+}  // namespace safety_filter::cbf

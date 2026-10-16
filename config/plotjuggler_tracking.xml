@@ -1,0 +1,277 @@
+<?xml version='1.0' encoding='utf-8'?>
+<root>
+  <tabbed_widget name="Main Window" parent="main_window">
+    <Tab tab_name="/panda_1 Pose" containers="1">
+      <Container>
+        <DockSplitter orientation="-" count="2" sizes="1;1">
+          <DockSplitter orientation="|" count="3" sizes="1;1;1">
+            <DockArea name="X position [m]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_pose/position/x" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_pose/position/x" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_pose/position/x" color="#009e73" />
+              </plot>
+            </DockArea>
+            <DockArea name="Y position [m]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_pose/position/y" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_pose/position/y" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_pose/position/y" color="#009e73" />
+              </plot>
+            </DockArea>
+            <DockArea name="Z position [m]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_pose/position/z" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_pose/position/z" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_pose/position/z" color="#009e73" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+          <DockSplitter orientation="|" count="3" sizes="1;1;1">
+            <DockArea name="Position error [m]">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/position_error_norm" color="#0072b2" />
+              </plot>
+            </DockArea>
+            <DockArea name="Orientation error [rad]">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/rotation_error_angle" color="#0072b2" />
+              </plot>
+            </DockArea>
+            <DockArea name="Cartesian active / home / request twist valid">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/motion_enabled" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/homing_active" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/requested_twist_valid" color="#009e73" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+        </DockSplitter>
+      </Container>
+    </Tab>
+    <Tab tab_name="/panda_1 Velocity" containers="1">
+      <Container>
+        <DockSplitter orientation="-" count="2" sizes="1;1">
+          <DockSplitter orientation="|" count="3" sizes="1;1;1">
+            <DockArea name="linear x [m/s]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_twist/linear/x" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_twist/linear/x" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_twist/linear/x" color="#009e73" />
+              </plot>
+            </DockArea>
+            <DockArea name="linear y [m/s]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_twist/linear/y" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_twist/linear/y" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_twist/linear/y" color="#009e73" />
+              </plot>
+            </DockArea>
+            <DockArea name="linear z [m/s]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_twist/linear/z" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_twist/linear/z" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_twist/linear/z" color="#009e73" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+          <DockSplitter orientation="|" count="3" sizes="1;1;1">
+            <DockArea name="angular x [rad/s]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_twist/angular/x" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_twist/angular/x" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_twist/angular/x" color="#009e73" />
+              </plot>
+            </DockArea>
+            <DockArea name="angular y [rad/s]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_twist/angular/y" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_twist/angular/y" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_twist/angular/y" color="#009e73" />
+              </plot>
+            </DockArea>
+            <DockArea name="angular z [rad/s]: request / reference / measured">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/requested_twist/angular/z" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/reference_twist/angular/z" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/measured_twist/angular/z" color="#009e73" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+        </DockSplitter>
+      </Container>
+    </Tab>
+    <Tab tab_name="/panda_1 Four torques" containers="1">
+      <Container>
+        <DockSplitter orientation="-" count="2" sizes="1;1">
+          <DockSplitter orientation="|" count="4" sizes="1;1;1;1">
+            <DockArea name="J1 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.0" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.0" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.0" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.0" color="#cc79a7" />
+              </plot>
+            </DockArea>
+            <DockArea name="J2 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.1" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.1" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.1" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.1" color="#cc79a7" />
+              </plot>
+            </DockArea>
+            <DockArea name="J3 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.2" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.2" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.2" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.2" color="#cc79a7" />
+              </plot>
+            </DockArea>
+            <DockArea name="J4 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.3" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.3" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.3" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.3" color="#cc79a7" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+          <DockSplitter orientation="|" count="4" sizes="1;1;1;1">
+            <DockArea name="J5 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.4" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.4" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.4" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.4" color="#cc79a7" />
+              </plot>
+            </DockArea>
+            <DockArea name="J6 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.5" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.5" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.5" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.5" color="#cc79a7" />
+              </plot>
+            </DockArea>
+            <DockArea name="J7 torque [Nm]; measured includes gravity">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/nominal_torque.6" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/commanded_torque.6" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/robot_desired_torque.6" color="#009e73" />
+                <curve name="/panda_1/tracking_status/measured_torque.6" color="#cc79a7" />
+              </plot>
+            </DockArea>
+            <DockArea name="Hardware torque valid / previous command available">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/robot_torque_valid" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/previous_command_valid" color="#e69f00" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+        </DockSplitter>
+      </Container>
+    </Tab>
+    <Tab tab_name="/panda_1 Diagnostics" containers="1">
+      <Container>
+        <DockSplitter orientation="-" count="2" sizes="1;1">
+          <DockSplitter orientation="|" count="3" sizes="1;1;1">
+            <DockArea name="Command age [ms]">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/command_age_ms" color="#0072b2" />
+              </plot>
+            </DockArea>
+            <DockArea name="Normalized safety intervention">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/normalized_torque_intervention" color="#0072b2" />
+              </plot>
+            </DockArea>
+            <DockArea name="Torque rate / magnitude / fallback">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/torque_rate_limited" color="#0072b2" />
+                <curve name="/panda_1/tracking_status/torque_magnitude_limited" color="#e69f00" />
+                <curve name="/panda_1/tracking_status/safety_fallback" color="#009e73" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+          <DockSplitter orientation="|" count="3" sizes="1;1;1">
+            <DockArea name="Monitoring queue drops (cumulative)">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/monitor_queue_drops" color="#0072b2" />
+              </plot>
+            </DockArea>
+            <DockArea name="Linear velocity error [m/s]">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/linear_velocity_error_norm" color="#0072b2" />
+              </plot>
+            </DockArea>
+            <DockArea name="Angular velocity error [rad/s]">
+              <plot style="Lines" mode="TimeSeries" flip_x="false" flip_y="false">
+                <range left="0" right="10" bottom="-1" top="1" />
+                <limitY />
+                <curve name="/panda_1/tracking_status/angular_velocity_error_norm" color="#0072b2" />
+              </plot>
+            </DockArea>
+          </DockSplitter>
+        </DockSplitter>
+      </Container>
+    </Tab>
+    <currentTabIndex index="0" />
+  </tabbed_widget>
+  <use_relative_time_offset enabled="1" />
+  <streaming_buffer_size value="30" />
+  <Plugins />
+  <customMathEquations />
+  <snippets />
+</root>

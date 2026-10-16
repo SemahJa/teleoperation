@@ -2,6 +2,11 @@
 std_msgs/Header header
 geometry_msgs/Pose target_pose
 geometry_msgs/Twist desired_twist
+# Mapped velocity before the mapper's low-pass filter. This is a blend of
+# native/pose-derived velocity, not raw IMU data. Older/custom producers may
+# leave requested_twist_valid false; consumers must not interpret zeros as data.
+geometry_msgs/Twist requested_twist
+bool requested_twist_valid
 bool motion_enabled
 string session_id
 uint64 sequence

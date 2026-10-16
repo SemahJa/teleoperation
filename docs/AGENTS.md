@@ -1,5 +1,18 @@
 # Teleoperation implementation policy
 
+## Current maintenance scope (2026-10-16)
+
+The owner authorized deletion of existing logs, raw recordings and generated
+analysis outputs, plus code formatting/efficiency cleanup and documentation
+updates. Source scope is maintained ROS packages, scripts and MATLAB. Preserve
+Android source/build artifacts, third-party dependencies, legacy Panda packages,
+existing Docker definitions and operator-edited runtime values. This overrides
+older requests to retain trial logs below. It does not authorize physical
+FCI/Hand/device operations. Current behavior includes normal-release joint
+position holding, fault/shutdown damping, actuator scales in `cbf` (enforced
+even when disabled), and monitoring/report tools. See [README.md](README.md)
+for current documentation navigation; older snapshots below are historical.
+
 ## Explicit runtime selection and minimal overall arguments (2026-10-13)
 
 The operator requests exactly two overall arguments: mandatory `runtime_config`

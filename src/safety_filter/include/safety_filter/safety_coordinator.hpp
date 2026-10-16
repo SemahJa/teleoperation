@@ -1,11 +1,21 @@
 // Copyright (c) 2026 Jiachun. Licensed under Apache-2.0.
 #pragma once
 #include <atomic>
+
 #include "safety_filter/cbf_safety_filter.hpp"
 #include "safety_filter/handoff.hpp"
 namespace safety_filter {
-enum class SafetyStop : unsigned { none, result_deadline, state_age, state_skew,
-  invalid_model, solver_failures, filter_deadline, owner_failure, scheduling };
+enum class SafetyStop : unsigned {
+  none,
+  result_deadline,
+  state_age,
+  state_skew,
+  invalid_model,
+  solver_failures,
+  filter_deadline,
+  owner_failure,
+  scheduling
+};
 const char* safety_stop_name(SafetyStop reason) noexcept;
 struct ModelRequest {
   cbf::ArmState state;
@@ -33,12 +43,12 @@ struct CoordinatorParameters {
 class SafetyCoordinator {
  public:
   bool configure(const CoordinatorParameters& limits, const cbf::SafetyParameters& safety,
-      const std::array<cbf::ArmIdentity, 2>& identities, std::string* error);
+                 const std::array<cbf::ArmIdentity, 2>& identities, std::string* error);
   void submit(int arm, const ModelRequest& request) noexcept { requests_[arm].publish(request); }
   bool receive(int arm, SafetyReply& reply) noexcept { return replies_[arm].read(reply); }
   bool pump(uint64_t now_ns = 0);
-  bool accepts(int arm, uint64_t cycle, uint64_t started_ns,
-               uint64_t now_ns, const SafetyReply& reply) noexcept;
+  bool accepts(int arm, uint64_t cycle, uint64_t started_ns, uint64_t now_ns,
+               const SafetyReply& reply) noexcept;
   void stop(SafetyStop reason) noexcept;
   SafetyStop stopped() const noexcept { return stop_.load(std::memory_order_acquire); }
   const CoordinatorParameters& limits() const noexcept { return limits_; }
@@ -46,6 +56,7 @@ class SafetyCoordinator {
   const ModelRequest& diagnostic_request(int arm) const { return pending_.at(arm); }
   const char* diagnostic_filter_status() const noexcept { return filter_status_; }
   const SafetyReply& diagnostic_reply() const noexcept { return diagnostic_reply_; }
+
  private:
   cbf::CbfSafetyFilter filter_;
   CoordinatorParameters limits_;

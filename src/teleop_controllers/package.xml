@@ -2,7 +2,7 @@
 <package format="3">
   <name>teleop_controllers</name>
   <version>0.1.0</version>
-  <description>Direct-libfranka Cartesian teleoperation controllers and arm homing.</description>
+  <description>Shared direct-libfranka torque runtime and controller manager with Cartesian impedance and homing laws.</description>
   <maintainer email="maintainer@example.com">Franka Teleoperation</maintainer>
   <license>Apache-2.0</license>
   <buildtool_depend>ament_cmake</buildtool_depend>

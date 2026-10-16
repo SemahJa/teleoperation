@@ -1,8 +1,8 @@
 // Copyright (c) 2026 Jiachun. Licensed under Apache-2.0.
 #pragma once
-#include <cmath>
 #include <Eigen/Geometry>
 #include <Eigen/SVD>
+#include <cmath>
 
 namespace safety_filter {
 // Legacy tool rotations can contain float-rounded 0.7071 rather than sqrt(.5).
@@ -12,7 +12,8 @@ namespace safety_filter {
 inline bool orthonormalize_legacy_pose(Eigen::Affine3d& pose) noexcept {
   constexpr double rounding_limit = 1e-4;
   if (!pose.matrix().allFinite() ||
-      !pose.matrix().row(3).isApprox(Eigen::RowVector4d(0,0,0,1), 1e-8)) return false;
+      !pose.matrix().row(3).isApprox(Eigen::RowVector4d(0, 0, 0, 1), 1e-8))
+    return false;
   const Eigen::Matrix3d raw = pose.linear();
   const double determinant = raw.determinant();
   const Eigen::Matrix3d gram = raw.transpose() * raw;
@@ -23,8 +24,9 @@ inline bool orthonormalize_legacy_pose(Eigen::Affine3d& pose) noexcept {
   if (!rotation.allFinite() ||
       !((rotation.transpose() * rotation).isApprox(Eigen::Matrix3d::Identity(), 1e-8)) ||
       std::abs(rotation.determinant() - 1) >= 1e-8 ||
-      (rotation - raw).cwiseAbs().maxCoeff() > rounding_limit) return false;
+      (rotation - raw).cwiseAbs().maxCoeff() > rounding_limit)
+    return false;
   pose.linear() = rotation;  // Keep the measured translation and homogeneous row.
   return true;
 }
-}
+}  // namespace safety_filter

@@ -1,0 +1,3 @@
+# Optional host/container tools; runtime packages do not depend on these.
+black==24.10.0
+miss-hit-core==0.9.44
