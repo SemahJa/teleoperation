@@ -1,8 +1,6 @@
 # Topic profile; teleop_bringup controls whether recording is launched.
-# Derive raw state/command/monitor/measured pose/robot state/event topics per arm.
-# Includes full-cycle tracking_samples for controller trajectory reports.
-# Only selected topics with publishers are recorded; mapper-only runs have no
-# controller/Hand/tracking publishers.
+# Derive controller input, mapped command, measured pose and tracking topics
+# per arm. Other topics can be added explicitly below.
 include_default_topics: true
 # Add custom topics here. Set include_default_topics:false to replace the profile.
 topics: []

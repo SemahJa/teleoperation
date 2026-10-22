@@ -265,28 +265,37 @@ For configuration and controller extension details, see
 
 ## Trajectory monitoring and experiment reports
 
-The controller publishes a coherent pose/velocity tracking stream and all four
-torque stages: nominal, after safety, robot-reported desired and measured
-link-side torque. The latest live view is `/<arm>/tracking_status`; the default
-recording profile captures `/<arm>/tracking_samples` at the control-cycle rate
-through a bounded non-realtime publishing handoff. Unavailable/idle references
-and mock torque readbacks are explicitly marked rather than treated as tracking
-measurements.
+Each arm can set `pose_filter` and `velocity_filter` independently to `none`,
+`low_pass`, or `four_pole`. The four-pole filter has a C3 continuous step
+response. Each arm can also set `pose_interpolation` and
+`velocity_interpolation` to `none`, `ptp_polynomial`, or `spline`.
+The septic point-to-point curve is C3 at completed knots; the quintic spline
+is C2 there. Separate cutoff and interpolation-duration settings are available
+under each arm in the package and bringup YAML files. Interpolation coalesces
+new waypoints while a segment runs, so it adds trajectory delay and may skip
+intermediate waypoints when input arrives faster than segments complete.
+
+While holding the trigger, hold Y on the left Quest controller or B on the
+right to follow orientation while holding the measured end-effector position.
+Release Y or B to return to Cartesian impedance tracking without releasing
+the trigger. The latest live tracking view is `/<arm>/tracking_status`.
+The default bag profile records controller input, mapped command, measured
+pose, and `/<arm>/tracking_samples`; its CSV exporter selects only trajectory
+fields and timing data for the MATLAB report.
 
 In a second ROS container terminal, run
 `bash scripts/plotjuggler_tracking.sh /panda_1` and subscribe to
-`/panda_1/tracking_status`. The dashboard has pose, velocity, four-torque and
-diagnostic tabs. For recorded reports, export bags to CSV with
+`/panda_1/tracking_status`. For recorded reports, export bags to CSV with
 `ros2 run recording export_tracking BAG OUTPUT_DIRECTORY`.
 
 MATLAB analysis runs in the separate optional `docker/matlab-compose.yaml`
 container and exports vector PDFs, high-resolution PNGs, metrics and estimated
-acceleration/jerk. It requires base MATLAB with an eligible license; no host
+acceleration/jerk. Torque and diagnostic report pages are omitted. It requires base MATLAB with an eligible license; no host
 installation, ROS Toolbox or Signal Processing Toolbox is required. First-time
 account/network activation, batch/browser commands and license handover are
 documented in [docs/TRAJECTORY_MONITORING.md](docs/TRAJECTORY_MONITORING.md).
-Every plot panel includes an explicit legend identifying its signals, including
-the seven-joint diagnostic residuals. Regenerate reports to update older figures.
+Every plot panel includes an explicit legend identifying its signals. Regenerate
+reports to update older figures.
 
 Generated recordings, exports, reports and runtime logs live under ignored
 `log/`. The existing experiment data was removed during the requested cleanup;

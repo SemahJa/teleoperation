@@ -12,7 +12,7 @@ from recording.export_tracking import export_bag, sample_row
 
 
 class TrackingExportTest(unittest.TestCase):
-    def test_actual_bag_roundtrip_preserves_clocks_arms_and_torque_conventions(self):
+    def test_actual_bag_roundtrip_preserves_clocks_arms_and_trajectories(self):
         with tempfile.TemporaryDirectory() as directory:
             root = Path(directory)
             bag = root / "bag"
@@ -25,6 +25,7 @@ class TrackingExportTest(unittest.TestCase):
                 topic = "/" + side + "/tracking_samples"
                 writer.create_topic(
                     rosbag2_py.TopicMetadata(
+                        id=0,
                         name=topic,
                         type="quest_teleop_interfaces/msg/TrackingSample",
                         serialization_format="cdr",
@@ -59,11 +60,8 @@ class TrackingExportTest(unittest.TestCase):
                     rows[0]["state_time_pc_monotonic_ns"], "9007199254740993"
                 )
                 self.assertAlmostEqual(float(rows[1]["time_s"]), 0.001)
-                self.assertEqual(float(rows[0]["nominal_torque_1"]), 10.0)
-                self.assertEqual(float(rows[0]["commanded_torque_1"]), 9.0)
-                self.assertEqual(float(rows[0]["robot_desired_torque_1"]), 8.0)
-                self.assertEqual(float(rows[0]["measured_torque_1"]), 20.0)
-                self.assertEqual(rows[0]["robot_torque_valid"], "1")
+                self.assertEqual(float(rows[0]["requested_position_x"]), 0.4)
+                self.assertNotIn("nominal_torque_1", rows[0])
                 self.assertEqual(rows[0]["frame_id"], topic.split("/")[1] + "/base")
             with self.assertRaises(FileExistsError):
                 export_bag(bag, root / "export")
@@ -71,7 +69,7 @@ class TrackingExportTest(unittest.TestCase):
             self.assertEqual(list(selected["topics"]), ["/right/tracking_samples"])
             with self.assertRaises(ValueError):
                 export_bag(bag, root / "bad", ["/absent"])
-            self.assertIn("includes gravity", json.dumps(manifest))
+            self.assertNotIn("torque_conventions", manifest)
 
     def test_relative_time_before_origin_and_invalid_values_are_preserved(self):
         msg = TrackingSample()
@@ -79,8 +77,7 @@ class TrackingExportTest(unittest.TestCase):
         msg.measured_torque[0] = float("nan")
         row = sample_row(msg, 2000000)
         self.assertAlmostEqual(row["time_s"], -0.001)
-        self.assertFalse(row["robot_torque_valid"])
-        self.assertTrue(math.isnan(row["measured_torque_1"]))
+        self.assertNotIn("measured_torque_1", row)
 
 
 if __name__ == "__main__":

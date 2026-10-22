@@ -15,14 +15,10 @@ outputDir)` analyzes every CSV in the manifest. Both accept `DerivativeWindow`,
 `MaximumGap`, `MakePlots`, and `DPI` name/value options. Run
 `runtests('test_teleop_analysis.m')` in a licensed MATLAB session before first use.
 
-Figures are vector PDFs, configurable-DPI PNGs and editable `.fig` files. Metrics
-and estimated derivatives are also exported as JSON/CSV. Raw torque readbacks
-retain their gravity conventions and time offsets. Acceleration and jerk are
-bandwidth-dependent supporting estimates from velocity, not sensor readings.
-Every subplot includes a visible legend with explicit signal labels; joint
-residuals identify Joint 1--7 with consistent colors. Regenerate old reports to
-apply the updated legends. The report round-trip self-test verifies legends
-in all 38 saved plot panels.
+Figures are vector PDFs, configurable-DPI PNGs and editable `.fig` files.
+The report plots pose, velocity, estimated acceleration and estimated jerk.
+These derivatives come from velocity fits; they are not sensor readings.
+The CSV export contains trajectory signals and timing fields used by this analysis.
 
 For formatting, use `python scripts/format_code.py` from the repository root
 after installing the optional tools in `requirements-dev.txt`. The local

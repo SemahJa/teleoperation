@@ -12,6 +12,8 @@ const char* reason_name(Reason reason) noexcept {
       return "released";
     case Reason::active:
       return "active";
+    case Reason::orientation_only:
+      return "orientation_only";
     case Reason::invalid_command:
       return "invalid_command";
     case Reason::stale:
@@ -202,13 +204,20 @@ ManagerOutput ControllerManager::update(const ArmState& s, uint64_t now, double 
   out.target_orientation = enabled_ ? last_.orientation : s.orientation;
   out.desired_twist = enabled_ ? last_.twist : Vector6::Zero();
   out.motion_enabled = enabled_;
-  out.reason = reason_;
+  out.reason = enabled_ && last_.orientation_only ? Reason::orientation_only : reason_;
   out.source_ns = last_.source_ns;
   out.sequence = last_.sequence;
 
   if (result.homing.stop_failed)
     return result;  // Fatal controlled-stop failure.
-  TorqueController* law = enabled_ ? &teleoperation_ : &damping_;
+  TorqueController* law = enabled_ ? (last_.orientation_only ? &orientation_only_ : &teleoperation_)
+                                   : &damping_;
+  if (enabled_ && last_.orientation_only) {
+    if (selected_ != &orientation_only_)
+      orientation_hold_position_ = s.position;
+    out.target_position = orientation_hold_position_;
+    out.desired_twist.head<3>().setZero();
+  }
   ControlReference reference =
       CartesianReference{out.target_position, out.target_orientation, out.desired_twist};
   if (result.homing.active) {
@@ -233,11 +242,12 @@ ManagerOutput ControllerManager::update(const ArmState& s, uint64_t now, double 
     out.position_hold_active = true;
     out.reason = Reason::position_hold;
   }
-  if (law != selected_ || (law == &teleoperation_ && teleoperation_reset_pending_) ||
+  if (law != selected_ || ((law == &teleoperation_ || law == &orientation_only_) &&
+                           teleoperation_reset_pending_) ||
       (law == &position_hold_ && hold_reset_pending_)) {
     law->reset(s);
     selected_ = law;
-    if (law == &teleoperation_)
+    if (law == &teleoperation_ || law == &orientation_only_)
       teleoperation_reset_pending_ = false;
     if (law == &position_hold_)
       hold_reset_pending_ = false;

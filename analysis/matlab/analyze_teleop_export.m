@@ -1,7 +1,7 @@
 function summaries = analyze_teleop_export(exportDirectory, outputDirectory, varargin)
 % ANALYZE_TELEOP_EXPORT Analyze every arm listed in an export manifest.
 manifest = jsondecode(fileread(fullfile(exportDirectory, 'manifest.json')));
-assert(manifest.schema_version == 1, 'Unsupported export schema.');
+assert(ismember(manifest.schema_version, [1 2]), 'Unsupported export schema.');
 items = struct2cell(manifest.topics);
 summaries = cell(size(items));
 for k = 1:numel(items)

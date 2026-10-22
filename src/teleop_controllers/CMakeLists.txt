@@ -16,6 +16,7 @@ find_package(sensor_msgs REQUIRED)
 find_package(quest_teleop_interfaces REQUIRED)
 add_library(controller_manager
   src/controller_manager.cpp src/cartesian_impedance_controller.cpp
+  src/orientation_only_controller.cpp
   src/position_hold_controller.cpp src/damping_controller.cpp
   src/homing_controller.cpp src/joint_motion_generator.cpp)
 target_include_directories(controller_manager PUBLIC

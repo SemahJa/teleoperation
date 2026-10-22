@@ -30,6 +30,7 @@
 #include "teleop_controllers/controller_manager.hpp"
 #include "teleop_controllers/damping_controller.hpp"
 #include "teleop_controllers/position_hold_controller.hpp"
+#include "teleop_controllers/orientation_only_controller.hpp"
 #include "tracking_message.hpp"
 
 namespace ft = teleop_controllers;
@@ -151,6 +152,7 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
     if (!hp.valid())
       throw std::invalid_argument("invalid homing parameters");
     ft::CartesianImpedanceController cartesian(impedance);
+    ft::OrientationOnlyController orientation_only(impedance);
     ft::PositionHoldParameters hold;
     const auto hold_k = parameter<std::vector<double>>(
         node, "hold_stiffness",
@@ -167,7 +169,7 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
       throw std::invalid_argument("invalid position hold gains or stiffness ramp");
     ft::PositionHoldController position_hold(hold);
     ft::DampingController damping(impedance.gain_translation, impedance.gain_rotation);
-    ft::ControllerManager manager(p, hp, cartesian, position_hold, damping);
+    ft::ControllerManager manager(p, hp, cartesian, orientation_only, position_hold, damping);
     const bool homing_enabled = parameter<bool>(node, "homing_enabled", true);
     sf::SpscQueue<ft::HomingInput> home_inputs;
     sf::SpscQueue<ft::Command> commands;
@@ -221,6 +223,7 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
           c.generation = msg->reference_space_generation;
           c.location_ns = msg->openxr_location_time_ns;
           c.enabled = msg->motion_enabled;
+          c.orientation_only = msg->orientation_only;
           c.released = msg->trigger_released;
           c.valid = msg->header.frame_id == frame && msg->input_valid && msg->source_time_valid &&
                     msg->clock_sync_valid && !msg->session_id.empty() &&

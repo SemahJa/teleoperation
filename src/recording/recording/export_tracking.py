@@ -12,68 +12,20 @@ import yaml
 SCALARS = (
     "control_cycle",
     "state_time_pc_monotonic_ns",
-    "control_time_pc_monotonic_ns",
     "command_issue_time_pc_monotonic_ns",
     "command_source_time_pc_monotonic_ns",
-    "command_receipt_time_pc_monotonic_ns",
     "openxr_location_time_ns",
     "sequence",
     "reference_space_generation",
     "session_id",
-    "reason",
     "hardware_backend",
     "motion_enabled",
     "requested_pose_valid",
     "requested_twist_valid",
     "cartesian_reference_valid",
     "homing_active",
-    "period_seconds",
-    "command_age_ms",
-    "lambda_translation",
-    "lambda_rotation",
-    "gain_translation",
-    "gain_rotation",
-    "robot_torque_valid",
-    "gravity_valid",
-    "previous_command_valid",
-    "previous_control_cycle",
-    "previous_command_issue_time_pc_monotonic_ns",
-    "maximum_torque_rate",
-    "torque_rate_limited",
-    "torque_magnitude_limited",
-    "cbf_enabled",
     "safety_fallback",
-    "solver_succeeded",
-    "normalized_torque_intervention",
-    "monitor_queue_drops",
-    "position_error_norm",
-    "rotation_error_angle",
-    "linear_velocity_error_norm",
-    "angular_velocity_error_norm",
 )
-ARRAYS = {
-    "position_error": ("x", "y", "z"),
-    "rotation_error": ("x", "y", "z"),
-    **{
-        name: tuple(str(i) for i in range(1, 8))
-        for name in (
-            "joint_position",
-            "joint_velocity",
-            "homing_joint_position",
-            "homing_joint_velocity",
-            "nominal_torque",
-            "commanded_torque",
-            "robot_desired_torque",
-            "measured_torque",
-            "gravity_torque",
-            "previous_nominal_torque",
-            "previous_commanded_torque",
-            "torque_limits",
-        )
-    },
-}
-
-
 def sample_row(msg, origin_ns):
     """Subtract integer clocks BEFORE conversion to seconds; retain absolute uint64s."""
     row = {
@@ -94,9 +46,6 @@ def sample_row(msg, origin_ns):
                 row[f"{prefix}_{part}_velocity_{axis}"] = getattr(
                     getattr(twist, part), axis
                 )
-    for name, suffixes in ARRAYS.items():
-        for suffix, value in zip(suffixes, getattr(msg, name)):
-            row[f"{name}_{suffix}"] = float(value)
     return row
 
 
@@ -160,16 +109,10 @@ def export_bag(bag, output, topics=()):
         for file in files.values():
             file.close()
     manifest = {
-        "schema_version": 1,
+        "schema_version": 2,
         "bag": str(bag),
         "storage_id": storage,
         "clock": "PC CLOCK_MONOTONIC; time_s is relative state time",
-        "torque_conventions": {
-            "nominal_and_commanded": "current callback output, without gravity/friction compensation",
-            "robot_desired": "incoming RobotState tau_J_d, without gravity",
-            "measured": "incoming link-side torque sensor tau_J, includes gravity",
-            "previous_command": "previous callback output; no exact robot acknowledgement implied",
-        },
         "topics": {
             topic: {
                 "csv": names[topic],

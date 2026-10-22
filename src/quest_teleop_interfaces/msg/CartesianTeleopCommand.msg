@@ -8,6 +8,8 @@ geometry_msgs/Twist desired_twist
 geometry_msgs/Twist requested_twist
 bool requested_twist_valid
 bool motion_enabled
+# Hold the measured end-effector position while following orientation.
+bool orientation_only
 string session_id
 uint64 sequence
 uint64 source_acquisition_time_ns

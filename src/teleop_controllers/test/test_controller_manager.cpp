@@ -10,6 +10,7 @@
 #include "teleop_controllers/controller_manager.hpp"
 #include "teleop_controllers/damping_controller.hpp"
 #include "teleop_controllers/position_hold_controller.hpp"
+#include "teleop_controllers/orientation_only_controller.hpp"
 namespace ft = teleop_controllers;
 namespace sf = safety_filter;
 namespace {
@@ -35,11 +36,12 @@ ft::ArmState state() {
 struct Fixture {
   ft::CartesianImpedanceParameters impedance;
   ft::CartesianImpedanceController cartesian{impedance};
+  ft::OrientationOnlyController orientation_only{impedance};
   ft::DampingController damping{impedance.gain_translation, impedance.gain_rotation};
   ft::PositionHoldController position_hold{ft::PositionHoldParameters{}};
   ft::ControllerManager manager;
   explicit Fixture(const ft::ManagerParameters& p = {})
-      : manager(p, ft::HomingParameters{}, cartesian, position_hold, damping) {}
+      : manager(p, ft::HomingParameters{}, cartesian, orientation_only, position_hold, damping) {}
   void accept(const ft::Command& c, uint64_t stamp) { manager.accept(c, stamp); }
   ft::Output update(const ft::ArmState& s, uint64_t stamp, double period) {
     return manager.update(s, stamp, period).control;
@@ -50,6 +52,31 @@ void arm(Fixture& core) {
   core.accept(command(2, true), now + 2);
 }
 }  // namespace
+TEST(Manager, OrientationModeCapturesPositionAndSwitchesWithoutTriggerRelease) {
+  Fixture core;
+  arm(core);
+  auto measured = state();
+  auto full = command(3, true);
+  full.position.x() = .45;
+  core.accept(full, now + 3);
+  EXPECT_EQ(core.update(measured, now + 3, .001).target_position.x(), .45);
+
+  auto orientation = command(4, true);
+  orientation.orientation_only = true;
+  orientation.position.x() = .5;
+  orientation.twist.x() = .2;
+  core.accept(orientation, now + 4);
+  auto output = core.update(measured, now + 4, .001);
+  EXPECT_TRUE(output.motion_enabled);
+  EXPECT_EQ(output.reason, ft::Reason::orientation_only);
+  EXPECT_DOUBLE_EQ(output.target_position.x(), .4);
+  EXPECT_DOUBLE_EQ(output.desired_twist.x(), 0.0);
+  measured.position.x() = .41;
+  core.accept(command(5, true), now + 5);
+  output = core.update(measured, now + 5, .001);
+  EXPECT_TRUE(output.motion_enabled);
+  EXPECT_DOUBLE_EQ(output.target_position.x(), .4);
+}
 TEST(Manager, ReleaseIsRequiredAndNominalLawIsPreserved) {
   Fixture core(ft::ManagerParameters{});
   auto s = state();

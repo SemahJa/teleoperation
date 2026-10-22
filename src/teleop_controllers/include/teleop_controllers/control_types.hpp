@@ -18,7 +18,7 @@ struct Command {
   std::array<char, 65> session{};
   uint64_t sequence{0}, generation{0}, source_ns{0}, receipt_ns{0}, uncertainty_ns{0},
       location_ns{0};
-  bool valid{false}, enabled{false}, released{false};
+  bool valid{false}, enabled{false}, released{false}, orientation_only{false};
 };
 
 struct ArmState {
@@ -33,6 +33,7 @@ enum class Reason : uint8_t {
   startup,
   released,
   active,
+  orientation_only,
   invalid_command,
   stale,
   order,

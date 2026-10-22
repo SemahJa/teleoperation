@@ -1,19 +1,14 @@
 function teleop_figures(D, summary, directory, dpi)
 % TELEOP_FIGURES Headless dashboard pages and vector/raster publication exports.
-% All units are explicit. Quaternion error is sign invariant; angular velocity
-% is in the robot base frame. All four raw torque stages remain distinguishable.
+% All units are explicit. Angular velocity is in the robot base frame.
 colors = [0 .447 .698; .902 .624 0; 0 .620 .451; .800 .475 .655];
 trackingLabels = {'Requested', 'Reference', 'Measured'};
-torqueLabels = {'Nominal', 'After safety', 'Robot desired (no gravity)', 'Measured (includes gravity)'};
-jointLabels = arrayfun(@(j) sprintf('Joint %d', j), 1:7, 'UniformOutput', false);
-jointColors = lines(7);
-raw = D.raw;
 r = D.request_index;
 state = D.time;
 issue = D.reference_time;
 [rt, rp] = break_trace(D.request_time, D.requested_position(r, :), D.request_episode);
 [~, rv] = break_trace(D.request_time, D.requested_velocity(r, :), D.request_episode);
-[fig, tiles] = page('Pose and velocity', 4, 3);
+[fig, tiles] = page('Pose and velocity', 3, 3);
 for k = 1:3
     ax = nexttile(tiles);
     hold(ax, 'on');
@@ -37,17 +32,6 @@ for k = 1:6
     end
     label(ax, [part ' velocity ' axis_name(mod(k - 1, 3) + 1)], unit, trackingLabels);
 end
-ax = nexttile(tiles);
-hold(ax, 'on');
-plot(ax, state, D.reference_rotation_error * 180 / pi, 'Color', colors(2, :));
-plot(ax, state, D.operator_rotation_error * 180 / pi, '--', 'Color', colors(1, :));
-label(ax, 'Orientation error', 'deg', {'Reference error', 'Requested error'});
-ax = nexttile(tiles);
-plot(ax, state, raw.command_age_ms);
-label(ax, 'Command age at evaluation', 'ms', {'Command age'});
-ax = nexttile(tiles);
-plot(ax, state, raw.normalized_torque_intervention);
-label(ax, 'Safety intervention', 'normalized norm', {'Normalized torque intervention'});
 if summary.hardware_data
     source = 'HARDWARE';
 else
@@ -56,65 +40,6 @@ end
 title(tiles, sprintf('%s | active %.2f s | pose RMSE %.2f mm', ...
                      source, summary.active_seconds, 1000 * summary.position_rmse_m));
 export_page(fig, tiles, directory, 'pose_velocity', dpi);
-
-[fig, tiles] = page('Four torque stages', 2, 4);
-for joint = 1:7
-    ax = nexttile(tiles);
-    hold(ax, 'on');
-    plot(ax, issue, raw.(['nominal_torque_' num2str(joint)]), '--', 'Color', colors(1, :));
-    plot(ax, issue, raw.(['commanded_torque_' num2str(joint)]), ':', 'Color', colors(2, :));
-    plot(ax, state, raw.(['robot_desired_torque_' num2str(joint)]), '-', 'Color', colors(3, :));
-    plot(ax, state, raw.(['measured_torque_' num2str(joint)]), '-', 'Color', colors(4, :));
-    label(ax, sprintf('Joint %d', joint), 'Nm', torqueLabels);
-end
-ax = nexttile(tiles);
-hold(ax, 'on');
-stairs(ax, state, raw.robot_torque_valid);
-stairs(ax, state, raw.previous_command_valid);
-label(ax, 'Readback availability', 'valid', {'Robot torque valid', 'Previous command valid'});
-title(tiles, 'Four raw torque stages: different clocks and gravity conventions; measured is link-side torque');
-export_page(fig, tiles, directory, 'four_torques', dpi);
-
-[fig, tiles] = page('Diagnostic context', 3, 2);
-ax = nexttile(tiles);
-hold(ax, 'on');
-stairs(ax, state, raw.motion_enabled);
-stairs(ax, state, raw.reason == "position_hold");
-stairs(ax, state, raw.homing_active);
-stairs(ax, state, raw.safety_fallback);
-label(ax, 'Controller modes', 'active', {'Teleoperation', 'Position hold', 'Homing', 'Safety fallback'});
-ax = nexttile(tiles);
-hold(ax, 'on');
-stairs(ax, state, raw.torque_rate_limited);
-stairs(ax, state, raw.torque_magnitude_limited);
-label(ax, 'Nominal actuator pressure', 'flag', {'Torque rate limited', 'Torque magnitude limited'});
-ax = nexttile(tiles);
-plot(ax, state, raw.monitor_queue_drops);
-label(ax, 'Monitoring queue drops', 'cumulative count', {'Queue drops'});
-ax = nexttile(tiles);
-plot(ax, state(2:end), 1000 * diff(state));
-label(ax, 'Recorded state intervals', 'ms', {'State sample interval'});
-ax = nexttile(tiles);
-hold(ax, 'on');
-for joint = 1:7
-    previous = raw.(['previous_commanded_torque_' num2str(joint)]);
-    residual = raw.(['robot_desired_torque_' num2str(joint)]) - previous;
-    residual(~logical(raw.previous_command_valid) | ~logical(raw.robot_torque_valid)) = NaN;
-    plot(ax, state, residual, 'Color', jointColors(joint, :));
-end
-label(ax, 'Robot desired minus previous output: candidate alignment', 'Nm', jointLabels);
-ax = nexttile(tiles);
-hold(ax, 'on');
-for joint = 1:7
-    residual = raw.(['measured_torque_' num2str(joint)]) - raw.(['gravity_torque_' num2str(joint)]) - ...
-        raw.(['robot_desired_torque_' num2str(joint)]);
-    residual(~logical(raw.gravity_valid) | ~logical(raw.robot_torque_valid)) = NaN;
-    plot(ax, state, residual, 'Color', jointColors(joint, :));
-end
-label(ax, 'Measured - model gravity - robot desired: approximate residual', 'Nm', jointLabels);
-title(tiles, ['Supporting diagnostics: residuals include model/contact/dynamic effects; ' ...
-              'no exact acknowledgement assumed']);
-export_page(fig, tiles, directory, 'diagnostics', dpi);
 
 for angular = 0:1
     if angular
@@ -165,8 +90,7 @@ xlabel(ax, 'Time [s]');
 ylabel(ax, unit, 'Interpreter', 'none');
 grid(ax, 'on');
 ax.FontSize = 10;
-% Every tile has its own explicit legend, including single-series diagnostics
-% and unavailable (NaN) signals. Saved FIG/PDF/PNG exports retain these labels.
+% Saved FIG/PDF/PNG exports retain explicit labels, including NaN signals.
 lgd = legend(ax, seriesLabels, 'Location', 'best', 'Interpreter', 'none', 'FontSize', 7);
 lgd.AutoUpdate = 'off';
 lgd.Visible = 'on';

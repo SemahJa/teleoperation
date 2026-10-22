@@ -8,7 +8,7 @@ from geometry_msgs.msg import PoseStamped
 from rclpy.executors import SingleThreadedExecutor
 from rclpy.node import Node
 from rclpy.parameter import Parameter
-from quest_teleop_interfaces.msg import CartesianTeleopCommand, QuestControllerState
+from quest_teleop_interfaces.msg import CartesianTeleopCommand, QuestControllerState, QuestButtonState
 
 from quest_teleop.pose_mapper import PoseMapper, qexp, qlog, qrotate
 
@@ -107,6 +107,28 @@ class PoseMapperTest(unittest.TestCase):
         self.node.on_state(self.state(0.2))
         self.assertFalse(self.node.enabled)
         self.assertFalse(self.node.need_release)
+
+    def test_orientation_button_switches_with_trigger_held(self):
+        self.node.on_state(self.state(0.0))
+        self.node.on_state(self.state(0.8))
+        button = QuestButtonState()
+        button.name = "b"
+        button.active = True
+        button.pressed = True
+        sample = self.state(0.8)
+        sample.buttons = [button]
+        self.node.on_state(sample)
+        self.assertTrue(self.commands.messages[-1].motion_enabled)
+        self.assertTrue(self.commands.messages[-1].orientation_only)
+        sample = self.state(0.8)
+        sample.buttons = [button]
+        sample.grip_pose.position.x = 0.1
+        self.node.on_state(sample)
+        self.assertAlmostEqual(self.commands.messages[-1].target_pose.position.x, 0.0)
+        self.assertAlmostEqual(self.commands.messages[-1].desired_twist.linear.x, 0.0)
+        self.node.on_state(self.state(0.8))
+        self.assertTrue(self.commands.messages[-1].motion_enabled)
+        self.assertFalse(self.commands.messages[-1].orientation_only)
 
     def test_pose_twist_and_command_metadata_publish_atomically(self):
         self.node.on_state(self.state(0.0))

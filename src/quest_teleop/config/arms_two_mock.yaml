@@ -7,6 +7,16 @@ arms:
     reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
     controller_enabled: false
     operator_confirm: false
+    # Independent mapped pose and velocity processing (none, low_pass, four_pole).
+    pose_filter: none
+    velocity_filter: low_pass
+    pose_filter_cutoff_hz: 10.0
+    velocity_filter_cutoff_hz: 10.0
+    # Interpolation: none, ptp_polynomial (septic), spline (quintic).
+    pose_interpolation: none
+    velocity_interpolation: none
+    pose_interpolation_duration_ms: 40.0
+    velocity_interpolation_duration_ms: 40.0
   panda_right:
     namespace: /panda_right
     controller: right
@@ -14,3 +24,13 @@ arms:
     reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
     controller_enabled: false
     operator_confirm: false
+    # Independent mapped pose and velocity processing (none, low_pass, four_pole).
+    pose_filter: none
+    velocity_filter: low_pass
+    pose_filter_cutoff_hz: 10.0
+    velocity_filter_cutoff_hz: 10.0
+    # Interpolation: none, ptp_polynomial (septic), spline (quintic).
+    pose_interpolation: none
+    velocity_interpolation: none
+    pose_interpolation_duration_ms: 40.0
+    velocity_interpolation_duration_ms: 40.0

@@ -20,4 +20,14 @@ arms:
     feedforward_scale: 1.0
     # Placeholder; choose and verify commissioning values before hardware use.
     twist_filter_cutoff_hz: 10.0
+    # Independent mapped pose and velocity processing (none, low_pass, four_pole).
+    pose_filter: none
+    velocity_filter: low_pass
+    pose_filter_cutoff_hz: 10.0
+    velocity_filter_cutoff_hz: 10.0
+    # Interpolation: none, ptp_polynomial (septic), spline (quintic).
+    pose_interpolation: none
+    velocity_interpolation: none
+    pose_interpolation_duration_ms: 40.0
+    velocity_interpolation_duration_ms: 40.0
     command_timeout_ms: 100

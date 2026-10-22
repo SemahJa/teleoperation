@@ -66,6 +66,14 @@ _DEFAULTS = dict(
     rotation_scale=1.0,
     feedforward_scale=1.0,
     twist_filter_cutoff_hz=10.0,
+    pose_filter="none",
+    velocity_filter="low_pass",
+    pose_interpolation="none",
+    velocity_interpolation="none",
+    pose_filter_cutoff_hz=10.0,
+    velocity_filter_cutoff_hz=10.0,
+    pose_interpolation_duration_ms=40.0,
+    velocity_interpolation_duration_ms=40.0,
     command_timeout_ms=100,
     max_clock_uncertainty_ms=10.0,
     max_source_future_ms=10.0,
@@ -146,7 +154,17 @@ def load_arms(path):
             ips.add(ip)
         p = dict(_DEFAULTS)
         p.update({key: raw[key] for key in _DEFAULTS if key in raw})
-        for key in _DEFAULTS:
+        if "velocity_filter_cutoff_hz" not in raw:
+            p["velocity_filter_cutoff_hz"] = p["twist_filter_cutoff_hz"]
+        modes = {"pose_filter", "velocity_filter"}
+        interpolations = {"pose_interpolation", "velocity_interpolation"}
+        for key in modes:
+            if p[key] not in ("none", "low_pass", "four_pole"):
+                raise ValueError(f"{name}.{key}: choose none, low_pass or four_pole")
+        for key in interpolations:
+            if p[key] not in ("none", "ptp_polynomial", "spline"):
+                raise ValueError(f"{name}.{key}: choose none, ptp_polynomial or spline")
+        for key in set(_DEFAULTS) - modes - interpolations:
             p[key] = number(
                 p[key],
                 f"{name}.{key}",

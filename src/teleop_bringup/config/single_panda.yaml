@@ -45,6 +45,16 @@ arms:
     rotation_scale: 0.33
     feedforward_scale: 0.0
     twist_filter_cutoff_hz: 10.0
+    # Independent mapped pose and velocity processing (none, low_pass, four_pole).
+    pose_filter: none
+    velocity_filter: low_pass
+    pose_filter_cutoff_hz: 10.0
+    velocity_filter_cutoff_hz: 10.0
+    # Interpolation: none, ptp_polynomial (septic), spline (quintic).
+    pose_interpolation: none
+    velocity_interpolation: none
+    pose_interpolation_duration_ms: 40.0
+    velocity_interpolation_duration_ms: 40.0
     command_timeout_ms: 100
     max_clock_uncertainty_ms: 10.0
     max_source_future_ms: 10.0
@@ -76,7 +86,7 @@ controller:
   homing_damping: [30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 5.0]
 
 hand:
-  speed_mps: 0.02
+  speed_mps: 0.05
   grasp_force_n: 30.0
   open_width_m: 0.025        # Use calibrated maximum width.
   grasp_width_m: 0.007      # Unknown object settings refuse grasp.

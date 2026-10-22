@@ -51,6 +51,18 @@ class ConfigurationTest(unittest.TestCase):
         self.assertEqual(
             arms[1].parameters["reference_to_robot_xyzw"], [0.0, 0.0, 0.0, 1.0]
         )
+        self.assertEqual(arms[0].parameters["pose_filter"], "none")
+        self.assertEqual(arms[0].parameters["velocity_filter"], "low_pass")
+        configured = copy.deepcopy(self.config)
+        configured["arms"]["left_arm"].update(
+            pose_filter="four_pole", velocity_filter="none",
+            pose_interpolation="spline", velocity_interpolation="ptp_polynomial",
+        )
+        settings = load_arms(self.write("processing.yaml", configured))[0].parameters
+        self.assertEqual(settings["pose_filter"], "four_pole")
+        self.assertEqual(settings["velocity_filter"], "none")
+        self.assertEqual(settings["pose_interpolation"], "spline")
+        self.assertEqual(settings["velocity_interpolation"], "ptp_polynomial")
 
     def test_reject_collisions_bad_calibration_and_invalid_settings(self):
         cases = [
@@ -67,6 +79,9 @@ class ConfigurationTest(unittest.TestCase):
             ("feedforward_scale", 1.1),
             ("translation_scale", 0),
             ("twist_filter_cutoff_hz", float("inf")),
+            ("pose_filter", "invalid"),
+            ("velocity_interpolation", "invalid"),
+            ("pose_interpolation_duration_ms", 0),
             ("command_timeout_ms", 1.5),
             ("trigger_release", 0.8),
             ("min_derivative_dt_ms", 101.0),

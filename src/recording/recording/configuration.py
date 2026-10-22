@@ -16,16 +16,8 @@ def default_recording_topics(arms):
             [
                 p["controller_state_topic"],
                 p["command_topic"],
-                p["monitor_topic"],
                 p["measured_pose_topic"],
-                arm.state_topic,
-                full_topic("watchdog_events", arm.namespace),
-                full_topic("gripper_events", arm.namespace),
-                full_topic("controller_status", arm.namespace),
                 full_topic("tracking_samples", arm.namespace),
-                full_topic("homing_status", arm.namespace),
-                full_topic("cbf_status", arm.namespace),
-                full_topic("joint_states", arm.namespace),
             ]
         )
     return list(dict.fromkeys(topics))

@@ -27,13 +27,20 @@ struct ManagerOutput {
 class ControllerManager {
  public:
   ControllerManager(const ManagerParameters& parameters, const HomingParameters& homing_parameters,
-                    TorqueController& teleoperation, TorqueController& position_hold,
+                    TorqueController& teleoperation, TorqueController& orientation_only,
+                    TorqueController& position_hold,
                     TorqueController& damping)
       : p_(parameters),
         homing_(homing_parameters),
         teleoperation_(teleoperation),
+        orientation_only_(orientation_only),
         position_hold_(position_hold),
         damping_(damping) {}
+  ControllerManager(const ManagerParameters& parameters, const HomingParameters& homing_parameters,
+                    TorqueController& teleoperation, TorqueController& position_hold,
+                    TorqueController& damping)
+      : ControllerManager(parameters, homing_parameters, teleoperation, teleoperation,
+                          position_hold, damping) {}
   void accept(const Command& command, uint64_t now_ns) noexcept;
   const Command& requested_command() const noexcept { return last_; }
   void homing_input(const HomingInput& input, uint64_t now_ns) noexcept {
@@ -51,11 +58,13 @@ class ControllerManager {
   ManagerParameters p_;
   HomingController homing_;
   TorqueController& teleoperation_;
+  TorqueController& orientation_only_;
   TorqueController& position_hold_;
   TorqueController& damping_;
   TorqueController* selected_{nullptr};
   JointReference hold_reference_;
   Eigen::Vector3d hold_position_{Eigen::Vector3d::Zero()};
+  Eigen::Vector3d orientation_hold_position_{Eigen::Vector3d::Zero()};
   Eigen::Quaterniond hold_orientation_{1, 0, 0, 0};
   Command last_{};
   std::array<char, 65> session_{};
