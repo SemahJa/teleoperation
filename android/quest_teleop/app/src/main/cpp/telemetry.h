@@ -50,7 +50,7 @@ class QuestTelemetry {
         in.trigger, in.trigger_active, in.squeeze, in.squeeze_active,
         right && in.primary, right && in.primary_active, right && in.secondary, right && in.secondary_active,
         !right && in.primary, !right && in.primary_active, !right && in.secondary, !right && in.secondary_active,
-        !right && in.menu, !right && in.menu_active);
+        !right && in.menu, !right && in.menu_active, in.thumb_click, in.thumb_click_active);
     }
   }
   UsbTransport transport_;
@@ -65,7 +65,8 @@ class QuestTelemetry {
                      Vector3 linear, Vector3 angular,
                      bool linear_valid, bool angular_valid, float trigger, bool trigger_active,
                      float grip, bool grip_active, bool a, bool a_active, bool b, bool b_active,
-                     bool x, bool x_active, bool y, bool y_active, bool menu, bool menu_active) {
+                     bool x, bool x_active, bool y, bool y_active, bool menu, bool menu_active,
+                     bool thumb_click, bool thumb_click_active) {
     std::ostringstream json;
     const uint64_t sequence = sequence_++;
     const ClockSnapshot clock = transport_.clock_snapshot(acquisition);
@@ -94,7 +95,9 @@ class QuestTelemetry {
          << "},\"inputs\":{\"trigger\":" << unit_input(trigger)
          << ",\"trigger_active\":" << (trigger_active ? "true" : "false")
          << ",\"grip\":" << unit_input(grip)
-         << ",\"grip_active\":" << (grip_active ? "true" : "false");
+         << ",\"grip_active\":" << (grip_active ? "true" : "false")
+         << ",\"thumbstick_click\":" << (thumb_click ? "true" : "false")
+         << ",\"thumbstick_click_active\":" << (thumb_click_active ? "true" : "false");
     if (std::strcmp(controller, "right") == 0) {
       json << ",\"button_a\":" << (a ? "true" : "false")
            << ",\"button_a_active\":" << (a_active ? "true" : "false")

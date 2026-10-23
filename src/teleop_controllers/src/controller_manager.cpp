@@ -83,7 +83,17 @@ bool ControllerManager::fresh(const Command& c, uint64_t now) const noexcept {
 
 void ControllerManager::fault(Reason reason) noexcept {
   teleoperation_reset_pending_ = true;
-  hold_reset_pending_ = true;
+  const bool exit_hold = reason == Reason::shutdown || reason == Reason::invalid_state ||
+                         reason == Reason::safety_filter || reason == Reason::homing;
+  if (exit_hold) {
+    local_hold_ = false;
+    hold_reset_pending_ = true;
+  } else if (enabled_) {
+    // Stop pursuing remote targets and capture measured joints once. Subsequent
+    // input faults must preserve that local anchor and the stiffness ramp.
+    local_hold_ = true;
+    hold_reset_pending_ = true;
+  }
   // Homing arbitration must not turn a preceding input fault into permission
   // to hold. Only a fresh, explicit release restores that permission.
   if (reason != Reason::homing)
@@ -125,11 +135,17 @@ void ControllerManager::accept(const Command& c, uint64_t now) noexcept {
   source_ns_ = c.source_ns;
   last_ = c;
   if (!c.enabled) {
-    if (enabled_)
+    if (enabled_) {
       teleoperation_reset_pending_ = true;
+      local_hold_ = true;
+      hold_reset_pending_ = true;
+    }
     enabled_ = false;
     if (c.released) {
       release_seen_ = true;
+      if (!local_hold_)
+        hold_reset_pending_ = true;
+      local_hold_ = true;
       hold_permitted_ = true;
       reason_ = Reason::released;
     } else if (release_seen_)
@@ -151,6 +167,7 @@ void ControllerManager::accept(const Command& c, uint64_t now) noexcept {
     return;
   }
   enabled_ = true;
+  local_hold_ = false;
   hold_permitted_ = false;
   hold_reset_pending_ = true;
   reason_ = Reason::active;
@@ -210,8 +227,8 @@ ManagerOutput ControllerManager::update(const ArmState& s, uint64_t now, double 
 
   if (result.homing.stop_failed)
     return result;  // Fatal controlled-stop failure.
-  TorqueController* law = enabled_ ? (last_.orientation_only ? &orientation_only_ : &teleoperation_)
-                                   : &damping_;
+  TorqueController* law =
+      enabled_ ? (last_.orientation_only ? &orientation_only_ : &teleoperation_) : &damping_;
   if (enabled_ && last_.orientation_only) {
     if (selected_ != &orientation_only_)
       orientation_hold_position_ = s.position;
@@ -223,14 +240,17 @@ ManagerOutput ControllerManager::update(const ArmState& s, uint64_t now, double 
   if (result.homing.active) {
     law = &homing_;
     reference = JointReference{result.homing.desired_q, result.homing.desired_dq};
-  } else if (!enabled_ && !shutdown_ && hold_permitted_ &&
-             (reason_ == Reason::startup || reason_ == Reason::released ||
-              (reason_ == Reason::homing && last_.valid && last_.released && !last_.enabled &&
-               fresh(last_, now)))) {
+  } else if (!enabled_ && !shutdown_ &&
+             (local_hold_ ||
+              (hold_permitted_ && (reason_ == Reason::startup || reason_ == Reason::released ||
+                                   (reason_ == Reason::homing && last_.valid && last_.released &&
+                                    !last_.enabled && fresh(last_, now)))))) {
     // A deliberate release holds the measured arm configuration, never an old
     // Quest goal. Startup also holds locally without authorizing teleoperation.
-    // Faults, stale input, safety fallback and shutdown retain damping behavior.
+    // Quest input loss does not release a parked arm. Safety fallback, invalid
+    // state, active homing and shutdown retain their separate stop policy.
     law = &position_hold_;
+    local_hold_ = true;
     if (selected_ != law || hold_reset_pending_) {
       hold_reference_ = JointReference{s.q, Vector7::Zero()};
       hold_position_ = s.position;
@@ -242,8 +262,8 @@ ManagerOutput ControllerManager::update(const ArmState& s, uint64_t now, double 
     out.position_hold_active = true;
     out.reason = Reason::position_hold;
   }
-  if (law != selected_ || ((law == &teleoperation_ || law == &orientation_only_) &&
-                           teleoperation_reset_pending_) ||
+  if (law != selected_ ||
+      ((law == &teleoperation_ || law == &orientation_only_) && teleoperation_reset_pending_) ||
       (law == &position_hold_ && hold_reset_pending_)) {
     law->reset(s);
     selected_ = law;

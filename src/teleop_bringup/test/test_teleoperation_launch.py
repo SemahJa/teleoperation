@@ -15,7 +15,7 @@ import rclpy
 from rclpy.node import Node
 from std_msgs.msg import String
 from geometry_msgs.msg import PoseStamped
-from rclpy.qos import QoSProfile, DurabilityPolicy
+from rclpy.qos import QoSProfile, DurabilityPolicy, qos_profile_sensor_data
 from quest_teleop_interfaces.msg import (
     ControllerStatus,
     HomingStatus,
@@ -24,6 +24,7 @@ from quest_teleop_interfaces.msg import (
     GripperStatus,
     CbfStatus,
     TrackingSample,
+    CartesianTeleopCommand,
 )
 
 
@@ -44,6 +45,7 @@ class TeleoperationLaunchTest(unittest.TestCase):
         cbf_enabled=True,
         torque_scale=0.35,
         torque_rate_scale=0.35,
+        hands=False,
     ):
         prefix = "/launch_" + uuid.uuid4().hex
         node = Node("test_" + uuid.uuid4().hex)
@@ -51,6 +53,7 @@ class TeleoperationLaunchTest(unittest.TestCase):
         homes = {s: [] for s in statuses}
         poses = {s: [] for s in statuses}
         tracking = {s: [] for s in statuses}
+        commands = {s: [] for s in statuses}
         cbf_statuses = []
         node.create_subscription(
             CbfStatus, prefix + "/" + side + "/cbf_status", cbf_statuses.append, 100
@@ -62,6 +65,12 @@ class TeleoperationLaunchTest(unittest.TestCase):
             for s in statuses
         }
         for s in statuses:
+            node.create_subscription(
+                CartesianTeleopCommand,
+                prefix + "/" + s + "/cartesian_teleop_command",
+                commands[s].append,
+                100,
+            )
             node.create_subscription(
                 ControllerStatus,
                 prefix + "/" + s + "/controller_status",
@@ -75,7 +84,7 @@ class TeleoperationLaunchTest(unittest.TestCase):
                 PoseStamped,
                 prefix + "/" + s + "/teleop_anchor_pose",
                 poses[s].append,
-                100,
+                qos_profile_sensor_data,
             )
             node.create_subscription(
                 TrackingSample,
@@ -83,10 +92,15 @@ class TeleoperationLaunchTest(unittest.TestCase):
                 tracking[s].append,
                 100,
             )
-        grippers = []
-        node.create_subscription(
-            GripperStatus, prefix + "/right/gripper_events", grippers.append, 100
-        )
+        hand_states = {s: [] for s in statuses}
+        grippers = hand_states["right"]
+        for s in statuses:
+            node.create_subscription(
+                GripperStatus,
+                prefix + "/" + s + "/gripper_events",
+                hand_states[s].append,
+                100,
+            )
         recordings = []
         # The recording status topic is remapped per test to avoid existing user's nodes.
         node.create_subscription(
@@ -136,7 +150,7 @@ class TeleoperationLaunchTest(unittest.TestCase):
                 backend="mock",
                 mode=mode,
                 single_controller=side,
-                start_hand=record,
+                start_hand=record or hands,
                 recording_enabled=record,
                 cbf_enabled=cbf_enabled,
             )
@@ -167,7 +181,13 @@ class TeleoperationLaunchTest(unittest.TestCase):
                 sequence = 0
 
                 def drive(
-                    duration=0.1, menu=False, trigger=0.0, home=False, tracked=True
+                    duration=0.1,
+                    menu=False,
+                    trigger=0.0,
+                    home=False,
+                    tracked=True,
+                    grip=0.0,
+                    joystick=None,
                 ):
                     nonlocal sequence
                     end = time.monotonic() + duration
@@ -193,12 +213,21 @@ class TeleoperationLaunchTest(unittest.TestCase):
                             m.reference_space_generation = 1
                             m.trigger_active = True
                             m.trigger_value = trigger
+                            m.grip_active = True
+                            m.grip_value = grip
                             m.grip_pose.orientation.w = 1.0
                             b = QuestButtonState()
                             b.name = "x" if s == "left" else "a"
                             b.active = True
                             b.pressed = home is True or home == s
                             m.buttons = [b]
+                            b = QuestButtonState()
+                            b.name, b.active, b.pressed = (
+                                "thumbstick",
+                                True,
+                                joystick == s,
+                            )
+                            m.buttons.append(b)
                             if s == "left":
                                 b = QuestButtonState()
                                 b.name = "menu"
@@ -234,23 +263,55 @@ class TeleoperationLaunchTest(unittest.TestCase):
                     )
 
                 expected = ("left", "right") if mode == "dual" else (side,)
+                pose_discovery_stamps = {}
+
+                def mapper_pose_ready(s):
+                    # The observer may receive poses before the mapper's pose
+                    # subscription matches. Wait for both subscribers and a
+                    # newly published pose after that discovery barrier.
+                    if (
+                        not poses[s]
+                        or node.count_subscribers(
+                            prefix + "/" + s + "/teleop_anchor_pose"
+                        )
+                        < 2
+                    ):
+                        return False
+                    stamp = poses[s][-1].header.stamp
+                    stamp_ns = stamp.sec * 1_000_000_000 + stamp.nanosec
+                    if s not in pose_discovery_stamps:
+                        pose_discovery_stamps[s] = stamp_ns
+                        return False
+                    return stamp_ns > pose_discovery_stamps[s]
+
                 try:
                     wait(
                         lambda: all(
                             statuses[s]
                             and homes[s]
-                            and raw[s].get_subscription_count() >= (3 if record else 2)
+                            and raw[s].get_subscription_count()
+                            >= (3 if record or hands else 2)
                             for s in expected
                         )
                     )
-                    # Startup also holds joints before the mapper has seen a
-                    # release. Require a consumed source command, not just the
-                    # hold mode, before testing the subsequent engagement.
+                    # Local holding survives invalid/disarmed input. Require
+                    # an actual valid release consumed by the owner before
+                    # testing engagement, rather than inferring readiness from
+                    # position_hold or a nonzero source timestamp alone.
                     wait(
                         lambda: all(
-                            poses[s]
+                            mapper_pose_ready(s)
                             and statuses[s][-1].reason == "position_hold"
-                            and statuses[s][-1].source_time_pc_monotonic_ns > 0
+                            and commands[s]
+                            and commands[s][-1].input_valid
+                            and commands[s][-1].trigger_released
+                            and any(
+                                c.input_valid
+                                and c.trigger_released
+                                and c.source_time_pc_monotonic_ns > 0
+                                and c.sequence <= statuses[s][-1].sequence
+                                for c in commands[s]
+                            )
                             for s in expected
                         ),
                         send=True,
@@ -307,6 +368,42 @@ class TeleoperationLaunchTest(unittest.TestCase):
                         wait(lambda: homes["right"][-1].phase == "succeeded", send=True)
                         self.assertEqual(homes["right"][-1].request_id, 1)
                         self.assertEqual(homes["left"][-1].request_id, 1)
+                    if hands:
+                        wait(
+                            lambda: all(
+                                hand_states[s]
+                                and hand_states[s][-1].calibrated
+                                and not hand_states[s][-1].busy
+                                for s in expected
+                            ),
+                            send=True,
+                        )
+                        drive(0.08, grip=1.0)
+                        drive(0.05)
+                        wait(
+                            lambda: all(
+                                hand_states[s][-1].state == "stopped"
+                                and not hand_states[s][-1].busy
+                                for s in expected
+                            ),
+                            send=True,
+                        )
+                        for chosen in expected:
+                            others = {
+                                s: hand_states[s][-1].operations_started
+                                for s in expected
+                                if s != chosen
+                            }
+                            drive(0.03, joystick=chosen)
+                            wait(
+                                lambda: hand_states[chosen][-1].state == "open"
+                                and not hand_states[chosen][-1].busy,
+                                send=True,
+                            )
+                            for s, count in others.items():
+                                self.assertEqual(
+                                    hand_states[s][-1].operations_started, count
+                                )
                     if record:
                         wait(
                             lambda: recordings
@@ -402,6 +499,12 @@ class TeleoperationLaunchTest(unittest.TestCase):
 
     def test_dual(self):
         self.run_mode(mode="dual")
+
+    def test_dual_cbf_disabled(self):
+        self.run_mode(mode="dual", cbf_enabled=False)
+
+    def test_dual_joystick_opens_only_the_assigned_hand(self):
+        self.run_mode(mode="dual", cbf_enabled=False, hands=True)
 
     def test_single_right_cbf_disabled(self):
         self.run_mode(cbf_enabled=False, torque_scale=0.2, torque_rate_scale=0.1)

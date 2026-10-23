@@ -29,8 +29,8 @@
 #include "teleop_controllers/cartesian_impedance_controller.hpp"
 #include "teleop_controllers/controller_manager.hpp"
 #include "teleop_controllers/damping_controller.hpp"
-#include "teleop_controllers/position_hold_controller.hpp"
 #include "teleop_controllers/orientation_only_controller.hpp"
+#include "teleop_controllers/position_hold_controller.hpp"
 #include "tracking_message.hpp"
 
 namespace ft = teleop_controllers;
@@ -49,6 +49,11 @@ struct Telemetry {
   sf::SafetyReply safety;
   ft::Vector7 gravity{ft::Vector7::Zero()};
   bool finish_requested{false};
+  uint64_t stamp_ns{0}, cycle{0};
+};
+struct PoseFeedback {
+  Eigen::Vector3d position{Eigen::Vector3d::Zero()};
+  Eigen::Quaterniond orientation{1, 0, 0, 0};
   uint64_t stamp_ns{0}, cycle{0};
 };
 // Written only by the owning callback, read after all realtime threads join.
@@ -174,15 +179,45 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
     sf::SpscQueue<ft::HomingInput> home_inputs;
     sf::SpscQueue<ft::Command> commands;
     sf::LatestSnapshot<Telemetry> snapshots;
+    sf::LatestSnapshot<PoseFeedback> feedback;
     auto tracking_queue = std::make_unique<sf::SpscQueue<ft::TrackingSnapshot, 1024>>();
     sf::LatestSnapshot<ft::TrackingSnapshot> live_tracking;
     std::atomic<uint64_t> tracking_drops{0};
     std::atomic<uint64_t> overflows{0};
     std::atomic<uint64_t> home_overflows{0};
+    std::atomic<bool> control_requested{false};
+    bool control_ready = false, command_seen = false;
+    bool startup_wait_logged = false;
+    const auto startup_watch_ns = monotonic_ns();
+    std::array<bool, 3> last_command_flags{};
+    bool raw_seen = false;
+    std::array<bool, 9> last_raw_flags{};
     auto raw_input = node->create_subscription<quest_teleop_interfaces::msg::QuestControllerState>(
         raw_topic, rclcpp::QoS(20),
         [&](quest_teleop_interfaces::msg::QuestControllerState::ConstSharedPtr msg) {
-          if (!homing_enabled || msg->controller_id != controller_id)
+          if (msg->controller_id != controller_id)
+            return;
+          const std::array<bool, 9> flags{msg->connection_valid,
+                                          msg->session_focused,
+                                          msg->pose_action_active,
+                                          msg->position_valid && msg->position_tracked,
+                                          msg->orientation_valid && msg->orientation_tracked,
+                                          msg->trigger_active,
+                                          msg->clock_sync_valid && msg->source_time_valid,
+                                          msg->reference_space == "LOCAL",
+                                          msg->trigger_value <= trigger_release};
+          if (!raw_seen || flags != last_raw_flags) {
+            raw_seen = true;
+            last_raw_flags = flags;
+            RCLCPP_INFO_THROTTLE(
+                node->get_logger(), *node->get_clock(), 500,
+                "Quest input: controller=%s connected=%d focused=%d pose_active=%d "
+                "position_ok=%d orientation_ok=%d trigger_active=%d clock_valid=%d "
+                "local_space=%d trigger=%.3f uncertainty_ms=%.3f",
+                controller_id.c_str(), flags[0], flags[1], flags[2], flags[3], flags[4], flags[5],
+                flags[6], flags[7], msg->trigger_value, msg->clock_uncertainty_ns / 1e6);
+          }
+          if (!homing_enabled)
             return;
           ft::HomingInput c;
           c.receipt_ns = monotonic_ns();
@@ -242,8 +277,22 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
           c.requested_twist_valid = msg->requested_twist_valid && c.requested_twist.allFinite();
           if (!commands.push(c))
             overflows.fetch_add(1, std::memory_order_release);
+          const std::array<bool, 3> flags{c.valid, c.released, c.enabled};
+          if (!command_seen || flags != last_command_flags) {
+            command_seen = true;
+            last_command_flags = flags;
+            RCLCPP_INFO_THROTTLE(node->get_logger(), *node->get_clock(), 500,
+                                 "Mapped input: valid=%d trigger_released=%d motion_requested=%d "
+                                 "frame_match=%d source_age_ms=%.3f uncertainty_ms=%.3f",
+                                 c.valid, c.released, c.enabled, msg->header.frame_id == frame,
+                                 c.source_ns && c.receipt_ns >= c.source_ns
+                                     ? (c.receipt_ns - c.source_ns) / 1e6
+                                     : -1.,
+                                 c.uncertainty_ns / 1e6);
+          }
         });
-    auto measured = node->create_publisher<geometry_msgs::msg::PoseStamped>(pose_topic, 1);
+    auto measured = node->create_publisher<geometry_msgs::msg::PoseStamped>(
+        pose_topic, rclcpp::SensorDataQoS().keep_last(1));
     auto joints = node->create_publisher<sensor_msgs::msg::JointState>("joint_states", 1);
     auto robot_state = node->create_publisher<franka_msgs::msg::FrankaState>(state_topic, 1);
     auto status = node->create_publisher<quest_teleop_interfaces::msg::ControllerStatus>(
@@ -265,100 +314,137 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
                                safety_parameters.maximum_torque_rate, safety_parameters.enabled,
                                tracking_drops.load(std::memory_order_relaxed), impedance));
     };
-    auto timer = node->create_wall_timer(std::chrono::milliseconds(10), [&] {
-      ft::TrackingSnapshot tracking;
-      if (live_tracking.read(tracking))
-        publish_tracking(tracking, tracking_status);
-      Telemetry sample;
-      if (!snapshots.read(sample))
+    // The mapper's freshness gate needs a current pose even when a reliable
+    // status publisher blocks. Keep this small best-effort path with input;
+    // bulk telemetry has its own executor and its own single-reader snapshot.
+    auto feedback_timer = node->create_wall_timer(std::chrono::milliseconds(10), [&] {
+      PoseFeedback sample;
+      if (!feedback.read(sample)) {
+        if (!control_ready && !startup_wait_logged &&
+            monotonic_ns() - startup_watch_ns >= 5000000000ULL) {
+          startup_wait_logged = true;
+          RCLCPP_WARN(node->get_logger(),
+                      "Arm startup still waiting for its first accepted torque cycle after "
+                      "5 s: control_requested=%d robot_ip=%s. FCI startup mode Idle alone "
+                      "does not confirm that torque callbacks have started.",
+                      control_requested.load(std::memory_order_acquire), ip.c_str());
+        }
         return;
+      }
+      if (!control_ready) {
+        control_ready = true;
+        RCLCPP_INFO(node->get_logger(),
+                    "Arm control ready: accepted torque cycle=%llu robot_ip=%s "
+                    "measured_frame=%s. Fresh valid trigger release/press is required "
+                    "for Quest teleoperation; startup does not home the arm.",
+                    static_cast<unsigned long long>(sample.cycle), ip.c_str(), frame.c_str());
+      }
       const auto now = monotonic_ns();
       const auto stamp = node->now() - rclcpp::Duration::from_nanoseconds(static_cast<int64_t>(
                                            now >= sample.stamp_ns ? now - sample.stamp_ns : 0));
       geometry_msgs::msg::PoseStamped pose;
       pose.header.stamp = stamp;
       pose.header.frame_id = frame;
-      write_pose(pose.pose, sample.state.position, sample.state.orientation);
+      write_pose(pose.pose, sample.position, sample.orientation);
       measured->publish(pose);
-      sensor_msgs::msg::JointState joint;
-      joint.header = pose.header;
-      for (int j = 0; j < 7; ++j)
-        joint.name.push_back("panda_joint" + std::to_string(j + 1));
-      joint.position.assign(sample.state.q.data(), sample.state.q.data() + 7);
-      joint.velocity.assign(sample.state.dq.data(), sample.state.dq.data() + 7);
-      joints->publish(joint);
-      franka_msgs::msg::FrankaState state;
-      state.header = pose.header;
-      std::copy_n(sample.state.q.data(), 7, state.q.begin());
-      std::copy_n(sample.state.dq.data(), 7, state.dq.begin());
-      state.tau_j = sample.native.tau_J;
-      state.tau_j_d = sample.native.tau_J_d;
-      state.dtau_j = sample.native.dtau_J;
-      Eigen::Affine3d actual =
-          Eigen::Translation3d(sample.state.position) * sample.state.orientation;
-      Eigen::Affine3d target =
-          Eigen::Translation3d(sample.output.target_position) * sample.output.target_orientation;
-      Eigen::Map<Eigen::Matrix4d>(state.o_t_ee.data()) = actual.matrix();
-      Eigen::Map<Eigen::Matrix4d>(state.o_t_ee_d.data()) = target.matrix();
-      Eigen::Map<Eigen::Matrix4d>(state.o_t_ee_c.data()) = target.matrix();
-      std::copy_n(sample.output.desired_twist.data(), 6, state.o_dp_ee_d.begin());
-      state.time = sample.native.time.toSec();
-      state.robot_mode = static_cast<uint8_t>(sample.native.robot_mode);
-      robot_state->publish(state);
-      quest_teleop_interfaces::msg::ControllerStatus event;
-      event.header = pose.header;
-      event.hardware_backend = hardware;
-      event.motion_enabled = sample.output.motion_enabled;
-      event.reason = ft::reason_name(sample.output.reason);
-      event.source_time_pc_monotonic_ns = sample.output.source_ns;
-      event.sequence = sample.output.sequence;
-      event.command_queue_overflows = overflows.load(std::memory_order_acquire);
-      event.torque_rate_limited = sample.output.rate_limited;
-      event.torque_magnitude_limited = sample.output.magnitude_limited;
-      std::copy_n(sample.output.nominal.data(), 7, event.nominal_torque.begin());
-      std::copy_n(sample.output.torque.data(), 7, event.commanded_torque.begin());
-      status->publish(event);
-      quest_teleop_interfaces::msg::HomingStatus home;
-      home.header = pose.header;
-      home.controller_id = controller_id;
-      home.phase = ft::home_phase_name(sample.homing.phase);
-      home.message = sample.homing.message;
-      home.request_id = sample.homing.request_id;
-      home.active = sample.homing.active;
-      home.stop_failed = sample.homing.stop_failed;
-      home.elapsed_seconds = sample.homing.elapsed;
-      home.maximum_joint_position_error = sample.homing.position_error;
-      home.maximum_joint_velocity = sample.homing.velocity;
-      std::copy_n(sample.homing.desired_q.data(), 7, home.desired_joint_position.begin());
-      std::copy_n(sample.homing.desired_dq.data(), 7, home.desired_joint_velocity.begin());
-      home_status->publish(home);
-      quest_teleop_interfaces::msg::CbfStatus safety;
-      safety.header = pose.header;
-      safety.hardware_backend = hardware;
-      const auto& filtered = sample.safety.result;
-      safety.solver_succeeded = filtered.solver_succeeded;
-      safety.fallback_active = filtered.fallback_active;
-      safety.fatal_input_fault = filtered.fatal_input_fault;
-      safety.solver_status = filtered.solver_status;
-      safety.stop_reason = sf::safety_stop_name(coordinator.stopped());
-      safety.control_cycle = sample.cycle;
-      safety.source_time_pc_monotonic_ns = sample.safety.source_ns;
-      if (sample.safety.source_ns[0] && sample.safety.source_ns[1])
-        safety.state_skew_ns = std::max(sample.safety.source_ns[0], sample.safety.source_ns[1]) -
-                               std::min(sample.safety.source_ns[0], sample.safety.source_ns[1]);
-      safety.consecutive_failures = sample.safety.consecutive_failures;
-      safety.filter_time_seconds = filtered.filter_time_seconds;
-      safety.solver_time_seconds = filtered.solver_time_seconds;
-      safety.maximum_constraint_violation = filtered.maximum_constraint_violation;
-      safety.minimum_table_clearance = filtered.minimum_table_clearance;
-      safety.minimum_self_clearance = filtered.minimum_self_clearance;
-      safety.minimum_inter_arm_clearance = filtered.minimum_inter_arm_clearance;
-      safety.intervention_norm = filtered.arm_intervention_norm[arm];
-      safety.active_constraints = filtered.active_constraints;
-      safety.inter_arm_constraints = filtered.inter_arm_constraints;
-      std::copy_n(sample.output.torque.data(), 7, safety.safe_torque.begin());
-      safety_status->publish(safety);
     });
+    auto telemetry_group =
+        node->create_callback_group(rclcpp::CallbackGroupType::MutuallyExclusive, false);
+    auto timer = node->create_wall_timer(
+        std::chrono::milliseconds(10),
+        [&] {
+          ft::TrackingSnapshot tracking;
+          if (live_tracking.read(tracking))
+            publish_tracking(tracking, tracking_status);
+          Telemetry sample;
+          if (!snapshots.read(sample))
+            return;
+          const auto now = monotonic_ns();
+          geometry_msgs::msg::PoseStamped pose;
+          pose.header.stamp = node->now() - rclcpp::Duration::from_nanoseconds(
+                                                now >= sample.stamp_ns ? now - sample.stamp_ns : 0);
+          pose.header.frame_id = frame;
+          sensor_msgs::msg::JointState joint;
+          joint.header = pose.header;
+          for (int j = 0; j < 7; ++j)
+            joint.name.push_back("panda_joint" + std::to_string(j + 1));
+          joint.position.assign(sample.state.q.data(), sample.state.q.data() + 7);
+          joint.velocity.assign(sample.state.dq.data(), sample.state.dq.data() + 7);
+          joints->publish(joint);
+          franka_msgs::msg::FrankaState state;
+          state.header = pose.header;
+          std::copy_n(sample.state.q.data(), 7, state.q.begin());
+          std::copy_n(sample.state.dq.data(), 7, state.dq.begin());
+          state.tau_j = sample.native.tau_J;
+          state.tau_j_d = sample.native.tau_J_d;
+          state.dtau_j = sample.native.dtau_J;
+          Eigen::Affine3d actual =
+              Eigen::Translation3d(sample.state.position) * sample.state.orientation;
+          Eigen::Affine3d target = Eigen::Translation3d(sample.output.target_position) *
+                                   sample.output.target_orientation;
+          Eigen::Map<Eigen::Matrix4d>(state.o_t_ee.data()) = actual.matrix();
+          Eigen::Map<Eigen::Matrix4d>(state.o_t_ee_d.data()) = target.matrix();
+          Eigen::Map<Eigen::Matrix4d>(state.o_t_ee_c.data()) = target.matrix();
+          std::copy_n(sample.output.desired_twist.data(), 6, state.o_dp_ee_d.begin());
+          state.time = sample.native.time.toSec();
+          state.robot_mode = static_cast<uint8_t>(sample.native.robot_mode);
+          robot_state->publish(state);
+          quest_teleop_interfaces::msg::ControllerStatus event;
+          event.header = pose.header;
+          event.hardware_backend = hardware;
+          event.motion_enabled = sample.output.motion_enabled;
+          event.reason = ft::reason_name(sample.output.reason);
+          event.source_time_pc_monotonic_ns = sample.output.source_ns;
+          event.sequence = sample.output.sequence;
+          event.command_queue_overflows = overflows.load(std::memory_order_acquire);
+          event.torque_rate_limited = sample.output.rate_limited;
+          event.torque_magnitude_limited = sample.output.magnitude_limited;
+          std::copy_n(sample.output.nominal.data(), 7, event.nominal_torque.begin());
+          std::copy_n(sample.output.torque.data(), 7, event.commanded_torque.begin());
+          status->publish(event);
+          quest_teleop_interfaces::msg::HomingStatus home;
+          home.header = pose.header;
+          home.controller_id = controller_id;
+          home.phase = ft::home_phase_name(sample.homing.phase);
+          home.message = sample.homing.message;
+          home.request_id = sample.homing.request_id;
+          home.active = sample.homing.active;
+          home.stop_failed = sample.homing.stop_failed;
+          home.elapsed_seconds = sample.homing.elapsed;
+          home.maximum_joint_position_error = sample.homing.position_error;
+          home.maximum_joint_velocity = sample.homing.velocity;
+          std::copy_n(sample.homing.desired_q.data(), 7, home.desired_joint_position.begin());
+          std::copy_n(sample.homing.desired_dq.data(), 7, home.desired_joint_velocity.begin());
+          home_status->publish(home);
+          quest_teleop_interfaces::msg::CbfStatus safety;
+          safety.header = pose.header;
+          safety.hardware_backend = hardware;
+          const auto& filtered = sample.safety.result;
+          safety.solver_succeeded = filtered.solver_succeeded;
+          safety.fallback_active = filtered.fallback_active;
+          safety.fatal_input_fault = filtered.fatal_input_fault;
+          safety.solver_status = filtered.solver_status;
+          safety.stop_reason = sf::safety_stop_name(coordinator.stopped());
+          safety.control_cycle = sample.cycle;
+          safety.source_time_pc_monotonic_ns = sample.safety.source_ns;
+          if (sample.safety.source_ns[0] && sample.safety.source_ns[1])
+            safety.state_skew_ns =
+                std::max(sample.safety.source_ns[0], sample.safety.source_ns[1]) -
+                std::min(sample.safety.source_ns[0], sample.safety.source_ns[1]);
+          safety.consecutive_failures = sample.safety.consecutive_failures;
+          safety.filter_time_seconds = filtered.filter_time_seconds;
+          safety.solver_time_seconds = filtered.solver_time_seconds;
+          safety.maximum_constraint_violation = filtered.maximum_constraint_violation;
+          safety.minimum_table_clearance = filtered.minimum_table_clearance;
+          safety.minimum_self_clearance = filtered.minimum_self_clearance;
+          safety.minimum_inter_arm_clearance = filtered.minimum_inter_arm_clearance;
+          safety.intervention_norm = filtered.arm_intervention_norm[arm];
+          safety.active_constraints = filtered.active_constraints;
+          safety.inter_arm_constraints = filtered.inter_arm_constraints;
+          std::copy_n(sample.output.torque.data(), 7, safety.safe_torque.begin());
+          safety_status->publish(safety);
+        },
+        telemetry_group);
     prepared.fetch_add(1, std::memory_order_acq_rel);
     while (prepared.load(std::memory_order_acquire) < count &&
            coordinator.stopped() == sf::SafetyStop::none)
@@ -370,10 +456,12 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
     // rclcpp::spin's executor in the worker raced with shutdown during cleanup.
     rclcpp::executors::SingleThreadedExecutor ros_executor;
     ros_executor.add_node(node);
-    std::thread executor([&] {
+    rclcpp::executors::SingleThreadedExecutor telemetry_executor;
+    telemetry_executor.add_callback_group(telemetry_group, node->get_node_base_interface());
+    auto spin_executor = [&](rclcpp::executors::SingleThreadedExecutor& target) {
       try {
         while (running.load(std::memory_order_acquire) && rclcpp::ok())
-          ros_executor.spin_once(std::chrono::milliseconds(10));
+          target.spin_once(std::chrono::milliseconds(10));
       } catch (const std::exception& e) {
         if (rclcpp::ok()) {
           RCLCPP_ERROR(node->get_logger(), "ROS executor stopped: %s", e.what());
@@ -381,12 +469,15 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
         }
       }
       running.store(false, std::memory_order_release);
-    });
+    };
+    std::thread executor([&] { spin_executor(ros_executor); });
     // Dedicated consumer: full-rate ROS serialization cannot delay the command
     // executor or torque callback. A slow consumer loses samples with a counter.
     std::atomic<bool> monitoring_running{true};
+    std::thread telemetry_thread;
     std::thread monitoring;
     try {
+      telemetry_thread = std::thread([&] { spin_executor(telemetry_executor); });
       monitoring = std::thread([&] {
         try {
           while (true) {
@@ -409,6 +500,9 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
     } catch (...) {
       running.store(false, std::memory_order_release);
       ros_executor.cancel();
+      telemetry_executor.cancel();
+      if (telemetry_thread.joinable())
+        telemetry_thread.join();
       executor.join();
       throw;
     }
@@ -418,6 +512,9 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
         monitoring.join();
       running.store(false, std::memory_order_release);
       ros_executor.cancel();
+      telemetry_executor.cancel();
+      if (telemetry_thread.joinable())
+        telemetry_thread.join();
       if (executor.joinable())
         executor.join();
     };
@@ -531,6 +628,8 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
         telemetry.output.target_orientation = telemetry.state.orientation;
       }
       snapshots.publish(telemetry);
+      feedback.publish({telemetry.state.position, telemetry.state.orientation, telemetry.stamp_ns,
+                        telemetry.cycle});
       ft::TrackingSnapshot tracking;
       tracking.state = telemetry.state;
       tracking.control = telemetry.output;
@@ -559,6 +658,7 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
       RCLCPP_INFO(node->get_logger(), "%s backend; atomic input %s; starts disarmed",
                   backend.c_str(), command_topic.c_str());
       if (!hardware) {
+        control_requested.store(true, std::memory_order_release);
         // Fixed fixture, not a dynamics, reachability, or collision model.
         Telemetry sample;
         sample.state.position << 0.4, 0, 0.4;
@@ -591,6 +691,7 @@ int run_arm(const std::shared_ptr<rclcpp::Node>& node, int arm, sf::SafetyCoordi
                 << " current_errors=" << startup_state.current_errors
                 << " last_motion_errors=" << startup_state.last_motion_errors;
         RCLCPP_INFO(node->get_logger(), "%s", startup.str().c_str());
+        control_requested.store(true, std::memory_order_release);
         robot.control(
             [&](const franka::RobotState& state, franka::Duration period) -> franka::Torques {
               Telemetry sample;
@@ -894,6 +995,10 @@ int main(int argc, char* argv[]) {
     std::string error;
     if (!coordinator.configure(limits, safety, ids, &error))
       throw std::invalid_argument(error);
+    if (count == 2 && !safety.enabled)
+      RCLCPP_INFO(root->get_logger(),
+                  "Dual actuator-only filtering uses independent current-cycle arm lanes; "
+                  "shared stop and finish arbitration remain enforced");
     std::atomic<bool> coordinating{true}, ready{false};
     std::thread coordinator_thread([&] {
       if (hardware) {
@@ -944,8 +1049,8 @@ int main(int argc, char* argv[]) {
       result = 2;
       if (coordinator.stopped() == sf::SafetyStop::result_deadline ||
           coordinator.stopped() == sf::SafetyStop::filter_deadline) {
-        const auto& reply = coordinator.diagnostic_reply();
         for (int i = 0; i < count; ++i) {
+          const auto& reply = coordinator.diagnostic_reply(i);
           const auto& t = timings[i];
           const bool matching =
               t.cycle && reply.cycles[i] == t.cycle && reply.source_ns[i] == t.source_ns;

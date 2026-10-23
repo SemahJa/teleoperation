@@ -4,16 +4,16 @@
 # transforms for BOTH arm_settings entries:
 #   world_from_base_xyz_xyzw: [x,y,z,qx,qy,qz,qw]
 # The mock's internal spacing is not physical installation data.
-# Enabled Hands perform empty-hand startup calibration; -1.0 object values refuse grasp.
+# Enabled Hands perform empty-hand startup calibration; release grip stops closing.
 pipeline:
   mode: dual
-  backend: mock
+  backend: hardware
   start_bridge: true
   start_mapper: true
   start_controller: true
   start_hand: true
   homing_enabled: true
-  cbf_enabled: true
+  cbf_enabled: false
   recording_enabled: true
   mock_measured_pose: false
 quest:
@@ -28,7 +28,7 @@ quest:
     client_receive_timeout_ms: 500
 arms:
   panda_left:
-    robot_ip: ''
+    robot_ip: 192.168.3.109
     namespace: /panda_left
     base_frame: panda_left/panda_link0
     controller: left
@@ -36,16 +36,16 @@ arms:
     target_pose_topic: target_pose
     measured_pose_topic: teleop_anchor_pose
     state_topic: robot_state
-    reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
-    translation_scale: 1.0
-    rotation_scale: 1.0
-    feedforward_scale: 1.0
+    reference_to_robot_xyzw: [0.5, 0.5, 0.5, 0.5]
+    translation_scale: 0.75
+    rotation_scale: 0.33
+    feedforward_scale: 0.5
     twist_filter_cutoff_hz: 10.0
-    # Independent mapped pose and velocity processing (none, low_pass, four_pole).
+    # Independent mapped pose and velocity processing: none, low_pass, four_pole.
     pose_filter: none
     velocity_filter: low_pass
-    pose_filter_cutoff_hz: 10.0
-    velocity_filter_cutoff_hz: 10.0
+    pose_filter_cutoff_hz: 5.0
+    velocity_filter_cutoff_hz: 5.0
     # Interpolation: none, ptp_polynomial (septic), spline (quintic).
     pose_interpolation: none
     velocity_interpolation: none
@@ -59,7 +59,7 @@ arms:
     trigger_engage: 0.75
     trigger_release: 0.25
   panda_right:
-    robot_ip: ''
+    robot_ip: 192.168.3.101
     namespace: /panda_right
     base_frame: panda_right/panda_link0
     controller: right
@@ -67,10 +67,10 @@ arms:
     target_pose_topic: target_pose
     measured_pose_topic: teleop_anchor_pose
     state_topic: robot_state
-    reference_to_robot_xyzw: [0.0, 0.0, 0.0, 1.0]
-    translation_scale: 1.0
-    rotation_scale: 1.0
-    feedforward_scale: 1.0
+    reference_to_robot_xyzw: [0.5, 0.5, 0.5, 0.5]
+    translation_scale: 0.75
+    rotation_scale: 0.33
+    feedforward_scale: 0.5
     twist_filter_cutoff_hz: 10.0
     # Independent mapped pose and velocity processing (none, low_pass, four_pole).
     pose_filter: none
@@ -90,10 +90,10 @@ arms:
     trigger_engage: 0.75
     trigger_release: 0.25
 controller:
-  lambda_translation: 50.0
-  lambda_rotation: 40.0
-  gain_translation: 20.0
-  gain_rotation: 2.5
+  lambda_translation: 15.0
+  lambda_rotation: 15.0
+  gain_translation: 50.0
+  gain_rotation: 5.0
   # Release trigger: capture measured joints once and hold the whole arm.
   hold_stiffness: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 75.0]  # Nm/rad
   hold_damping: [50.0, 50.0, 50.0, 50.0, 20.0, 15.0, 10.0]        # Nm s/rad
@@ -111,15 +111,16 @@ controller:
   homing_stiffness: [300.0, 300.0, 300.0, 300.0, 120.0, 100.0, 50.0]
   homing_damping: [30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 5.0]
 hand:
-  speed_mps: 0.02
-  grasp_force_n: 5.0
-  open_width_m: -1.0
-  grasp_width_m: -1.0
-  epsilon_inner_m: -1.0
-  epsilon_outer_m: -1.0
+  # Hold grip to close; release stops. A joystick click opens automatically.
+  close_width_m: 0.0       # Full finger gap lower bound; closing uses move(), not grasp().
+  close_retry_interval_ms: 200.0  # Held-close refresh period, independent of result; 0 disables refresh.
+  worker_poll_ms: 1.0     # Completion/retry/watchdog checks; release stop is event-driven.
+  open_speed_mps: 0.1    # Opening speed; closing keeps speed_mps below.
+  speed_mps: 0.05
+  open_width_m: 0.025
   grip_press: 0.75
   grip_release: 0.25
-  grip_debounce_ms: 50.0
+  grip_debounce_ms: 0.0
   command_timeout_ms: 100.0
   max_clock_uncertainty_ms: 10.0
   mock_operation_duration_ms: 100.0
@@ -135,8 +136,10 @@ cbf:
   obstacle_centers: []
   obstacle_radii: []
 arm_settings:
-  panda_left: {}
-  panda_right: {}
+  panda_left: 
+    world_from_base_xyz_xyzw: [0.0, 0.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+  panda_right: 
+    world_from_base_xyz_xyzw: [0.0, 0.69, 0.0, 0.0, 0.0, 0.0, 1.0]
 recording:
   mode: menu
   namespace: /quest

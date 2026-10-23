@@ -57,6 +57,15 @@ class RuntimeConfigurationTest(unittest.TestCase):
             expected = ALLOWED[section] - (
                 {"inter_arm_minimum_clearance"} if section == "cbf" else set()
             )
+            if section == "hand":
+                expected -= {
+                    "grasp_force_n",
+                    "grasp_width_m",
+                    "epsilon_inner_m",
+                    "epsilon_outer_m",
+                    "grip_click_max_ms",
+                    "grip_double_click_ms",
+                }
             self.assertEqual(set(data[section]), expected)
         # The template is edited for deployment; schema/selection checks must
         # not require an operator's saved backend to remain the mock default.
@@ -78,6 +87,14 @@ class RuntimeConfigurationTest(unittest.TestCase):
     def test_dual_template_requires_no_physical_geometry_for_mock(self):
         path = Path(__file__).parents[2] / "teleop_bringup/config/dual_panda.yaml"
         data = yaml.safe_load(path.read_text())
+        # Installation YAML is operator-editable. Exercise mock selection using
+        # a temporary copy, without changing saved IPs or surveyed transforms.
+        data["pipeline"]["backend"] = "mock"
+        for arm in data["arms"].values():
+            arm["robot_ip"] = ""
+        for settings in data["arm_settings"].values():
+            settings.pop("world_from_base_xyz_xyzw", None)
+        path = self.write(data)
         arms = select_arms(load_arms(path), "dual", "right")
         self.assertEqual(
             [a.parameters["controller_id"] for a in arms], ["left", "right"]
@@ -105,7 +122,19 @@ class RuntimeConfigurationTest(unittest.TestCase):
         )
         load_runtime(path, arms)
         for section in ALLOWED:
-            self.assertEqual(set(data[section]), ALLOWED[section])
+            expected = ALLOWED[section] - (
+                {
+                    "grasp_force_n",
+                    "grasp_width_m",
+                    "epsilon_inner_m",
+                    "epsilon_outer_m",
+                    "grip_click_max_ms",
+                    "grip_double_click_ms",
+                }
+                if section == "hand"
+                else set()
+            )
+            self.assertEqual(set(data[section]), expected)
 
     def test_namespaced_bridge_and_per_arm_settings(self):
         self.data.update(

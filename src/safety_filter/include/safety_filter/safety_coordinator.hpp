@@ -39,7 +39,9 @@ struct CoordinatorParameters {
   bool valid() const noexcept;
 };
 // One producer/consumer per arm lane. Arm callbacks submit once and await only
-// their own cycle. A single coordinator owns the coupled solver. No ROS/mutexes.
+// their own cycle. CBF uses a coupled solver; actuator-only dual filtering
+// services lanes independently because joint bounds do not need peer state.
+// Shared stop and finish arbitration remain. No ROS/mutexes.
 class SafetyCoordinator {
  public:
   bool configure(const CoordinatorParameters& limits, const cbf::SafetyParameters& safety,
@@ -56,17 +58,24 @@ class SafetyCoordinator {
   const ModelRequest& diagnostic_request(int arm) const { return pending_.at(arm); }
   const char* diagnostic_filter_status() const noexcept { return filter_status_; }
   const SafetyReply& diagnostic_reply() const noexcept { return diagnostic_reply_; }
+  const SafetyReply& diagnostic_reply(int arm) const { return lane_diagnostics_.at(arm); }
 
  private:
+  bool process(const std::array<bool, 2>& active, cbf::CbfSafetyFilter& filter, unsigned& failures,
+               uint64_t now_ns);
   cbf::CbfSafetyFilter filter_;
+  std::array<cbf::CbfSafetyFilter, 2> actuator_filters_;
+  bool independent_actuators_{false};
   CoordinatorParameters limits_;
   std::array<LatestSnapshot<ModelRequest>, 2> requests_;
   std::array<LatestSnapshot<SafetyReply>, 2> replies_;
   std::array<ModelRequest, 2> pending_;
   std::array<bool, 2> new_{};
   unsigned failures_{0};
+  std::array<unsigned, 2> lane_failures_{};
   const char* filter_status_{"not_run"};
   SafetyReply diagnostic_reply_;
+  std::array<SafetyReply, 2> lane_diagnostics_;
   std::atomic<SafetyStop> stop_{SafetyStop::none};
 };
 }  // namespace safety_filter

@@ -1,10 +1,11 @@
 # Implementation record
 
-Current implementation: separated runtime/manager/torque laws, normal-release
+Current implementation: separated runtime/manager/torque laws, persistent local
 joint position hold, shared CBF-independent actuator caps, homing, Hand control,
 recording, full-cycle tracking telemetry and MATLAB report tools. The owner
-still waits for the current cycle's safety reply; asynchronous reuse and pose
-interpolation remain planned in [MILESTONE_2.md](MILESTONE_2.md).
+still waits for the current cycle's safety reply; asynchronous reuse remains
+planned in [MILESTONE_2.md](MILESTONE_2.md). Optional pose/velocity filtering and
+interpolation are implemented in the mapper and disabled/enabled per arm.
 
 Use the [documentation guide](README.md) for current operating instructions.
 The dated entries below are historical evidence; older paths, test counts and
@@ -12,6 +13,395 @@ descriptions of release behavior do not override the current implementation.
 Physical FCI/device operations remain operator actions.
 
 ## Stages and evidence
+
+### Right-Hand opening lockout and late stop acknowledgement (2026-10-23)
+
+- Preserved four recent dual Hand logs under
+  `log/diagnostics/right_hand_open_review_20261023/`. In the latest right-Hand
+  log (PID 28902, robot `192.168.3.101`), startup calibration succeeded. A
+  subsequent stop took 9124.666 ms inside the SDK, then completion reported
+  `communication_ok=0` and cleared calibration. Later joystick presses and
+  side-grip inputs were fresh/valid but ignored because `calibrated=0`.
+  Manually reopening the fingers cannot clear this software fault latch.
+- Reproduced a backend race before fixing it: a successful blocking stop
+  acknowledgement exceeded the two-second retry window, and command completion
+  during the final wait was discarded as failure. The regression now passes;
+  successful acknowledgement plus command completion permits opening and a
+  later close. The retry window still faults if completion remains outstanding;
+  it does not interrupt blocking SDK calls or guarantee physical stop latency.
+- Retained distinct unsuccessful responses, command exceptions, device/
+  communication errors and retry exhaustion instead of overwriting them with
+  one generic timeout. Genuine stop faults are not retried. A later transport
+  fault cannot be hidden by an earlier successful acknowledgement; ordinary
+  redundant command rejection after acknowledgement remains tolerated while
+  waiting for command completion. New logs expose `stop_acknowledged` and
+  `stop_retry_exhausted`; `/gripper_events.message` retains the fault detail
+  until explicit recalibration starts. Error logs name the affected calibration
+  service. Motion remains serialized and genuine faults require explicit
+  empty-hand calibration; there is no automatic reconnect/calibration.
+- The older hardware logs discarded the actual stop response, so they cannot
+  prove that the reproduced race caused this specific trial's fault. No device
+  latency or physical gripping result is inferred from the software fix.
+  Updated the runtime guide with diagnosis and per-arm recovery instructions.
+- Release build succeeded with tests explicitly enabled (the container cache
+  had `BUILD_TESTING=OFF`). Gripper: 52 cases (31 core, 17 backend, 4 ROS);
+  bringup: 15 cases including 6 actual mock launch modes. All 67 passed without
+  failures/errors/skips. Test log: `/tmp/hand-stop-fix-tests.log` inside the
+  existing container. APK, runtime values, Docker definitions and third-party
+  code were unchanged; no physical FCI/Hand/headset operation was performed.
+
+### Review of calibration timing and engaged overshoot (2026-10-23)
+
+- Inspected the latest dual hardware trial (owner PID 24113, Hand PIDs
+  24115/24117). Both calibration requests were dispatched within 0.1 ms.
+  Left completion took 9203.199 ms: SDK command 9166.626 ms and readback
+  35.979 ms. Right completion took 6598.295 ms: SDK command 6551.431 ms and
+  readback 46.169 ms. Both report success/communication OK and calibration
+  ready. The difference is inside the SDK homing call, not sequential ROS
+  dispatch; these metrics cannot distinguish physical homing from firmware/
+  network acknowledgement time. `homing()` exposes no motion-speed argument.
+  Desk's indicator during FCI and its disappearance afterward match the
+  [maintainer explanation](https://github.com/frankarobotics/franka_ros/issues/118).
+  Preserved owner/Hand logs in `log/diagnostics/overshoot_review_20261023/`.
+- Audited the current engaged Cartesian law and dual YAML. `D = gain` and
+  `K = gain * lambda`, giving translational K=900 N/m and D=30 N s/m, and
+  rotational K=75 Nm/rad and D=2.5 Nm s/rad for the current file. Gains are
+  not inertia-normalized/adapted, and no explicit nullspace damping or posture
+  term is implemented. Hold/homing damping is selected separately; changing
+  hold gains does not damp continuously engaged Cartesian tracking.
+- Both dual mappings currently use unshaped pose, 10 Hz low-pass velocity
+  and no interpolation. Their `feedforward_scale: 0.5` blends native and
+  pose-derived velocities; it is not an amplitude multiplier. Zero still
+  supplies pose-derived reference velocity. Independent pose/twist processing
+  can leave residual twist when pose stops. Actuator caps/rate limiting can
+  also change braking, and the latest owner log contains a stale-release
+  sample; no tracking bag from the reported overshoot was available to
+  identify which effect dominated. No controller gains, filters, torque caps,
+  calibration policy or hardware behavior were changed based on speculation.
+- Updated architecture and monitoring documentation with the exact damping
+  semantics, missing nullspace behavior and diagnostic distinctions. Corrected
+  stale text claiming mapper pose interpolation was absent. This review is
+  read-only apart from documentation/evidence preservation; no build/test or
+  physical operation is needed for these changes.
+
+### Joystick opening and responsive Hand command path (2026-10-23)
+
+- Replaced side-grip double-click opening with one press of each assigned
+  joystick. Opening uses the press edge, not release/duration recognition.
+  Each joystick needs fresh active release after calibration/reconnection/fault;
+  startup-held/unavailable buttons cannot open, and holding cannot repeat.
+  Opening cancels held-close demand and waits for any preceding stop; an
+  already-held side grip cannot reverse it without a fresh release/press.
+  Side-grip hold/release closing and persistent refreshes remain in place.
+- Native OpenXR already sampled joystick clicks locally. Added
+  `thumbstick_click`/`thumbstick_click_active` to the APK's JSON serializer and
+  a named `thumbstick` button in the bridge. Increased the raw message button
+  bound to four for left joystick/X/Y/Menu. Existing APK packets without the
+  optional pair remain accepted for arm/closing input; partial pairs are
+  rejected. Joystick opening requires the updated APK and rebuilt ROS nodes.
+- Closing debounce defaults to zero; opening has an independent
+  `open_speed_mps: 0.1`, retaining operator closing speeds, widths and refresh
+  period in both overall configs. Completion/watchdog polling defaults to
+  1 ms on a separate thread, avoiding competition from an always-ready ROS
+  timer. Input/core synchronization never holds a lock across SDK, DDS or
+  console I/O. A dedicated reporting thread has latest-only status and bounded
+  diagnostic backlog; pending motion dispatch precedes completion reporting.
+- Cancellation distinguishes command return from final UDP readback, so it
+  does not repeatedly stop an already-ended command while readback is pending.
+  A possibly overtaken stop can still retry while the command is outstanding;
+  condition-variable wake-up follows command return without a lost-notification
+  window. Final readback/stop serialization and communication-fault calibration
+  requirements remain. Added captured dispatch/collection monotonic timestamps,
+  SDK command/readback/stop durations and stop-call count. Deferred console
+  prefix timestamps must not be used as physical event timestamps.
+- Nine-package ROS Release build and offline Gradle debug APK build succeed.
+  All 152 affected cases pass: 30 Quest, 52 controller, 48 Hand, 15 bringup and
+  seven recording. New cases cover both-hand USB joystick forwarding, malformed
+  pairs, press edges/release gates, held-opening priority, cancellation/readback
+  races, 400 ms delayed status publication and independent dual-Hand operation.
+  Corrected old debounce/config fixtures and an existing rosbag test using a
+  non-Humble `TopicMetadata(id=...)` argument. An initial mixed stress run missed
+  a short joystick press with source age near 100 ms; the final separate-polling
+  path passes the same test without relaxing freshness. It does not establish
+  guaranteed timing on a loaded non-realtime host or physical Hand.
+- Documentation, formatting and scoped whitespace checks pass. Software tests
+  use localhost ROS domain 137 and mock/injected devices; no FCI, Hand or headset
+  operation occurred. The new APK is at
+  `android/quest_teleop/app/build/outputs/apk/debug/app-debug.apk`; install it
+  with `bash scripts/quest_install.sh` on the host, then restart the sourced ROS
+  pipeline. Build/test logs are `/tmp/joystick-hand-*.log` in the ROS container;
+  final evidence includes `final-build`, `final-tests`, `timing-build` and
+  `verified-tests`. Hardware response remains to be checked by the operator:
+  firmware acknowledgement, valid readback and finger travel still take time.
+
+### Separate Desk status from input starvation and Hand readback rejection (2026-10-22)
+
+- The operator identified the warning as Desk's Hand/end-effector panel.
+  [Franka's maintainers document this indicator as expected during FCI control](https://github.com/frankarobotics/franka_ros/issues/118).
+  It does not establish that our Hand connection failed. The latest hardware
+  trial (16:36:10 UTC, owner PID 14043) reports accepted torque cycles for both
+  arms, but mapped command source ages reach 1398 ms and motion stays disabled.
+  Both firmware calibrations return success; only the right Hand reaches our
+  calibration-ready state. Earlier trials show software readback rejection on
+  either side. Preserved latest owner/Hand logs under
+  `log/diagnostics/dual_desk_20261022/`. No physical operation was performed.
+- Reproduced a concrete execution-path defect without hardware: injecting a
+  400 ms stall into `robot_state` publication starves the shared ROS executor's
+  Quest callbacks and pose anchors, preventing engagement. Split bulk telemetry
+  into its own callback group/executor. Input and small pose feedback retain
+  a separate executor and fixed-size latest-only handoff; anchors use
+  best-effort, depth-one QoS with a matching mapper subscription. Full-cycle
+  tracking keeps its existing dedicated queue/publisher. Torque laws, gains,
+  actuator caps, deadlines and 100 ms freshness gates are unchanged. The same
+  injected-stall regression now passes sustained engagement, release, fresh
+  pose feedback and clean shutdown. This reproduces the observed symptom; old
+  logs do not identify the exact middleware call that delayed the hardware run.
+- The old Hand state check rejects measured width above the estimated maximum
+  by more than 1 micrometre, or any negative endpoint noise. Added a shared
+  10 micrometre software readback allowance for completion and live closing;
+  accepted internal widths are clamped to calibrated travel. Commanded travel
+  is not expanded. Larger/invalid readback and transport/stop faults still
+  revoke calibration. Raw width, maximum, endpoint excess and communication
+  status are now logged together, with an immediate error on rejected
+  completion. Old logs omit maximum width, so endpoint discrepancy remains a
+  plausible cause of those calibration rejections, not a confirmed hardware
+  diagnosis. No automatic calibration/reconnect was added. Input transition
+  logging is rate-limited to reduce callback overhead.
+- Release builds pass; all 136 affected cases pass: 29 Quest, 52 controller,
+  41 Hand and 14 bringup cases. The new regression failed before production
+  changes and passes after them. Corrected its test-only CMake environment
+  assignment before the final run. The publisher-stall preload library is
+  built only for testing, never installed or enabled in hardware launch.
+  Formatting, scoped diff whitespace and documentation links pass. Tests use
+  localhost ROS domain 137 and mock/injected devices. Container logs:
+  `/tmp/desk-repro-build.log`, `/tmp/desk-stall-repro.log`,
+  `/tmp/desk-fix-build.log`, `/tmp/desk-fix-tests.log` and
+  `/tmp/desk-isolation-test.log`. Physical validation of both arms and Hands
+  remains an operator action; further rejection now has explicit readback
+  evidence rather than only a Desk indicator.
+
+### Distinguish right Hand calibration from arm/input readiness (2026-10-22)
+
+- Investigated the next dual trial (16:04:58 UTC, owner PID 12066). The operator
+  confirmed physical right IP `192.168.3.101`, Desk readiness and fresh right
+  trigger/grip release followed by continued nonresponse. The right Hand log
+  nevertheless reports calibration success after 6693.558 ms with maximum
+  gap 0.0802295655 m. Left calibration reports success after 11122.715 ms.
+  No ordinary right-Hand request follows calibration. The arm log contains
+  startup `Idle` reads and no controller fault; launch ultimately escalated
+  Ctrl+C to SIGKILL. Existing logs do not establish whether the right owner
+  entered its first accepted torque cycle or which input gate blocked commands.
+  This is not treated as a confirmed calibration failure or a resolved hardware
+  control issue. Preserved evidence under
+  `log/diagnostics/right_readiness_20261022T160458Z/`.
+- Added non-realtime `Arm control ready` logging after the first accepted
+  safety-checked torque cycle, and a diagnostic warning if no accepted cycle
+  appears after five seconds. The warning distinguishes whether control was
+  requested but does not stop/recover/restart hardware. Added raw Quest and
+  mapped validity/release/request transition logs. Hand logs now identify
+  backend/IP/input assignment, calibration-ready readback and input/release
+  gates. No arming, tracking, torque or calibration policies were bypassed.
+- Release builds pass. All 18 selected process cases pass: four controller/
+  mapper, six CBF runtime, three Hand and five combined-launch cases. One launch
+  fixture exposed a DDS readiness race: its observer saw poses before the
+  mapper subscription matched. It now waits for both subscribers and a newly
+  published pose before trigger engagement; production release gates remain
+  unchanged. Formatting, scoped diff whitespace and documentation links/anchors
+  pass. Used localhost ROS domain 137 and mock processes; no physical FCI/Hand
+  commands. Logs: `/tmp/readiness-*` in the ROS container. A running-trial
+  capture of right controller status, Hand status and raw Quest state remains
+  necessary to identify the actual right-side failure.
+
+### Independent dual actuator-only lanes after startup deadline stop (2026-10-22)
+
+- Inspected the actual PID 9927 ROS log from the dual hardware launch at
+  15:51:09 UTC. Both robots reported `Idle`; the first fatal cause was
+  `result_deadline` on cycle 1 with CBF disabled. Arm 0 spent 81.945 us preparing
+  and 833.379 us waiting, totaling 915.324 us against its 900 us deadline, with
+  no matching result. The coordinator had consumed arm 0's model but had no
+  paired result. Arm 1 then observed the shared stop on its first cycle.
+  Subsequent Hand stop requests, bridge disconnect and SIGINT messages were
+  normal launch teardown. Preserved the controller/launch logs and saved model
+  under `log/diagnostics/dual_startup_20261022T155109Z/` before mock testing.
+- Removed the unnecessary peer-state barrier only for dual actuator-only
+  filtering. Each arm now receives an independently validated current-cycle
+  result using its own model, nominal torque, previous robot torque and period.
+  Existing effective caps, model/age/filter/result deadline guards and shared
+  fatal-stop propagation remain. Both owners must still request finishing.
+  CBF-enabled dual filtering retains coupled fresh-state/skew checks; no
+  asynchronous reuse or deadline increase was introduced. Timing diagnostics
+  now select the saved reply for the corresponding lane.
+- Added regressions for absent/delayed peer startup, actuator bounds, continued
+  operation with an old unused peer snapshot, coordinated finishing, own-state
+  age/model/deadline faults and shared stop. Added actual mock dual bringup with
+  CBF disabled. Its safety status intentionally carries only the current arm's
+  source timestamp; the unused entry is zero rather than a claimed paired state.
+- Nine-package Release build and all 92 affected cases pass: 27 safety, 51
+  controller and 14 bringup, with zero failures/errors. Corrected a new test
+  fixture that initially applied 0.35 twice to already-scaled defaults; runtime
+  caps were unchanged. Source formatting, scoped diff whitespace and local
+  documentation link/anchor checks pass. Used isolated localhost ROS domain 137
+  and robot-free fixtures; no physical arm/Hand commands or operator YAML edits.
+  Build/test logs are under `/tmp/dual-actuator-*` in the ROS container.
+  Physical dual-arm callback timing still requires operator verification.
+
+### Persistent held-close demand independent of results (2026-10-22)
+
+- The owner clarified that a held grip must keep the closing demand active
+  independently of ordinary attempt success/failure. Refresh deadlines now
+  start at close dispatch, not after a failed/unfinished completion. The
+  existing `close_retry_interval_ms` setting is retained as the held-close
+  refresh period. A running move remains uninterrupted; once it ends, an
+  overdue refresh dispatches on the next worker check, without replaying missed
+  periods or overlapping calls.
+- Successful closure to zero no longer ends the held demand. Periodic live
+  readback skips redundant moves at the bound, but closes again if the gap
+  reopens during the same hold. Release, invalid/stale input and faults retain
+  cancellation behavior. Transport/state/stop errors do not become automatic
+  motion restarts. Position refreshes still do not command a specified force;
+  this change does not add force-based `grasp()` control.
+- Release build and all 50 affected cases pass: 37 Hand (24 core, 10 backend,
+  three ROS process) and 13 bringup, with zero failures/errors. Regressions
+  cover dispatch-based cadence, slow in-progress moves, healthy and failed
+  completion, zero-width refresh, a reopened gap under the same hold and
+  release cancellation. Source formatting, scoped diff whitespace and local
+  documentation links/anchors pass. Operator values, Android artifacts and
+  arm control remain unchanged. Used mocks/injected devices with ROS domain
+  137 and localhost-only discovery, without physical FCI/Hand access. Logs:
+  `/tmp/grip-persistent-*` in the ROS container. Sustained physical clamping
+  force is not established by these tests.
+
+### Repeated held-grip closing and command timing (2026-10-22)
+
+- Added repeated position-closing attempts while a fresh grip remains held and
+  the measured gap is above the lower width bound. The configurable
+  `hand.close_retry_interval_ms` defaults to 200 ms after completion; zero
+  disables retries. Attempts reuse width/speed and never overlap an active
+  move or stop. Release, input faults and shutdown cancel pending retries;
+  reaching the lower bound ends repetition. Existing fresh-release/repress and
+  double-click opening behavior remains available.
+- Unsuccessful close results and libfranka command exceptions may retry after
+  valid state readback. The API does not identify contact, so these are not
+  claimed as contact detections. Transport/protocol/unknown failures remain
+  faults even if a later state read succeeds. Failed stop acknowledgement
+  still invalidates calibration. Position retries do not command or measure
+  clamping force, and do not automatically increase speed or force.
+- Changed grip subscription depth from 20 to one latest queued sample. Release
+  dispatch precedes request logging and bypasses press debounce. Completion,
+  retry and watchdog polling defaults to 5 ms (previously 10 ms), configurable
+  with `hand.worker_poll_ms`. Added request source-age and operation/stop
+  completion durations to logs. These distinguish software delivery from the
+  downstream path without claiming physical stopping latency or a fixed-rate
+  Hand command stream. Documented timing checks and future sensor-based grip
+  regulation separately from operator haptic cues.
+- Nine-package Release build and all 78 affected cases pass: 36 Hand (23 core,
+  10 backend, three ROS process), 29 Quest/configuration and 13 bringup, with
+  zero failures/errors. Tests cover multiple blocked retries, release/fault/
+  shutdown cancellation, lower-bound termination, disabled retries, new-press
+  restart and driver error classification. Formatting, diff whitespace in the
+  changed source/docs and local documentation links/anchors pass. Existing
+  unrelated operator YAML values and Android artifacts were preserved. Used
+  injected devices/mocks, ROS domain 137 and localhost-only discovery; no
+  physical arm/Hand commands or APK rebuild. Logs: `/tmp/grip-repeat-*` in
+  the ROS container. Physical contact forces and stopping delay remain for
+  operator measurement.
+
+### Repeatable Hand gestures and persistent pause holding (2026-10-22)
+
+- Reproduced discarded grip presses arriving while a previous stop was still
+  finishing and a stale zero-width completion snapshot rejecting a new close
+  despite a nonzero live finger gap. Closing now reads current hardware width
+  before each move, never commands opening, and does nothing if already at the
+  configured lower bound. A new held press survives pending cancellation only
+  while it remains fresh and held; release, faults and watchdog expiry cancel
+  it. A new stable hold can interrupt automatic opening. Contact still does
+  not trigger automatic retry, force increases or movement through an object.
+- Grip buttons no longer depend on Cartesian pose tracking. Connection, focus,
+  grip-action availability, clock/freshness/order/session gates remain required.
+  Successful stop acknowledgement is retained if a subsequent redundant stop
+  throws, but subsequent movement still waits for both workers to finish.
+  Missing stop acknowledgement remains a fault requiring recalibration.
+  Added an injectable device adapter to verify these hardware-driver paths
+  without connecting to a physical Hand.
+- Extended the startup hold latch to pauses: ordinary Quest input faults keep
+  the parked joint reference and stiffness ramp. An input fault during engaged
+  teleoperation captures measured joints once and selects local holding.
+  Fresh release/re-engagement is still required. Safety fallback, invalid-state
+  termination, homing priority and shutdown remain unchanged. Gains, actuator
+  limits, payload settings and operator YAML values were not changed.
+- Nine-package Release build succeeds. All 120 affected robot-free cases pass:
+  31 Hand, 51 controller, 25 safety and 13 bringup, with zero failures/errors.
+  The new launch readiness check verifies a valid trigger release consumed by
+  the owner, since `position_hold` also applies before Quest is ready. Used
+  ROS domain 137 and localhost-only discovery; no physical FCI/Hand commands.
+  Logs are under `/tmp/pause-*` in the ROS container. Hardware stopping latency,
+  finger contact behavior and physical holding performance need operator
+  verification; mocks do not establish zero physical drift under all loads.
+
+### Preserve startup joint hold before Quest engagement (2026-10-22)
+
+- Reproduced a startup mode-selection defect: the production mapper publishes
+  invalid/disarmed watchdog commands before Quest is ready. `fault()` revoked
+  holding permission and reset the hold law, so an owner that initially selected
+  joint holding switched to Cartesian damping with no static restoring torque.
+  First-session/freshness faults could also reset the stiffness ramp or capture
+  a later, displaced configuration. Two new deterministic regressions fail on
+  the previous implementation, including a seven-joint synthetic displacement.
+- Added a separate local startup-hold latch. Before the first accepted motion
+  command or active homing, input validity/order/session/queue/freshness faults
+  still revoke engagement permission but preserve the first local joint anchor
+  and the progressing stiffness ramp. Fresh startup release messages also keep
+  that anchor. Invalid state, safety fallback and shutdown exit this startup
+  behavior; post-engagement input-fault damping remains unchanged. No gains,
+  torque limits, payload settings or operator YAML values were changed.
+- Added production mapper/mock-owner coverage for invalid tracking before
+  trigger release/engagement and updated transition tests to distinguish local
+  startup hold from post-engagement holding. Documented the startup exception
+  and expected `reason: position_hold`, `motion_enabled: false` status.
+- Release builds and all 88 affected robot-free cases pass: 50 controller,
+  25 safety and 13 bringup, with zero failures/errors. Formatting and local
+  documentation link/anchor checks pass. Safety and launch tests were explicitly
+  enabled because their existing operator build caches had `BUILD_TESTING=OFF`.
+  Development uses mock backends, ROS domain 137 and localhost-only discovery;
+  no physical arm/Hand connection is made. Logs: `/tmp/startup-hold-*` in the
+  ROS container. Robot-free tests establish mode selection and restoring torque,
+  not zero physical motion under arbitrary load/model errors or saturation.
+
+### Hold-to-close and double-click Hand control (2026-10-22)
+
+- Replaced the grip grasp/open toggle with debounced hold-to-close using
+  `move(close_width_m, speed_mps)`, immediate stop request on fresh release,
+  and automatic move to `open_width_m` after two short clicks. All widths are
+  full finger gaps. Default click duration is 50--200 ms and the first-release
+  to second-release interval is at most 350 ms; these settings are configurable
+  globally and per arm. Preserved the operator's speed/open widths and unrelated
+  runtime settings. Legacy grasp force/width/tolerance keys remain accepted for
+  old configs but no longer affect position closing.
+- Kept transport-neutral gesture handling in `hand_core`; extracted blocking
+  hardware/mock motion and cancellation into `hand_worker`. The stop worker
+  runs independently of the blocking move and ROS executor. Stop requests are
+  serialized against subsequent motion; repeated stop dispatch covers the
+  race where cancellation reaches the device before a just-starting move.
+  A failed/timed-out stop clears calibration and cannot launch deferred opening.
+  Modelled partial travel in the mock rather than teleporting on completion.
+- Invalid/stale/out-of-order/session/reference input and watchdog expiry stop
+  ordinary movement and clear pending gestures; held input cannot resume it.
+  Startup empty-hand calibration remains independent of Quest input. Shutdown
+  requests cancellation and joins both workers. Closing at or below the lower
+  bound cannot turn into opening; no automatic retry or force increase occurs.
+- Updated runtime schema, standalone/single/dual YAML, operation/state reporting,
+  README and architecture/runtime guides. Runtime configuration tests now use
+  a temporary mock copy instead of assuming operator-edited dual IPs are empty.
+  Initial tests exposed calibration being stopped by a stale pre-calibration
+  input; fixed the policy and added dedicated coverage.
+- Nine-package Release build passes. All 65 affected robot-free cases pass:
+  23 Hand (16 core, 4 backend, 3 ROS process), 29 Quest/configuration and
+  13 bringup; zero failures/errors. Used ROS domain 137 and localhost-only
+  discovery. Checked C++/Python formatting, local documentation links/anchors
+  and diff whitespace. No physical Hand/arm operation or APK rebuild occurred.
+  Real input/network/device stopping latency and position-closing contact
+  behavior remain operator validation; no exact force or instantaneous stop
+  guarantee is claimed. Logs are under `/tmp/grip-*` in the ROS container.
 
 ### Maintenance cleanup, formatting and documentation (2026-10-16)
 

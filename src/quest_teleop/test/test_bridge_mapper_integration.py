@@ -321,6 +321,29 @@ class BridgeMapperIntegrationTest(unittest.TestCase):
         self.assertEqual(list(self.right_states[-1].buttons), [])
         self.assertEqual(list(self.left_states[-1].buttons), [])
 
+    def test_joystick_click_is_forwarded_for_each_hand_and_requires_a_complete_pair(
+        self,
+    ):
+        self.connect()
+        for controller in ("right", "left"):
+            packet = self.packet(0.0, controller=controller)
+            packet["inputs"].update(thumbstick_click=True, thumbstick_click_active=True)
+            self.send(packet)
+            states = self.right_states if controller == "right" else self.left_states
+            self.wait_for(
+                lambda: any(s.sequence == int(packet["sequence"]) for s in states)
+            )
+            buttons = [(b.name, b.pressed, b.active) for b in states[-1].buttons]
+            self.assertIn(("thumbstick", True, True), buttons)
+            self.assertEqual(len(buttons), 3 if controller == "right" else 4)
+        malformed = self.packet(0.0)
+        malformed["inputs"]["thumbstick_click"] = False
+        before = len(self.right_states)
+        self.send(malformed)
+        self.wait_for(
+            lambda: any(not s.connection_valid for s in self.right_states[before:])
+        )
+
     def test_reject_bad_decimal_strings_and_cross_hand_buttons(self):
         mutations = [
             ("negative sequence", lambda p: p.update(sequence="-1")),

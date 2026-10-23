@@ -49,19 +49,9 @@ command builds the teleoperation pipeline, excluding the legacy Panda demos.
 Libfranka's own tests/examples default to off; an unused `BUILD_TESTING` warning
 from libfranka is harmless because that option controls the ROS packages.
 
-For subsequent sessions, **Host 1** opens the existing image:
-
-```bash
-cd ~/franka_teleoperation
-docker compose -f docker/compose.yaml run --rm --name franka-teleop panda-ros2
+To exist the container:
 ```
-
-Then **CONTAINER 1** sources the existing workspace; no rebuild is needed unless code changes:
-
-```bash
-cd /ws
-source /opt/ros/humble/setup.bash
-source install/setup.bash
+docker rm -f franka-teleop
 ```
 
 ## 2. Set the unified configuration
@@ -85,7 +75,7 @@ restart the launch after changing settings.
 | `quest.bridge` | USB receiver port, bind address, namespace and clock/freshness limits; retain port `45454` with the current Quest app |
 | `arms.<arm_name>` | Actual `robot_ip`, controller assignment, namespace/base frame, input/output topics, calibrated basis, scales, trigger thresholds and mapper timing |
 | `controller` | Impedance gains, actuator limits/rate, tool envelope and homing speed/gains/stop settings |
-| `hand` | Finger speed/force, object grasp width/tolerances, open width and input debounce; `-1.0` object values refuse grasp |
+| `hand` | Closing/opening speeds, widths, grip thresholds and input timing |
 | `cbf` | Torque/rate scales (always enforced), surveyed table height, clearances, obstacle spheres and solver failure limit |
 | `arm_settings.<arm_name>` | Per-arm controller/Hand overrides and `world_from_base_xyz_xyzw` transforms; names must match `arms` |
 | `recording` | `mode: menu/continuous`, namespace, Menu input/debounce, selected topics, output folder and storage plugin |
@@ -125,8 +115,23 @@ bash scripts/quest_adb_reverse.sh 45454
 bash scripts/quest_install.sh
 ```
 
+To enable teloperation without wearing the headset:
+```
+docker compose -f docker/android-compose.yaml run --rm quest-adb adb shell am broadcast -a com.oculus.vrpowermanager.prox_close
+```
+
+To recover teleoperation for wearing headset:
+```
+docker compose -f docker/android-compose.yaml run --rm quest-adb adb shell am broadcast -a com.oculus.vrpowermanager.automation_disabled
+```
+
 `adb devices` must list the authorized headset as `device`. The install helper
-also launches the app. For subsequent sessions, reuse the APK:
+also launches the app. Joystick opening requires the updated APK: older builds read joystick clicks locally
+but do not send them to ROS. Rebuild/reinstall after this update, rebuild all active
+ROS packages against the updated button message, and restart the pipeline. Older
+APK packets remain accepted for arm motion and side-grip closing.
+
+For subsequent sessions with the updated APK, reuse it:
 
 ```bash
 docker compose -f docker/android-compose.yaml up -d quest-adb-server
@@ -155,16 +160,37 @@ The file selects single/dual mode and every feature. Only one arm owner per
 robot and one USB receiver per port may run. Do not start overlapping standalone
 launches. The existing package name is `teleop_bringup`.
 
+Desk may show **end-effector not connected** while FCI owns the Hand; this is
+[expected during external control](https://github.com/frankarobotics/franka_ros/issues/118).
+Check `Arm control ready` and `Hand calibration ready` for **each** arm in the
+launch output. Firmware calibration success alone does not establish that the
+Hand worker accepted its readback. See
+[startup diagnostics](docs/TELEOPERATION_RUNTIME.md#launch-selection).
+
 | Quest action | Operation |
 | --- | --- |
 | Release trigger, then hold above its engage threshold (default 0.75) | Engage assigned arm at measured pose; controller motion changes its target |
 | Release below its release threshold (default 0.25) | Capture measured joints once and hold the whole arm configuration |
-| Fresh grip presses, releasing between presses | First post-calibration press opens; later presses alternate grasp/open |
+| Hold the assigned grip / release it | Close progressively / stop moving |
+| Click the assigned joystick once | Open automatically to `hand.open_width_m` at `hand.open_speed_mps` |
 | Right A / left X held at least one second, then released | Home assigned arm with trigger released and homing enabled |
 | Fresh left Menu presses | Start/stop an episode with `recording.mode: menu` |
 
 Ctrl+C stops bringup. Input loss/recenter requires trigger release/press before
 resuming. The manufacturer stop remains the physical emergency-stop mechanism.
+
+While grip remains held, its closing demand stays active and refreshes every
+`hand.close_retry_interval_ms` (default 200 ms; `0` disables refresh). This
+continues after success or an ordinary failed close, including at zero width;
+an active move runs uninterrupted and calls never overlap. Release
+cancels retries and requests stop immediately on receipt. Completion checks use
+`hand.worker_poll_ms` (default 1 ms); this is not the hardware command frequency.
+Repeated position commands do not guarantee gripping force. See
+[Hand timing and diagnostics](docs/TELEOPERATION_RUNTIME.md#command-timing-and-diagnosing-delay).
+If both joystick opening and further closing become unresponsive, inspect
+`gripper_events.calibrated` and `message`: a stop/device fault disables both
+until explicit empty-hand recalibration. See
+[Hand fault diagnosis and recovery](docs/TELEOPERATION_RUNTIME.md#when-joystick-opening-and-further-closing-both-stop-working).
 
 Normal trigger release selects joint position holding (`reason: position_hold`,
 `motion_enabled: false`). Hold stiffness ramps up over 0.25 s; joint damping
@@ -172,9 +198,12 @@ acts immediately, and all output still passes through the shared torque limits.
 Tune `controller.hold_stiffness` [Nm/rad], `hold_damping` [Nm s/rad] and
 `hold_stiffness_ramp_seconds` in the selected runtime YAML. These are finite
 impedance gains, not a mechanical lock; physical response needs commissioning.
-Invalid/stale input, safety fallback and shutdown retain damping rather than
-continuing an old hold target. Startup captures the initial configuration, and
-normal homing completion returns to measured hold with fresh input.
+Startup and pauses hold a fixed measured joint configuration independently of
+Quest readiness. Missing, invalid or stale input cannot discard that anchor
+or reset its stiffness ramp. Input loss during engagement captures measured
+joints once and holds there; fresh release/re-engagement is still required.
+Safety fallback, homing priority, invalid-state termination and shutdown retain
+their separate stop policy.
 
 Arm torque/rate caps default to **35% of Panda FCI ceilings**, with CBF enabled
 or disabled. Edit `cbf.torque_limit_scale` and `cbf.torque_rate_limit_scale`
@@ -302,3 +331,10 @@ Generated recordings, exports, reports and runtime logs live under ignored
 new recordings create their directories automatically. The reusable analysis
 code remains in `analysis/matlab/`. For formatting and robot-free validation,
 see [DEVELOPMENT.md](docs/DEVELOPMENT.md).
+
+Hand closing now uses position motion (`move`), with `stop` on release.
+`hand.close_width_m` sets the lower gap bound; `speed_mps` sets closing speed.
+A joystick press opens immediately after its input is received and any preceding
+stop completes. `open_speed_mps` sets opening speed independently (default 0.1 m/s);
+closing debounce defaults to zero. Legacy grasp and double-click settings are unused.
+See [Hand control details](docs/TELEOPERATION_RUNTIME.md#hand-position-control-and-joystick-opening).

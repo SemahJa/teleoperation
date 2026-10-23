@@ -23,6 +23,9 @@ Each arm publishes two `quest_teleop_interfaces/TrackingSample` topics:
 The torque callback copies fixed-size snapshots into a 1024-slot SPSC queue.
 A separate thread converts/publishes ROS messages; a slow monitor never blocks
 control. Overflow drops monitoring samples and increments `monitor_queue_drops`.
+The 100 Hz status publishers also run separately from Quest input and the
+mapper's measured-pose feedback. That pose feedback uses best-effort, depth-one
+QoS; recording and analysis still use the full-cycle `tracking_samples` stream.
 The default rosbag profile includes `tracking_samples`. Gaps in recorded cycle
 numbers expose missing samples; explicitly exporting the 100 Hz topic naturally
 omits intermediate control cycles. Neither ROS nor a bag is a lossless guarantee.
@@ -30,7 +33,8 @@ omits intermediate control cycles. Neither ROS nor a bag is a lossless guarantee
 Each sample includes:
 
 - Requested pose: mapped Quest pose in the robot base frame, before reference
-  shaping. The current controller has no pose interpolator.
+  shaping. Optional pose filtering/interpolation runs in the mapper; the
+  current bringup templates select no pose shaping.
 - Requested twist: mapped native/pose-derived blend **before** the mapper's
   low-pass filter. Reference twist: the filtered velocity supplied to the law.
   These are kinematic signals, not raw accelerometer/gyroscope readings.
@@ -87,10 +91,14 @@ fixture and does not simulate robot dynamics, sensors or downstream processing.
 Normal trigger release now captures the measured joint configuration once and
 holds it with configurable joint stiffness/damping. `reason: position_hold`
 identifies that mode; `motion_enabled=false` still means Quest teleoperation is
-disengaged. Startup also captures the measured configuration. Fault/stale-input
-and shutdown behavior remains damping. The hold reference is fixed until a mode
-transition; it does not follow each new measured sample. All laws share the same
-final safety path. The new `controller.hold_stiffness`, `hold_damping` and
+disengaged. Startup and pauses retain a fixed local anchor through ordinary
+Quest input faults. A fault during engagement captures measured joints once
+and switches to local holding, with fresh release/re-engagement still required.
+This appears as `reason: position_hold` while input is unavailable. Safety
+fallback, shutdown and invalid-state termination retain their separate stop
+policy. The hold reference is fixed until a mode transition; it does not follow
+each new measured sample. All laws share the same final safety path.
+The `controller.hold_stiffness`, `hold_damping` and
 `hold_stiffness_ramp_seconds` settings are in both runtime templates.
 
 Measured pose, twist and all four torques continue recording during position
@@ -319,3 +327,14 @@ derivative estimates to explain events, alongside task time, corrective hand
 movements and operator feedback. Accurate tracking of a filtered reference can
 coexist with poor responsiveness to the operator. Smoothing or gain changes are
 not performed automatically by this pipeline.
+
+For overshoot while the trigger remains held, inspect only intervals with
+`motion_enabled=true`, `cartesian_reference_valid=true` and no fallback. Compare
+the requested, reference and measured pose around each movement stop, then
+reference/measured twist, command age and torque magnitude/rate flags. A
+stationary reference pose with a still-moving reference twist indicates
+reference-path lag or inconsistency; oscillatory measured pose after both
+references settle is evidence for investigating task damping/dynamics. Joint
+motion with little Cartesian motion is a separate nullspace diagnostic. The
+current Cartesian law has no explicit nullspace damping or posture term. See
+[controller damping](PACKAGE_STRUCTURE.md#damping-and-nullspace-behavior-during-engagement).

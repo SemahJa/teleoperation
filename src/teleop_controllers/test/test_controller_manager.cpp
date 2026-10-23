@@ -9,8 +9,8 @@
 #include "teleop_controllers/cartesian_impedance_controller.hpp"
 #include "teleop_controllers/controller_manager.hpp"
 #include "teleop_controllers/damping_controller.hpp"
-#include "teleop_controllers/position_hold_controller.hpp"
 #include "teleop_controllers/orientation_only_controller.hpp"
+#include "teleop_controllers/position_hold_controller.hpp"
 namespace ft = teleop_controllers;
 namespace sf = safety_filter;
 namespace {
@@ -103,7 +103,7 @@ TEST(Manager, StaleTargetIsRemovedAndPacketsCannotResume) {
   s.previous_torque[0] = 5;
   const auto out = core.update(s, now + 100000003, .001);
   EXPECT_FALSE(out.motion_enabled);
-  EXPECT_EQ(out.reason, ft::Reason::stale);
+  EXPECT_EQ(out.reason, ft::Reason::position_hold);
   EXPECT_EQ(out.target_position, s.position);
   EXPECT_EQ(out.desired_twist, ft::Vector6::Zero());
   EXPECT_TRUE(out.nominal.isZero());
@@ -497,18 +497,20 @@ TEST(Manager, ReleaseCapturesMeasuredJointsOnceAndHoldsTheUnobservedSeventhJoint
   EXPECT_NEAR(core.update(s, stamp + 1, .001).nominal[6], -75 * .03, 1e-12);
 }
 
-TEST(Manager, FaultsDropTheHoldAndFreshReleaseCapturesANewConfiguration) {
+TEST(Manager, InputFaultsPreserveTheHoldAndFreshReleaseCannotRecaptureIt) {
   Fixture core;
   auto s = state();
-  core.accept(command(1, false, true), now + 1);
-  ASSERT_TRUE(core.update(s, now + 1, .001).position_hold_active);
+  arm(core);
+  ASSERT_TRUE(core.update(s, now + 2, .001).motion_enabled);
+  core.accept(command(3, false, true), now + 3);
+  ASSERT_TRUE(core.update(s, now + 3, .001).position_hold_active);
   s.q[0] = .1;
-  auto out = core.update(s, now + 100000002, .001);
-  EXPECT_EQ(out.reason, ft::Reason::stale);
-  EXPECT_FALSE(out.position_hold_active);
-  EXPECT_TRUE(out.nominal.isZero());  // Fault damping, no old restoring target.
-  auto c = command(2, true);
-  c.source_ns = c.receipt_ns = now + 100000003;
+  auto out = core.update(s, now + 100000004, .001);
+  EXPECT_EQ(out.reason, ft::Reason::position_hold);
+  EXPECT_TRUE(out.position_hold_active);
+  EXPECT_LT(out.nominal[0], 0);  // Restore the parked configuration.
+  auto c = command(4, true);
+  c.source_ns = c.receipt_ns = now + 100000005;
   core.accept(c, c.source_ns);
   EXPECT_FALSE(core.update(s, c.source_ns, .001).motion_enabled);
   c.sequence++;
@@ -519,7 +521,7 @@ TEST(Manager, FaultsDropTheHoldAndFreshReleaseCapturesANewConfiguration) {
   core.accept(c, c.source_ns);
   out = core.update(s, c.source_ns, .001);
   EXPECT_TRUE(out.position_hold_active);
-  EXPECT_TRUE(out.nominal.isZero());  // New configuration captured, not q=0.
+  EXPECT_LT(out.nominal[0], 0);  // Fresh release cannot follow displaced joints.
   core.manager.fault(ft::Reason::invalid_command);
   core.manager.fault(ft::Reason::homing);  // Arbitration cannot erase the fault gate.
   EXPECT_FALSE(core.update(s, c.source_ns + 1, .001).position_hold_active);
@@ -539,9 +541,9 @@ TEST(Manager, HoldingRecapturesAfterTeleoperationAndReturnsItsOwnership) {
   EXPECT_EQ(hold.resets, 1);
   manager.accept(command(1, false, true), now + 1);
   manager.update(s, now + 1, .001);
-  EXPECT_EQ(hold.resets, 2);  // First session invalidates the startup anchor.
+  EXPECT_EQ(hold.resets, 1);  // Quest readiness cannot move the startup anchor.
   manager.update(s, now + 2, .001);
-  EXPECT_EQ(hold.resets, 2);
+  EXPECT_EQ(hold.resets, 1);
   manager.accept(command(2, true), now + 2);
   auto out = manager.update(s, now + 2, .001).control;
   EXPECT_TRUE(out.motion_enabled);
@@ -549,7 +551,7 @@ TEST(Manager, HoldingRecapturesAfterTeleoperationAndReturnsItsOwnership) {
   EXPECT_EQ(law.calls, 1);
   manager.accept(command(3, false, true), now + 3);
   EXPECT_TRUE(manager.update(s, now + 3, .001).control.position_hold_active);
-  EXPECT_EQ(hold.resets, 3);
+  EXPECT_EQ(hold.resets, 2);
 }
 
 TEST(PositionHold, StiffnessRampsAndJointDampingAndCoriolisArePreserved) {
@@ -590,4 +592,79 @@ TEST(PositionHold, InvalidParametersAndReferencesAreRejected) {
   ft::JointReference reference;
   reference.position[0] = std::numeric_limits<double>::infinity();
   EXPECT_EQ(hold.compute(state(), reference, .001).fault, ft::StateFault::invalid_reference);
+}
+
+TEST(Manager, StartupHoldSurvivesMissingInvalidAndStaleQuestInputWithoutFollowingDrift) {
+  Fixture core;
+  auto s = state();
+  auto out = core.update(s, now, .001);
+  ASSERT_TRUE(out.position_hold_active);
+  // The mapper watchdog emits invalid disarmed commands until Quest is ready.
+  // Disturb all seven joints while no operator has ever requested movement.
+  const ft::Vector7 displacement = ft::Vector7::Constant(.01);
+  s.q += displacement;
+  s.position.x() += .01;
+  for (int n = 1; n <= 400; ++n) {
+    auto c = command(n, false);
+    c.valid = false;
+    c.source_ns = c.receipt_ns = now + n * 1000000;
+    core.accept(c, c.receipt_ns);
+    out = core.update(s, c.receipt_ns, .001);
+    ASSERT_TRUE(out.position_hold_active) << n;
+    EXPECT_FALSE(out.motion_enabled);
+  }
+  const ft::PositionHoldParameters gains;
+  EXPECT_TRUE(out.nominal.isApprox(-gains.stiffness.cwiseProduct(displacement)));
+  EXPECT_NEAR(out.target_position.x(), .4, 1e-12);
+  auto released = command(401, false, true);
+  released.source_ns = released.receipt_ns = now + 401000000;
+  core.accept(released, released.receipt_ns);
+  out = core.update(s, released.receipt_ns, .001);
+  EXPECT_TRUE(out.nominal.isApprox(-gains.stiffness.cwiseProduct(displacement)));
+  // Repeated stale/fault processing must neither recapture q nor restart ramp.
+  for (int n = 1; n < 50; ++n) {
+    out = core.update(s, released.receipt_ns + 200000000 + n * 1000000, .001);
+    ASSERT_TRUE(out.position_hold_active);
+    EXPECT_TRUE(out.nominal.isApprox(-gains.stiffness.cwiseProduct(displacement)));
+  }
+}
+
+TEST(Manager, StartupSessionAndQueueFaultsCannotMoveTheLocalHoldAnchor) {
+  ProbeController law, hold;
+  ft::DampingController damping(20, 2.5);
+  ft::ControllerManager manager({}, {}, law, hold, damping);
+  auto s = state();
+  manager.update(s, now, .001);
+  ASSERT_EQ(hold.resets, 1);
+  const ft::Reason reasons[] = {ft::Reason::invalid_command, ft::Reason::stale, ft::Reason::order,
+                                ft::Reason::session_change, ft::Reason::queue_overflow};
+  for (auto reason : reasons) {
+    manager.fault(reason);
+    EXPECT_TRUE(manager.update(s, now + 1, .001).control.position_hold_active);
+    EXPECT_EQ(hold.resets, 1);
+  }
+  manager.accept(command(1, true), now + 1);  // Startup-held trigger is not permission.
+  EXPECT_FALSE(manager.update(s, now + 1, .001).control.motion_enabled);
+  EXPECT_EQ(hold.resets, 1);
+  manager.safety_fallback();
+  EXPECT_FALSE(manager.update(s, now + 2, .001).control.position_hold_active);
+}
+TEST(Manager, PausedHoldSurvivesTrackingFaultAndStalenessWithoutRecapture) {
+  Fixture f;
+  auto s = state();
+  arm(f);
+  f.update(s, now + 2, .001);
+  f.accept(command(3, false, true), now + 3);
+  f.update(s, now + 3, .001);
+  s.q[6] = .02;
+  for (int i = 0; i < 400; ++i) {
+    auto c = command(4 + i, false);
+    c.valid = false;
+    c.source_ns = c.receipt_ns = now + 4000000 + i * 1000000;
+    f.accept(c, c.receipt_ns);
+    const auto out = f.update(s, c.receipt_ns, .001);
+    ASSERT_TRUE(out.position_hold_active);
+    EXPECT_FALSE(out.motion_enabled);
+  }
+  EXPECT_NEAR(f.update(s, now + 500000000, .001).nominal[6], -1.5, 1e-10);
 }

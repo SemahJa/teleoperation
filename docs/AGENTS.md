@@ -1,5 +1,76 @@
 # Teleoperation implementation policy
 
+## Joystick opening and responsive Hand control override (2026-10-23)
+
+The owner now requests one joystick press on each assigned Quest controller to
+open its Hand, replacing side-grip double-click opening. Keep hold-grip closing
+and release-to-stop, persistent held-close refreshes, fresh release gates and
+fault handling. Minimize software delay: press-edge opening, zero default close
+debounce, separate opening speed, prompt completion collection, and diagnostics
+outside input processing. Updating the native packet serializer, ROS bridge and
+button message bound is necessary and authorized by this mapping change; retain
+other Android behavior and existing Docker definitions. Validate with mocks and
+build the APK without installing it or operating physical devices. Firmware and
+mechanical latency must not be represented as an instantaneous guarantee.
+
+## Dual actuator-only startup correction (2026-10-22)
+
+The reported dual launch stopped on first-cycle `result_deadline` with CBF
+disabled. Actuator-only filtering must not wait for another robot's callback:
+service each current arm snapshot independently while retaining model validity,
+own-cycle/age/deadline checks, actuator bounds, shared fault stop and coordinated
+finishing. CBF-enabled dual filtering retains coupled fresh-state/skew checks.
+This is not asynchronous CBF result reuse. Validate without physical FCI access.
+
+## Persistent held-close demand override (2026-10-22)
+
+The owner clarifies that held grip must maintain a continuous closing demand,
+not start a delay only after a failed attempt. Refresh on a cadence measured
+from close dispatch, regardless of success/failure or reaching the lower bound.
+Leave an in-progress move running; serialize firmware calls rather than
+interrupting them on every refresh. Preserve release/fault cancellation and
+robot-free validation. Position refreshes do not establish force regulation.
+
+## Held-grip closing retries override (2026-10-22)
+
+The owner explicitly requests repeated closing attempts while a fresh grip
+remains held, including when an object prevents reaching zero width. This
+supersedes historical no-automatic-retry policies for ordinary close attempts.
+Use a configurable interval, serialize moves/stops, and cancel pending retries
+on release or input faults. Do not retry transport/state/stop faults or raise
+force automatically. Preserve startup calibration and robot-free validation.
+
+## Pause holding and repeatable grip override (2026-10-22)
+
+The owner reports grip/release unreliability and arm drift between trigger holds.
+Keep a fixed local joint hold through ordinary input faults during pauses and
+capture measured joints once if input fails during engagement; require fresh
+release/re-engagement without chasing old Quest targets. This supersedes the
+startup-only exception below. Preserve safety fallback, invalid-state termination,
+homing priority and shutdown. Grip control follows fresh button availability
+independently of pose tracking; latest held intent may continue after a pending
+stop only while it remains fresh and held. Release/fault cancels that intent.
+Validate using mocks/injected devices, without physical robot access.
+
+## Startup position hold override (2026-10-22)
+
+The owner reports drift before any Quest input and requests its prevention.
+Until the first authorized teleoperation/homing motion, keep the initial local
+joint hold independent of Quest readiness. Missing/invalid/stale input must not
+disable this hold, recapture its anchor, or reset its stiffness ramp. This is
+an exception to historical input-fault damping during startup only. Preserve
+engagement gates, post-engagement fault behavior, safety bounds/fallback,
+invalid-state termination and shutdown; validate without physical robot access.
+
+## Hand gesture override (2026-10-22)
+
+The owner requests hold grip to close, release to stop, and double-click grip
+to open to the configured width. This supersedes historical grasp/open toggles
+and the policy that input loss cannot cancel a Hand operation. Stop ordinary
+finger motion on invalid/stale input; preserve startup empty-hand calibration,
+explicit hardware confirmation and robot-free agent validation. Closing uses
+position motion; legacy force/tolerance keys are compatibility-only.
+
 ## Current maintenance scope (2026-10-16)
 
 The owner authorized deletion of existing logs, raw recordings and generated

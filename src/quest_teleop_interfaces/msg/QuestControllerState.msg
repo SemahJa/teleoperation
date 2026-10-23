@@ -29,6 +29,6 @@ float32 trigger_value
 bool trigger_active
 float32 grip_value
 bool grip_active
-# Only this controller's physical buttons: right a/b; left x/y/menu.
+# Only this controller's physical buttons: right thumbstick/a/b; left thumbstick/x/y/menu.
 # Disconnect notifications carry an empty array with connection_valid=false.
-QuestButtonState[<=3] buttons
+QuestButtonState[<=4] buttons

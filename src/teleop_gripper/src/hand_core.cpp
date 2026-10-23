@@ -1,20 +1,67 @@
 #include "teleop_gripper/hand_core.hpp"
 
+#include <algorithm>
+#include <cmath>
+
 namespace teleop_gripper {
+bool valid_hand_feedback(double width, double maximum) noexcept {
+  return std::isfinite(width) && std::isfinite(maximum) && maximum > 0 &&
+         width >= -kWidthReadbackTolerance && width <= maximum + kWidthReadbackTolerance;
+}
 bool HandParameters::valid() const noexcept {
-  const double values[] = {press,      release,     speed,         force,
-                           open_width, grasp_width, epsilon_inner, epsilon_outer};
-  for (auto v : values)
-    if (!std::isfinite(v))
-      return false;
-  return release >= 0 && press > release && press <= 1 && speed > 0 && force > 0 &&
-         (open_width == -1 || open_width >= 0) && (grasp_width == -1 || grasp_width >= 0) &&
-         (epsilon_inner == -1 || epsilon_inner >= 0) &&
-         (epsilon_outer == -1 || epsilon_outer >= 0) && debounce_ns > 0 && timeout_ns > 0 &&
-         timeout_ns <= 100000000 && uncertainty_ns > 0 && uncertainty_ns <= 10000000;
+  return std::isfinite(press) && std::isfinite(release) && release >= 0 && press > release &&
+         press <= 1 && std::isfinite(speed) && speed > 0 && std::isfinite(open_speed) &&
+         open_speed > 0 && std::isfinite(open_width) && (open_width == -1 || open_width > 0) &&
+         std::isfinite(close_width) && close_width >= 0 &&
+         (open_width == -1 || close_width < open_width) && debounce_ns <= 100000000 &&
+         timeout_ns > 0 && timeout_ns <= 100000000 && uncertainty_ns > 0 &&
+         uncertainty_ns <= 10000000 &&
+         (close_retry_ns == 0 || (close_retry_ns >= 50000000 && close_retry_ns <= 10000000000ULL));
+}
+void HandCore::reset_input() noexcept {
+  need_release_ = true;
+  pressed_ = consumed_ = false;
+  press_start_ns_ = 0;
+  open_down_ = false;
+  open_release_required_ = true;
+  open_after_stop_ = false;
+  close_after_stop_ = false;
+  retry_due_ns_ = 0;
+}
+HandRequest HandCore::interrupt() noexcept {
+  if (!busy() || stopping_)
+    return {};
+  stopping_ = true;
+  message_ = "stop requested";
+  return {HandOperation::stop};
+}
+HandRequest HandCore::start(HandOperation operation, uint64_t now) noexcept {
+  if (!calibrated_ || busy())
+    return {};
+  const double open = p_.open_width == -1 ? maximum_width_ : p_.open_width;
+  if (open > maximum_width_ || p_.close_width >= open) {
+    message_ = "configured widths exceed calibrated travel or close width is not below open width";
+    return {};
+  }
+  // width_ is a completion snapshot, not live feedback. The backend must read
+  // current width and clamp a close target so stale feedback cannot block a
+  // fresh press or accidentally command opening.
+  operation_ = operation;
+  // Held grip is a persistent goal, not a failure-triggered retry. Arm its
+  // next refresh when a close starts. A still-running move keeps that goal
+  // active without interruption; the overdue refresh runs once it completes.
+  retry_due_ns_ =
+      operation == HandOperation::close && p_.close_retry_ns ? now + p_.close_retry_ns : 0;
+  message_ =
+      operation == HandOperation::close ? "closing while grip held" : "joystick-click opening";
+  return {operation, operation == HandOperation::close ? p_.close_width : open,
+          operation == HandOperation::close ? p_.speed : p_.open_speed};
 }
 HandRequest HandCore::input(const GripInput& c, uint64_t now) noexcept {
-  HandRequest request;
+  if (operation_ == HandOperation::calibrate) {
+    reset_input();
+    return {};  // Empty-hand calibration is independent of Quest input.
+  }
   const bool fresh =
       c.source_ns > 0 &&
       (c.source_ns <= now ? now - c.source_ns <= p_.timeout_ns : c.source_ns - now <= 10000000) &&
@@ -22,125 +69,176 @@ HandRequest HandCore::input(const GripInput& c, uint64_t now) noexcept {
   if (!c.valid || !fresh || !std::isfinite(c.value) || c.value < 0 || c.value > 1 ||
       c.session[0] == '\0') {
     reset_input();
-    message_ = "invalid/stale grip input; release required";
-    return request;
+    const auto stop = interrupt();
+    message_ = "invalid/stale grip input; stop requested if moving; release required";
+    return stop;
   }
   if (!identity_ || c.session != last_.session || c.generation != last_.generation) {
     reset_input();
     identity_ = true;
     last_ = GripInput{};
+    const auto stop = interrupt();
+    if (stop.operation != HandOperation::none) {
+      last_ = c;
+      return stop;
+    }
   }
-  if (last_.source_ns && (c.sequence <= last_.sequence || c.source_ns <= last_.source_ns)) {
+  if (last_.source_ns && (c.sequence <= last_.sequence || c.source_ns <= last_.source_ns ||
+                          c.source_ns - last_.source_ns > p_.timeout_ns)) {
     reset_input();
-    message_ = "out-of-order grip input; release required";
-    return request;
+    const auto stop = interrupt();
+    message_ = "grip order/gap fault; release required";
+    // Keep the watermark on out-of-order input, advance on a forward gap.
+    if (c.sequence > last_.sequence && c.source_ns > last_.source_ns)
+      last_ = c;
+    return stop;
   }
-  if (last_.source_ns && c.source_ns - last_.source_ns > p_.timeout_ns)
-    reset_input();
   last_ = c;
+  // Each available joystick needs a fresh released sample after startup/fault.
+  // The press edge opens immediately; no click-duration or release wait.
+  const bool open_edge = c.open_active && c.open_pressed && !open_down_ && !open_release_required_;
+  if (!c.open_active) {
+    open_release_required_ = true;
+    open_down_ = false;
+  } else {
+    if (!c.open_pressed)
+      open_release_required_ = false;
+    open_down_ = c.open_pressed;
+  }
+  if (open_edge && calibrated_) {
+    retry_due_ns_ = 0;
+    need_release_ = true;  // A held side grip cannot reverse this opening.
+    pressed_ = consumed_ = close_after_stop_ = false;
+    if (operation_ == HandOperation::open)
+      return {};
+    if (busy()) {
+      open_after_stop_ = true;
+      return interrupt();
+    }
+    return start(HandOperation::open, now);
+  }
+  if ((!c.grip_active && operation_ == HandOperation::close) ||
+      (!c.open_active && operation_ == HandOperation::open)) {
+    reset_input();
+    return interrupt();
+  }
+  if (!c.grip_active) {
+    need_release_ = true;
+    pressed_ = consumed_ = close_after_stop_ = false;
+    retry_due_ns_ = 0;
+    return {};
+  }
   if (c.value <= p_.release) {
+    retry_due_ns_ = 0;
+    close_after_stop_ = false;
     need_release_ = false;
+    pressed_ = consumed_ = false;
     press_start_ns_ = 0;
-    return request;
+    if (operation_ == HandOperation::close)
+      return interrupt();
+    return {};
   }
   if (need_release_)
-    return request;
-  if (c.value < p_.press) {
-    press_start_ns_ = 0;
-    return request;
-  }
-  if (!press_start_ns_) {
+    return {};
+  if (!pressed_) {
+    if (c.value < p_.press)
+      return {};
+    pressed_ = true;
     press_start_ns_ = c.source_ns;
-    return request;
+    consumed_ = false;
   }
-  if (c.source_ns - press_start_ns_ < p_.debounce_ns)
-    return request;
-  // Consume every qualifying gesture, even when disabled or busy. Never queue
-  // it or fire it later when calibration/another operation finishes.
-  reset_input();
-  if (busy_) {
-    message_ = "grip press ignored while busy";
-    return request;
-  }
-  if (!calibrated_) {
-    message_ = "grip press rejected: calibration required";
-    return request;
-  }
-  request.speed = p_.speed;
-  request.force = p_.force;
-  if (state_ == HandState::open) {
-    if (p_.grasp_width < 0 || p_.epsilon_inner < 0 || p_.epsilon_outer < 0 ||
-        p_.grasp_width > maximum_width_) {
-      message_ = "configure object width and grasp tolerances before grasping";
-      return request;
+  if (!consumed_ && c.source_ns - press_start_ns_ >= p_.debounce_ns) {
+    consumed_ = true;
+    if (busy()) {
+      // Keep only the current, fresh held intent. Release/fault/watchdog clears
+      // it; historical clicks are never replayed as later close commands.
+      close_after_stop_ = true;
+      open_after_stop_ = false;
+      return interrupt();
     }
-    request.operation = HandOperation::grasp;
-    request.width = p_.grasp_width;
-    request.epsilon_inner = p_.epsilon_inner;
-    request.epsilon_outer = p_.epsilon_outer;
-  } else {
-    request.operation = HandOperation::open;
-    request.width = p_.open_width == -1 ? maximum_width_ : p_.open_width;
-    if (request.width > maximum_width_) {
-      message_ = "configured open width exceeds calibrated maximum";
-      return HandRequest{};
-    }
+    return start(HandOperation::close, now);
   }
-  busy_ = true;
-  message_ = "operation started";
-  return request;
+  return {};
 }
 HandRequest HandCore::calibrate(bool empty_hand, bool confirmed) noexcept {
-  if (!empty_hand || !confirmed) {
-    message_ = "calibration requires explicit empty-hand and operator confirmation";
+  if (!empty_hand || !confirmed || busy()) {
+    message_ = "calibration requires both confirmations and an idle worker";
     return {};
   }
-  if (busy_) {
-    message_ = "calibration rejected while busy";
-    return {};
-  }
-  busy_ = true;
+  reset_input();
   calibrated_ = false;
   state_ = HandState::unknown;
-  reset_input();
+  operation_ = HandOperation::calibrate;
   message_ = "calibration started";
-  HandRequest request;
-  request.operation = HandOperation::calibrate;
-  return request;
+  return {operation_};
 }
-void HandCore::complete(HandOperation operation, bool success, bool communication_ok, double width,
-                        double maximum) noexcept {
-  busy_ = false;
-  const bool valid = communication_ok && std::isfinite(width) && width >= 0 &&
-                     std::isfinite(maximum) && maximum > 0 && width <= maximum + 1e-6;
-  if (!valid) {
+HandRequest HandCore::complete(HandOperation operation, bool success, bool communication_ok,
+                               double width, double maximum, uint64_t now,
+                               bool retryable) noexcept {
+  const bool stopped = stopping_;
+  const bool reopen = open_after_stop_;
+  const bool reclose = close_after_stop_ && pressed_ && !need_release_;
+  operation_ = HandOperation::none;
+  stopping_ = open_after_stop_ = false;
+  close_after_stop_ = false;
+  if (!communication_ok || !valid_hand_feedback(width, maximum)) {
     calibrated_ = false;
     state_ = HandState::unknown;
     reset_input();
-    message_ = "Hand communication/state fault; no retry, explicit calibration required";
-    return;
+    message_ = "Hand communication/state fault; explicit calibration required";
+    return {};
   }
-  width_ = width;
+  width_ = std::clamp(width, 0., maximum);
   maximum_width_ = maximum;
-  if (!success) {
-    state_ = HandState::unknown;
+  const bool repeat_close = operation == HandOperation::close && !stopped &&
+                            (success || retryable) && calibrated_ && pressed_ && !need_release_ &&
+                            p_.close_retry_ns;
+  if (repeat_close) {
+    // Keep the existing cadence after success, failure, or reaching the lower
+    // bound. Periodic live readback can detect a later reopened finger gap.
+    state_ = success ? HandState::closed : HandState::unknown;
+    message_ = "grip held; closing demand remains active";
+    return {};
+  }
+  if (!success || (stopped && operation == HandOperation::calibrate)) {
     if (operation == HandOperation::calibrate)
       calibrated_ = false;
-    message_ = "operation failed; no retry or force increase; next deliberate press opens";
-    return;
+    state_ = HandState::unknown;
+    reset_input();
+    message_ = "operation failed or calibration stopped; no automatic retry";
+    return {};
   }
   if (operation == HandOperation::calibrate) {
     calibrated_ = true;
+    reset_input();
     state_ = HandState::unknown;
-    message_ = "calibrated; next deliberate grip press opens";
+    message_ = "calibrated; release grip before closing";
   } else {
-    state_ = operation == HandOperation::open ? HandState::open : HandState::grasped;
-    message_ = operation == HandOperation::open ? "open completed" : "grasp completed";
+    state_ = stopped ? HandState::stopped
+                     : (operation == HandOperation::open ? HandState::open : HandState::closed);
+    message_ = stopped ? "motion stopped"
+                       : (operation == HandOperation::open ? "open completed" : "close completed");
   }
+  if (reopen)
+    return start(HandOperation::open, now);
+  if (reclose)
+    return start(HandOperation::close, now);
+  return {};
 }
-void HandCore::watchdog(uint64_t now) noexcept {
+HandRequest HandCore::watchdog(uint64_t now) noexcept {
+  if (operation_ == HandOperation::calibrate)
+    return {};
   if (last_.source_ns && (now >= last_.source_ns ? now - last_.source_ns > p_.timeout_ns
-                                                 : last_.source_ns - now > 10000000))
-    reset_input();  // Does not cancel/alter any already-issued Hand operation.
+                                                 : last_.source_ns - now > 10000000)) {
+    reset_input();
+    return interrupt();
+  }
+  if (retry_due_ns_ && now >= retry_due_ns_ && !busy() && calibrated_ && pressed_ && !need_release_)
+    return start(HandOperation::close, now);
+  return {};
+}
+HandRequest HandCore::shutdown() noexcept {
+  reset_input();
+  return interrupt();
 }
 }  // namespace teleop_gripper

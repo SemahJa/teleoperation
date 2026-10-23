@@ -7,6 +7,7 @@ import time
 import rclpy
 from geometry_msgs.msg import PoseStamped
 from rclpy.node import Node
+from rclpy.qos import QoSProfile, ReliabilityPolicy
 from quest_teleop_interfaces.msg import CartesianTeleopCommand, QuestControllerState
 from quest_teleop.trajectory_processing import TrajectoryProcessor
 
@@ -179,7 +180,10 @@ class PoseMapper(Node):
             QuestControllerState, self.state_topic, self.on_state, 20
         )
         self.create_subscription(
-            PoseStamped, self.pose_topic, self.on_measured_pose, 10
+            PoseStamped,
+            self.pose_topic,
+            self.on_measured_pose,
+            QoSProfile(depth=1, reliability=ReliabilityPolicy.BEST_EFFORT),
         )
         self.create_timer(0.02, self.watchdog)
         self.measured = None
@@ -399,8 +403,10 @@ class PoseMapper(Node):
         ap, aq = self.anchor_controller
         rp, rq = self.anchor_robot
         dp = qrotate(self.basis, vec_sub(p, ap))
-        target_p = rp if self.orientation_only else vec_add(
-            rp, vec_scale(dp, self.translation_scale)
+        target_p = (
+            rp
+            if self.orientation_only
+            else vec_add(rp, vec_scale(dp, self.translation_scale))
         )
         relative = qmul(q, qconj(aq))
         mapped = qmul(qmul(self.basis, relative), qconj(self.basis))

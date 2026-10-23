@@ -1,6 +1,7 @@
 #include <gtest/gtest.h>
 
 #include <chrono>
+#include <thread>
 
 #include "safety_filter/panda_limits.hpp"
 #include "safety_filter/panda_model_fixture.hpp"
@@ -211,6 +212,105 @@ TEST(Coordinator, DisabledCbfRetainsActuatorBoundsAndInvalidModelStop) {
   c.submit(0, r);
   ASSERT_TRUE(c.pump());
   EXPECT_EQ(c.stopped(), ft::SafetyStop::invalid_model);
+}
+
+TEST(Coordinator, DisabledDualCbfDoesNotWaitForPeerStartupButStillCoordinatesFinish) {
+  ft::SafetyCoordinator c;
+  ft::CoordinatorParameters p;
+  p.active = {true, true};
+  p.filter_deadline_ns = 100000000;
+  p.result_deadline_ns = 200000000;
+  ft::cbf::SafetyParameters s;
+  s.active_arms = p.active;
+  s.enabled = false;
+  s.maximum_joint_torque = ft::panda_torque_limits(.35);
+  s.maximum_torque_rate = ft::panda_torque_rate_limit(.35);
+  std::string error;
+  ASSERT_TRUE(c.configure(p, s, ids(), &error)) << error;
+  auto left = request(now());
+  left.nominal.setConstant(100);
+  c.submit(0, left);
+  ASSERT_TRUE(c.pump());  // The right owner has not entered its first callback.
+  ft::SafetyReply reply;
+  ASSERT_TRUE(c.receive(0, reply));
+  EXPECT_TRUE(c.accepts(0, left.cycle, left.stamp_ns, now(), reply));
+  EXPECT_STREQ(reply.result.solver_status, "disabled_actuator_bounds_only");
+  EXPECT_TRUE(reply.result.safe_torque.head<7>().isConstant(.35, 1e-10));
+  EXPECT_TRUE(reply.result.safe_torque.tail<7>().isZero());
+  EXPECT_EQ(reply.cycles[1], 0u);
+  EXPECT_EQ(reply.source_ns[1], 0u);
+  EXPECT_FALSE(reply.finish);
+  EXPECT_FALSE(c.receive(1, reply));
+
+  // A peer can start after the old left snapshot's age limit. Its own fresh
+  // actuator check needs no stale peer model and does not refresh that peer.
+  std::this_thread::sleep_for(std::chrono::milliseconds(3));
+  auto right = request(now());
+  right.nominal.setConstant(-100);
+  c.submit(1, right);
+  ASSERT_TRUE(c.pump());
+  ASSERT_TRUE(c.receive(1, reply));
+  EXPECT_TRUE(c.accepts(1, right.cycle, right.stamp_ns, now(), reply));
+  EXPECT_TRUE(reply.result.safe_torque.tail<7>().isConstant(-.35, 1e-10));
+  EXPECT_FALSE(c.receive(0, reply));
+  EXPECT_EQ(c.stopped(), ft::SafetyStop::none);
+
+  left = request(now(), 2);
+  left.finish_requested = true;
+  c.submit(0, left);
+  ASSERT_TRUE(c.pump());
+  ASSERT_TRUE(c.receive(0, reply));
+  EXPECT_FALSE(reply.finish);
+  right = request(now(), 2);
+  right.finish_requested = true;
+  c.submit(1, right);
+  ASSERT_TRUE(c.pump());
+  ASSERT_TRUE(c.receive(1, reply));
+  EXPECT_TRUE(reply.finish);
+  left = request(now(), 3);
+  left.finish_requested = true;
+  c.submit(0, left);
+  ASSERT_TRUE(c.pump());
+  ASSERT_TRUE(c.receive(0, reply));
+  EXPECT_TRUE(reply.finish);
+  EXPECT_EQ(c.diagnostic_reply(0).cycles[0], 3u);
+  EXPECT_EQ(c.diagnostic_reply(1).cycles[1], 2u);
+}
+
+TEST(Coordinator, DisabledDualCbfRetainsOwnStateAndDeadlineGuardsAndSharedStop) {
+  for (int scenario = 0; scenario < 4; ++scenario) {
+    ft::SafetyCoordinator c;
+    ft::CoordinatorParameters p;
+    p.active = {true, true};
+    p.filter_deadline_ns = scenario == 2 ? 1 : 100000000;
+    p.result_deadline_ns = 200000000;
+    ft::cbf::SafetyParameters s;
+    s.enabled = false;
+    s.active_arms = p.active;
+    std::string error;
+    ASSERT_TRUE(c.configure(p, s, ids(), &error)) << error;
+    const auto stamp = now();
+    auto r = request(stamp);
+    if (scenario == 0)
+      r.stamp_ns -= p.maximum_age_ns + 1;
+    if (scenario == 1)
+      r.state.mass(0, 0) = -1;
+    c.submit(0, r);
+    c.pump(stamp);
+    if (scenario == 3) {
+      ft::SafetyReply reply;
+      ASSERT_TRUE(c.receive(0, reply));
+      EXPECT_FALSE(c.accepts(0, 1, stamp, stamp + p.result_deadline_ns + 1, reply));
+    }
+    EXPECT_EQ(c.stopped(), scenario == 0   ? ft::SafetyStop::state_age
+                           : scenario == 1 ? ft::SafetyStop::invalid_model
+                           : scenario == 2 ? ft::SafetyStop::filter_deadline
+                                           : ft::SafetyStop::result_deadline);
+    c.submit(1, request(now()));
+    EXPECT_FALSE(c.pump());
+    ft::SafetyReply peer;
+    EXPECT_FALSE(c.receive(1, peer));
+  }
 }
 
 TEST(Coordinator, LateResultTimingIsPreservedWithoutRelaxingDeadline) {

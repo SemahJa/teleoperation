@@ -1,7 +1,9 @@
 hand:
+  open_width_m: -1.0  # -1 uses the calibrated maximum opening.
+  # Hold grip to close; release stops. A joystick click opens automatically.
+  close_width_m: 0.0       # Full finger gap lower bound; closing uses move(), not grasp().
+  close_retry_interval_ms: 200.0  # Held-close refresh period, independent of result; 0 disables refresh.
+  worker_poll_ms: 1.0     # Completion/retry/watchdog checks; release stop is event-driven.
+  open_speed_mps: 0.1    # Opening speed; closing keeps speed_mps below.
   speed_mps: 0.02
-  grasp_force_n: 5.0
-  grasp_width_m: -1.0
-  epsilon_inner_m: -1.0
-  epsilon_outer_m: -1.0
 arm_settings: {}

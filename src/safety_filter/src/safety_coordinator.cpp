@@ -41,7 +41,17 @@ bool SafetyCoordinator::configure(const CoordinatorParameters& p, const cbf::Saf
     return false;
   }
   limits_ = p;
-  return filter_.configure(s, ids, error);
+  if (!filter_.configure(s, ids, error))
+    return false;
+  independent_actuators_ = !s.enabled && p.active[0] && p.active[1];
+  if (independent_actuators_)
+    for (int arm = 0; arm < 2; ++arm) {
+      auto local = s;
+      local.active_arms = {arm == 0, arm == 1};
+      if (!actuator_filters_[arm].configure(local, ids, error))
+        return false;
+    }
+  return true;
 }
 void SafetyCoordinator::stop(SafetyStop r) noexcept {
   auto expected = SafetyStop::none;
@@ -58,9 +68,22 @@ bool SafetyCoordinator::pump(uint64_t now) {
         new_[i] = true;
       }
     }
+  if (independent_actuators_) {
+    bool processed = false;
+    for (int arm = 0; arm < 2 && stopped() == SafetyStop::none; ++arm)
+      if (new_[arm])
+        processed =
+            process({arm == 0, arm == 1}, actuator_filters_[arm], lane_failures_[arm], now) ||
+            processed;
+    return processed;
+  }
   for (int i = 0; i < 2; ++i)
     if (limits_.active[i] && !new_[i])
       return false;
+  return process(limits_.active, filter_, failures_, now);
+}
+bool SafetyCoordinator::process(const std::array<bool, 2>& active, cbf::CbfSafetyFilter& filter,
+                                unsigned& failures, uint64_t now) {
   // In production read the clock after consuming snapshots. A producer can
   // publish between an earlier clock read and the acquire, without being future-dated.
   if (!now)
@@ -75,8 +98,13 @@ bool SafetyCoordinator::pump(uint64_t now) {
   SafetyReply reply;
   reply.started_ns = now;
   reply.finish = true;
+  // Stop each owner only after every active owner has requested finishing.
+  // This barrier is independent of per-cycle actuator filtering.
   for (int i = 0; i < 2; ++i)
-    if (limits_.active[i]) {
+    if (limits_.active[i])
+      reply.finish = reply.finish && pending_[i].cycle && pending_[i].finish_requested;
+  for (int i = 0; i < 2; ++i)
+    if (active[i]) {
       const auto& p = pending_[i];
       if (!std::isfinite(p.period) || p.period <= 0 || p.period > .02) {
         stop(SafetyStop::invalid_model);
@@ -92,7 +120,6 @@ bool SafetyCoordinator::pump(uint64_t now) {
       nominal.segment<7>(i * 7) = p.nominal;
       activity[i] = p.motion_active;
       period = std::min(period, p.period);
-      reply.finish = reply.finish && p.finish_requested;
       reply.cycles[i] = p.cycle;
       reply.source_ns[i] = p.stamp_ns;
     }
@@ -100,22 +127,23 @@ bool SafetyCoordinator::pump(uint64_t now) {
     stop(SafetyStop::state_skew);
     return false;
   }
-  reply.result = filter_.filter(nominal, state, period, activity);
+  reply.result = filter.filter(nominal, state, period, activity);
   filter_status_ = reply.result.solver_status;
   if (reply.result.fatal_input_fault)
     stop(SafetyStop::invalid_model);
   if (reply.result.filter_time_seconds * 1e9 > limits_.filter_deadline_ns)
     stop(SafetyStop::filter_deadline);
-  failures_ = reply.result.solver_succeeded ? 0 : failures_ + 1;
-  if (failures_ >= limits_.maximum_failures)
+  failures = reply.result.solver_succeeded ? 0 : failures + 1;
+  if (failures >= limits_.maximum_failures)
     stop(SafetyStop::solver_failures);
-  reply.consecutive_failures = failures_;
+  reply.consecutive_failures = failures;
   reply.completed_ns = std::chrono::duration_cast<std::chrono::nanoseconds>(
                            std::chrono::steady_clock::now().time_since_epoch())
                            .count();
   diagnostic_reply_ = reply;
   for (int i = 0; i < 2; ++i)
-    if (limits_.active[i]) {
+    if (active[i]) {
+      lane_diagnostics_[i] = reply;
       replies_[i].publish(reply);
       new_[i] = false;
     }

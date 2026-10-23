@@ -9,8 +9,8 @@ the model, threading and failure behavior for controller developers.
 
 Current status: the filter is connected to the actual single/dual arm executable.
 Robot-free core/coordinator/process tests pass. Hardware callbacks collect one
-RobotState's mass, coriolis, poses and Jacobians; physical execution and timing
-commissioning have not been performed.
+RobotState's mass, coriolis, poses and Jacobians; successful physical CBF/timing
+commissioning has not been established by these tests.
 
 ## Formulation and adaptation
 
@@ -32,7 +32,7 @@ Both pass through the same filter before torque is returned.
   `tau_J_d`, rather than the filter's previous requested output. Each slew
   interval is capped at one millisecond even after a delayed callback.
 - Single-arm masking disables inactive-arm barriers and forces its dummy
-  torques to zero. Dual mode retains coupled collision rows; independent
+  torques to zero. CBF-enabled dual mode retains coupled collision rows; independent
   per-arm filters cannot substitute for that coordinator.
 - Geometry transcribes the pinned Panda URDF coarse cylinders/spheres as
   capsules, including the Panda flange geometry and hand mounting yaw. The
@@ -139,12 +139,12 @@ the solver's feasibility tolerance require the normal iterative path.
 ## Runtime ownership, handoff and failure behavior
 
 Combined bringup selects CBF through `pipeline.cbf_enabled` in the chosen
-runtime YAML. The current single-arm configuration disables it; the dual
-template enables it. Standalone arm launch also exposes `cbf_enabled`.
+runtime YAML; inspect that editable value before launch. Standalone arm launch
+also exposes `cbf_enabled`.
 Setting it false routes `cbf.enabled=false` to the owner; the coordinator
 then uses the filter's actuator-bounds-only branch, without joint/collision
 barriers or QP iterations. All model/actuator validity, exact-cycle handoff,
-age/skew/deadline checks and consumer engagement gates remain. It reports
+own-state age/deadline checks and consumer engagement gates remain. It reports
 `disabled_actuator_bounds_only` and a startup warning. This removes software
 collision and joint CBF protection; it is not normal commissioning acceptance
 and does not alter the robot's own protections or start physical control
@@ -157,8 +157,21 @@ for a reply carrying its exact cycle and model timestamp; earlier-cycle results
 are never applied. The coordinator requires a new snapshot from each active arm
 for every coupled solve. Single mode masks the inactive arm completely.
 
+With CBF disabled, dual actuator bounds are checked in independent arm lanes
+inside the same coordinator. Each lane uses its own current model, nominal
+torque, `tau_J_d` anchor and period, with the same configured magnitude/rate
+caps. It returns an exact-cycle result without waiting for a peer callback.
+This avoids a first-cycle timeout when independent robots enter FCI control
+at different times. Own-state validity, age, filter/result deadlines and shared
+fault stop remain enforced. Peer model age/skew are irrelevant to these local
+actuator checks; CBF-enabled dual operation still requires coherent peer state.
+The actuator-only status contains only its own source timestamp; the unused
+array entry is zero, and zero `state_skew_ns` does not imply synchronized robot
+sampling. No previous-cycle torque or safety result is reused in either mode.
+
 Hardware provisional limits: model age 2 ms, cross-arm timestamp skew 1 ms,
 callback/model/solve/result deadline 0.9 ms, and filter computation 0.8 ms.
+The cross-arm skew limit applies to coupled CBF filtering.
 These are enforced software limits, not measured timing guarantees. Snapshot
 timestamps are local callback-entry times; they do not establish synchronized
 physical acquisition across robot clocks. Bound network/receive delay and its
@@ -199,9 +212,11 @@ latched stop. Owners terminate through libfranka exceptions without automatic
 reconnect, recovery or restart. Fallback has no geometric guarantee.
 
 Normal shutdown uses filtered measured-pose damping and controlled homing
-cancellation. Both owners request finishing; the coordinator grants finishing
-in the same paired reply, preventing one owner from disappearing while its peer
-still awaits a coupled solve. `/ARM/cbf_status` reports source timestamps, cycle,
+cancellation. Both owners must request finishing. CBF-enabled dual operation
+grants finishing in the same paired reply, preventing one owner from disappearing
+while its peer still awaits a coupled solve. Actuator-only lanes grant their
+own finish replies once both owners have requested finishing.
+`/ARM/cbf_status` reports source timestamps, cycle,
 skew, solver/filter time, failure count, constraints, clearances, intervention,
 filtered torque and stop reason. Fatal stop reasons also appear in process logs.
 

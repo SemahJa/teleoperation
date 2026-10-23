@@ -86,15 +86,16 @@ controller:
   homing_damping: [30.0, 30.0, 30.0, 30.0, 10.0, 10.0, 5.0]
 
 hand:
+  # Hold grip to close; release stops. A joystick click opens automatically.
+  close_width_m: 0.0       # Full finger gap lower bound; closing uses move(), not grasp().
+  close_retry_interval_ms: 200.0  # Held-close refresh period, independent of result; 0 disables refresh.
+  worker_poll_ms: 1.0     # Completion/retry/watchdog checks; release stop is event-driven.
+  open_speed_mps: 0.1    # Opening speed; closing keeps speed_mps below.
   speed_mps: 0.05
-  grasp_force_n: 30.0
-  open_width_m: 0.025        # Use calibrated maximum width.
-  grasp_width_m: 0.007      # Unknown object settings refuse grasp.
-  epsilon_inner_m: 0.00005
-  epsilon_outer_m: 0.00005
+  open_width_m: 0.025        # Full opening gap; -1 uses calibrated maximum.
   grip_press: 0.75
   grip_release: 0.25
-  grip_debounce_ms: 50.0
+  grip_debounce_ms: 0.0
   command_timeout_ms: 100.0
   max_clock_uncertainty_ms: 10.0
   mock_operation_duration_ms: 100.0

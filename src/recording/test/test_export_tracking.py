@@ -25,7 +25,6 @@ class TrackingExportTest(unittest.TestCase):
                 topic = "/" + side + "/tracking_samples"
                 writer.create_topic(
                     rosbag2_py.TopicMetadata(
-                        id=0,
                         name=topic,
                         type="quest_teleop_interfaces/msg/TrackingSample",
                         serialization_format="cdr",

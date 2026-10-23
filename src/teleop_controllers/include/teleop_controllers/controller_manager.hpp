@@ -28,8 +28,7 @@ class ControllerManager {
  public:
   ControllerManager(const ManagerParameters& parameters, const HomingParameters& homing_parameters,
                     TorqueController& teleoperation, TorqueController& orientation_only,
-                    TorqueController& position_hold,
-                    TorqueController& damping)
+                    TorqueController& position_hold, TorqueController& damping)
       : p_(parameters),
         homing_(homing_parameters),
         teleoperation_(teleoperation),
@@ -73,6 +72,9 @@ class ControllerManager {
   bool shutdown_{false}, teleoperation_reset_pending_{true};
   bool hold_reset_pending_{true};
   bool hold_permitted_{true};
+  // Local position holding is independent of Quest readiness at startup and
+  // between engagements. Input faults revoke arming, never an idle hold anchor.
+  bool local_hold_{true};
   Reason reason_{Reason::startup};
 };
 }  // namespace teleop_controllers

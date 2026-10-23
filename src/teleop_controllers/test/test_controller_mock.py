@@ -142,8 +142,14 @@ class ControllerMockTest(unittest.TestCase):
                 try:
                     wait_for(lambda: bool(statuses) and mapper.measured is not None)
                     self.assertFalse(statuses[-1].hardware_backend)
+                    # Production mapper watchdogs publish invalid disarmed
+                    # commands before tracking is ready. They must not drop the
+                    # local startup hold, even after the command timeout.
+                    send(0.8, tracked=False, duration=0.3)
+                    wait_for(lambda: statuses[-1].reason == "position_hold")
                     send(0.8)
                     self.assertFalse(statuses[-1].motion_enabled)
+                    self.assertEqual(statuses[-1].reason, "position_hold")
                     send(0.0)
                     send(0.8)
                     wait_for(lambda: statuses[-1].motion_enabled)
@@ -233,7 +239,7 @@ class ControllerMockTest(unittest.TestCase):
                     mapper.destroy_node()
                     mapper = None
                     wait_for(
-                        lambda: statuses[-1].reason == "stale"
+                        lambda: statuses[-1].reason == "position_hold"
                         and not statuses[-1].motion_enabled
                     )
                     self.assertEqual(list(statuses[-1].nominal_torque), [0.0] * 7)
