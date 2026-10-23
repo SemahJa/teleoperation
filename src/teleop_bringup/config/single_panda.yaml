@@ -64,10 +64,10 @@ arms:
     trigger_release: 0.25
 
 controller:
-  lambda_translation: 30.0
-  lambda_rotation: 30.0
-  gain_translation: 30.0
-  gain_rotation: 2.5
+  lambda_translation: 15.0
+  lambda_rotation: 15.0
+  gain_translation: 50.0
+  gain_rotation: 5.0
   # Release trigger: capture measured joints once and hold the whole arm.
   hold_stiffness: [600.0, 600.0, 600.0, 600.0, 250.0, 150.0, 75.0]  # Nm/rad
   hold_damping: [50.0, 50.0, 50.0, 50.0, 20.0, 15.0, 10.0]        # Nm s/rad
