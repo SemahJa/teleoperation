@@ -35,6 +35,18 @@ and the Menu recorder. Wait for **Arm control ready**, **Hand calibration ready*
 and **RealSense Node Is Up!** for both cameras. Controller tracking must be valid;
 keep the unworn headset upright with its cameras facing the controllers.
 
+If you encounter the following error: Port 45454 is already bound ( due a stale ADB’s Quest-side port forwarding entry from a previous session)
+With the previous pipeline stopped, clear only this forwarding entry:
+```bash
+docker exec docker-quest-adb-server-1 \
+  adb -s 2G0YC5ZH1L00T2 reverse --remove tcp:45454
+
+# If it reports “listener not found” try:
+docker exec docker-quest-adb-server-1 \
+  adb -s 2G0YC5ZH1L00T2 reverse --list
+
+ss -ltnp 'sport = :45454'
+```
 ## 3. Record exactly once
 
 1. Press and release **left Menu once**. Confirm a **new episode** reports
