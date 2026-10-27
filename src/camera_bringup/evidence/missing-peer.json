@@ -1,0 +1,77 @@
+{
+  "seconds": 8.0,
+  "results": {
+    "wrist/rgb": {
+      "count": 240,
+      "arrival_hz": 29.98,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "wrist_color_optical_frame"
+      ],
+      "encodings": [
+        "rgb8"
+      ]
+    },
+    "wrist/depth": {
+      "count": 241,
+      "arrival_hz": 29.98,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "wrist_color_optical_frame"
+      ],
+      "encodings": [
+        "16UC1"
+      ]
+    },
+    "wrist/rgb_info": {
+      "count": 241,
+      "arrival_hz": 30.01,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "wrist_color_optical_frame"
+      ],
+      "encodings": [
+        ""
+      ]
+    },
+    "wrist/depth_info": {
+      "count": 241,
+      "arrival_hz": 30.02,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "wrist_color_optical_frame"
+      ],
+      "encodings": [
+        ""
+      ]
+    },
+    "wrist/matching_rgb_depth_stamps": 240
+  },
+  "static_frames": [
+    "wrist_color_frame",
+    "wrist_color_optical_frame",
+    "wrist_depth_frame",
+    "wrist_depth_optical_frame"
+  ],
+  "failures": []
+}

@@ -1,0 +1,954 @@
+{
+  "target": {
+    "duration_seconds": 12.003589432992158,
+    "diagnostics": {
+      "streams": {
+        "scene/color_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 359,
+            "min": 32997802,
+            "median": 33334228,
+            "max": 33540283
+          },
+          "samples": 360,
+          "header_gap_ns": {
+            "count": 359,
+            "min": 32997802,
+            "median": 33334228,
+            "max": 33540283
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 360,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 360,
+            "min": 29622188,
+            "median": 35771469.5,
+            "max": 44742399
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/depth_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 359,
+            "min": 32997802,
+            "median": 33334228,
+            "max": 33540284
+          },
+          "samples": 360,
+          "header_gap_ns": {
+            "count": 359,
+            "min": 32997802,
+            "median": 33334228,
+            "max": 33540283
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 360,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 360,
+            "min": 29816968,
+            "median": 35896767.5,
+            "max": 44944473
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/color_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 359,
+            "min": 33355957,
+            "median": 33357178,
+            "max": 33358887
+          },
+          "samples": 360,
+          "header_gap_ns": {
+            "count": 359,
+            "min": 33355957,
+            "median": 33357178,
+            "max": 33358887
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 360,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 360,
+            "min": 38103836,
+            "median": 40452627.0,
+            "max": 45016827
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/depth_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 359,
+            "min": 33356201,
+            "median": 33357178,
+            "max": 33358887
+          },
+          "samples": 360,
+          "header_gap_ns": {
+            "count": 359,
+            "min": 33355957,
+            "median": 33357178,
+            "max": 33358887
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 360,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 360,
+            "min": 38363499,
+            "median": 40576839.0,
+            "max": 45201418
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/aligned_depth": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 355,
+          "header_gap_ns": {
+            "count": 354,
+            "min": 32997802,
+            "median": 33334473.0,
+            "max": 66885253
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 4,
+          "expected_fps": 30,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 355,
+            "min": 29201756,
+            "median": 33231363,
+            "max": 40601611
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/rgb": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 359,
+          "header_gap_ns": {
+            "count": 358,
+            "min": 32997802,
+            "median": 33334228.0,
+            "max": 33540283
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 359,
+            "min": 30492711,
+            "median": 35529478,
+            "max": 44045326
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/aligned_depth": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 359,
+          "header_gap_ns": {
+            "count": 358,
+            "min": 33355957,
+            "median": 33357178.0,
+            "max": 33358887
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 359,
+            "min": 36934310,
+            "median": 38074614,
+            "max": 44596383
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/rgb": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 359,
+          "header_gap_ns": {
+            "count": 358,
+            "min": 33355957,
+            "median": 33357178.0,
+            "max": 33358887
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 359,
+            "min": 38866209,
+            "median": 40195231,
+            "max": 44624061
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        }
+      },
+      "header_relationships": {
+        "wrist_rgb_to_aligned_depth_ns": {
+          "count": 359,
+          "min": 0,
+          "median": 0,
+          "max": 0
+        },
+        "scene_rgb_to_aligned_depth_ns": {
+          "count": 359,
+          "min": -33442382,
+          "median": 0,
+          "max": 33322754
+        },
+        "wrist_to_scene_rgb_ns": {
+          "count": 359,
+          "min": -11522216,
+          "median": -5218506,
+          "max": -1343261
+        }
+      },
+      "native_rgb_depth_relationships": {
+        "wrist": {
+          "sdk_frame_depth_minus_color_ns": {
+            "count": 360,
+            "min": -18067,
+            "median": -18066.0,
+            "max": -17822
+          },
+          "firmware_readout_depth_minus_color_ns": {
+            "count": 360,
+            "min": -18000,
+            "median": -18000.0,
+            "max": -18000
+          },
+          "firmware_exposure_midpoint_depth_minus_color_ns": {
+            "count": 360,
+            "min": -3195000,
+            "median": -2778000.0,
+            "max": -706000
+          },
+          "color_header_minus_native_frame_ns": {
+            "count": 360,
+            "min": 0,
+            "median": 0.0,
+            "max": 1
+          },
+          "warning": "Same-device paired metadata only; firmware counters may wrap; not a calibrated host capture-time bound."
+        },
+        "scene": {
+          "sdk_frame_depth_minus_color_ns": {
+            "count": 360,
+            "min": -58350,
+            "median": -57862.0,
+            "max": -57373
+          },
+          "firmware_readout_depth_minus_color_ns": {
+            "count": 360,
+            "min": -58000,
+            "median": -58000.0,
+            "max": -58000
+          },
+          "firmware_exposure_midpoint_depth_minus_color_ns": {
+            "count": 360,
+            "min": -2549000,
+            "median": -2549000.0,
+            "max": -1705000
+          },
+          "color_header_minus_native_frame_ns": {
+            "count": 360,
+            "min": 0,
+            "median": 0.0,
+            "max": 1
+          },
+          "warning": "Same-device paired metadata only; firmware counters may wrap; not a calibrated host capture-time bound."
+        }
+      },
+      "interpretation": "Nearest header phase offsets are observational; not measured cross-device capture skew.",
+      "exact_rgb_depth_headers": {
+        "wrist": {
+          "shared": 359,
+          "rgb_without_depth": 0,
+          "depth_without_rgb": 0
+        },
+        "scene": {
+          "shared": 355,
+          "rgb_without_depth": 4,
+          "depth_without_rgb": 0
+        }
+      },
+      "metadata_fields": {
+        "scene/color_metadata": [
+          "actual_fps",
+          "auto_exposure",
+          "auto_white_balance_temperature",
+          "backend_timestamp",
+          "backlight_compensation",
+          "brightness",
+          "clock_domain",
+          "contrast",
+          "frame_counter",
+          "frame_number",
+          "frame_timestamp",
+          "gamma",
+          "hue",
+          "hw_timestamp",
+          "low_light_compensation",
+          "manual_white_balance",
+          "power_line_frequency",
+          "raw_frame_size",
+          "saturation",
+          "sensor_timestamp",
+          "sharpness",
+          "time_of_arrival"
+        ],
+        "scene/depth_metadata": [
+          "actual_exposure",
+          "actual_fps",
+          "auto_exposure",
+          "backend_timestamp",
+          "clock_domain",
+          "exposure_priority",
+          "exposure_roi_bottom",
+          "exposure_roi_left",
+          "exposure_roi_right",
+          "exposure_roi_top",
+          "frame_counter",
+          "frame_emitter_mode",
+          "frame_laser_power",
+          "frame_laser_power_mode",
+          "frame_number",
+          "frame_timestamp",
+          "gain_level",
+          "gpio_input_data",
+          "hw_timestamp",
+          "raw_frame_size",
+          "sensor_timestamp",
+          "sequence_id",
+          "sequence_name",
+          "sequence_size",
+          "time_of_arrival"
+        ],
+        "wrist/color_metadata": [
+          "actual_fps",
+          "auto_exposure",
+          "auto_white_balance_temperature",
+          "backend_timestamp",
+          "backlight_compensation",
+          "brightness",
+          "clock_domain",
+          "contrast",
+          "frame_counter",
+          "frame_number",
+          "frame_timestamp",
+          "gamma",
+          "hue",
+          "hw_timestamp",
+          "low_light_compensation",
+          "manual_white_balance",
+          "power_line_frequency",
+          "raw_frame_size",
+          "saturation",
+          "sensor_timestamp",
+          "sharpness",
+          "time_of_arrival"
+        ],
+        "wrist/depth_metadata": [
+          "actual_exposure",
+          "actual_fps",
+          "auto_exposure",
+          "backend_timestamp",
+          "clock_domain",
+          "exposure_priority",
+          "exposure_roi_bottom",
+          "exposure_roi_left",
+          "exposure_roi_right",
+          "exposure_roi_top",
+          "frame_counter",
+          "frame_emitter_mode",
+          "frame_laser_power",
+          "frame_laser_power_mode",
+          "frame_number",
+          "frame_timestamp",
+          "gain_level",
+          "gpio_input_data",
+          "hw_timestamp",
+          "raw_frame_size",
+          "sensor_timestamp",
+          "sequence_id",
+          "sequence_name",
+          "sequence_size",
+          "time_of_arrival"
+        ]
+      },
+      "metadata_clock_domains": {
+        "scene/color_metadata": [
+          "global_time"
+        ],
+        "scene/depth_metadata": [
+          "global_time"
+        ],
+        "wrist/color_metadata": [
+          "global_time"
+        ],
+        "wrist/depth_metadata": [
+          "global_time"
+        ]
+      }
+    },
+    "clock_models": [
+      {
+        "source": "host_ros_system:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+        "reference": "host_monotonic:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+        "segment": "0",
+        "source_origin_ns": 1792766963137703784,
+        "reference_origin_ns": 100878274296194,
+        "rate": 0.9999998875975066,
+        "uncertainty_ns": 29218,
+        "valid_from_ns": 1792766963137703784,
+        "valid_to_ns": 1792766975137923809,
+        "method": "simultaneous_pairs_affine_empirical_envelope"
+      }
+    ],
+    "robot_topics_subscribed": {},
+    "errors": [],
+    "original_report_sha256": "cf3823af8887436e13d3bbce2ef077af94b53088774c42f01eb631e6120f4bac",
+    "stored_compact_report_bytes": 5105151
+  },
+  "mixed": {
+    "duration_seconds": 12.00293482800771,
+    "diagnostics": {
+      "streams": {
+        "wrist/color_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 358,
+            "min": 33139404,
+            "median": 33357178.0,
+            "max": 33391602
+          },
+          "samples": 359,
+          "header_gap_ns": {
+            "count": 358,
+            "min": 33139404,
+            "median": 33357178.0,
+            "max": 33391602
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 359,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 359,
+            "min": 34987980,
+            "median": 40641892,
+            "max": 48646266
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/depth_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 358,
+            "min": 33139404,
+            "median": 33357178.0,
+            "max": 33391846
+          },
+          "samples": 359,
+          "header_gap_ns": {
+            "count": 358,
+            "min": 33139404,
+            "median": 33357178.0,
+            "max": 33391602
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 359,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 359,
+            "min": 35108979,
+            "median": 40769674,
+            "max": 48899346
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/color_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 179,
+            "min": 64999512,
+            "median": 66704345,
+            "max": 66911621
+          },
+          "samples": 180,
+          "header_gap_ns": {
+            "count": 179,
+            "min": 64999512,
+            "median": 66704345,
+            "max": 66911621
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 15,
+          "frame_numbers_available": 180,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 180,
+            "min": 54413256,
+            "median": 75571849.0,
+            "max": 82548141
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/depth_metadata": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 179,
+            "min": 64995850,
+            "median": 66704346,
+            "max": 66911865
+          },
+          "samples": 180,
+          "header_gap_ns": {
+            "count": 179,
+            "min": 64999512,
+            "median": 66704345,
+            "max": 66911621
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 15,
+          "frame_numbers_available": 180,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 180,
+            "min": 54638033,
+            "median": 75712856.5,
+            "max": 82770232
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/aligned_depth": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 359,
+          "header_gap_ns": {
+            "count": 358,
+            "min": 33139404,
+            "median": 33357178.0,
+            "max": 33391602
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 359,
+            "min": 32967749,
+            "median": 38122181,
+            "max": 47126877
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "wrist/rgb": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 358,
+          "header_gap_ns": {
+            "count": 357,
+            "min": 33139404,
+            "median": 33357178,
+            "max": 33391602
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 30,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 358,
+            "min": 34871318,
+            "median": 40337849.0,
+            "max": 47844743
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/aligned_depth": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 179,
+          "header_gap_ns": {
+            "count": 178,
+            "min": 64999512,
+            "median": 66704956.0,
+            "max": 66911621
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 15,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 179,
+            "min": 56360960,
+            "median": 72837979,
+            "max": 78161971
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        },
+        "scene/rgb": {
+          "hardware_timestamp_decreases": 0,
+          "native_timestamp_non_monotonic": 0,
+          "native_frame_gap_ns": {
+            "count": 0
+          },
+          "samples": 179,
+          "header_gap_ns": {
+            "count": 178,
+            "min": 64999512,
+            "median": 66704956.0,
+            "max": 66911621
+          },
+          "non_monotonic": 0,
+          "duplicated_stamps": 0,
+          "estimated_missing_from_header_gaps": 0,
+          "expected_fps": 15,
+          "frame_numbers_available": 0,
+          "counter_gaps": 0,
+          "counter_duplicates": 0,
+          "counter_resets_or_reorder": 0,
+          "arrival_ros_minus_header_ns": {
+            "count": 179,
+            "min": 58563472,
+            "median": 75224420,
+            "max": 81814578
+          },
+          "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone."
+        }
+      },
+      "header_relationships": {
+        "wrist_rgb_to_aligned_depth_ns": {
+          "count": 358,
+          "min": 0,
+          "median": 0.0,
+          "max": 0
+        },
+        "scene_rgb_to_aligned_depth_ns": {
+          "count": 179,
+          "min": 0,
+          "median": 0,
+          "max": 0
+        },
+        "wrist_to_scene_rgb_ns": {
+          "count": 358,
+          "min": -32633057,
+          "median": 475830.0,
+          "max": 38889893
+        }
+      },
+      "native_rgb_depth_relationships": {
+        "wrist": {
+          "sdk_frame_depth_minus_color_ns": {
+            "count": 359,
+            "min": -17090,
+            "median": -17090,
+            "max": -16845
+          },
+          "firmware_readout_depth_minus_color_ns": {
+            "count": 359,
+            "min": -17000,
+            "median": -17000,
+            "max": -17000
+          },
+          "firmware_exposure_midpoint_depth_minus_color_ns": {
+            "count": 359,
+            "min": -923000,
+            "median": -923000,
+            "max": -923000
+          },
+          "color_header_minus_native_frame_ns": {
+            "count": 359,
+            "min": 0,
+            "median": 0,
+            "max": 1
+          },
+          "warning": "Same-device paired metadata only; firmware counters may wrap; not a calibrated host capture-time bound."
+        },
+        "scene": {
+          "sdk_frame_depth_minus_color_ns": {
+            "count": 180,
+            "min": -121582,
+            "median": -121093.0,
+            "max": -117920
+          },
+          "firmware_readout_depth_minus_color_ns": {
+            "count": 180,
+            "min": -121000,
+            "median": -121000.0,
+            "max": -121000
+          },
+          "firmware_exposure_midpoint_depth_minus_color_ns": {
+            "count": 180,
+            "min": -2549000,
+            "median": -2369000.0,
+            "max": -2369000
+          },
+          "color_header_minus_native_frame_ns": {
+            "count": 180,
+            "min": 0,
+            "median": 0.0,
+            "max": 1
+          },
+          "warning": "Same-device paired metadata only; firmware counters may wrap; not a calibrated host capture-time bound."
+        }
+      },
+      "interpretation": "Nearest header phase offsets are observational; not measured cross-device capture skew.",
+      "exact_rgb_depth_headers": {
+        "wrist": {
+          "shared": 358,
+          "rgb_without_depth": 0,
+          "depth_without_rgb": 1
+        },
+        "scene": {
+          "shared": 179,
+          "rgb_without_depth": 0,
+          "depth_without_rgb": 0
+        }
+      },
+      "metadata_fields": {
+        "wrist/color_metadata": [
+          "actual_fps",
+          "auto_exposure",
+          "auto_white_balance_temperature",
+          "backend_timestamp",
+          "backlight_compensation",
+          "brightness",
+          "clock_domain",
+          "contrast",
+          "frame_counter",
+          "frame_number",
+          "frame_timestamp",
+          "gamma",
+          "hue",
+          "hw_timestamp",
+          "low_light_compensation",
+          "manual_white_balance",
+          "power_line_frequency",
+          "raw_frame_size",
+          "saturation",
+          "sensor_timestamp",
+          "sharpness",
+          "time_of_arrival"
+        ],
+        "wrist/depth_metadata": [
+          "actual_exposure",
+          "actual_fps",
+          "auto_exposure",
+          "backend_timestamp",
+          "clock_domain",
+          "exposure_priority",
+          "exposure_roi_bottom",
+          "exposure_roi_left",
+          "exposure_roi_right",
+          "exposure_roi_top",
+          "frame_counter",
+          "frame_emitter_mode",
+          "frame_laser_power",
+          "frame_laser_power_mode",
+          "frame_number",
+          "frame_timestamp",
+          "gain_level",
+          "gpio_input_data",
+          "hw_timestamp",
+          "raw_frame_size",
+          "sensor_timestamp",
+          "sequence_id",
+          "sequence_name",
+          "sequence_size",
+          "time_of_arrival"
+        ],
+        "scene/color_metadata": [
+          "actual_fps",
+          "auto_exposure",
+          "auto_white_balance_temperature",
+          "backend_timestamp",
+          "backlight_compensation",
+          "brightness",
+          "clock_domain",
+          "contrast",
+          "frame_counter",
+          "frame_number",
+          "frame_timestamp",
+          "gamma",
+          "hue",
+          "hw_timestamp",
+          "low_light_compensation",
+          "manual_white_balance",
+          "power_line_frequency",
+          "raw_frame_size",
+          "saturation",
+          "sensor_timestamp",
+          "sharpness",
+          "time_of_arrival"
+        ],
+        "scene/depth_metadata": [
+          "actual_exposure",
+          "actual_fps",
+          "auto_exposure",
+          "backend_timestamp",
+          "clock_domain",
+          "exposure_priority",
+          "exposure_roi_bottom",
+          "exposure_roi_left",
+          "exposure_roi_right",
+          "exposure_roi_top",
+          "frame_counter",
+          "frame_emitter_mode",
+          "frame_laser_power",
+          "frame_laser_power_mode",
+          "frame_number",
+          "frame_timestamp",
+          "gain_level",
+          "gpio_input_data",
+          "hw_timestamp",
+          "raw_frame_size",
+          "sensor_timestamp",
+          "sequence_id",
+          "sequence_name",
+          "sequence_size",
+          "time_of_arrival"
+        ]
+      },
+      "metadata_clock_domains": {
+        "wrist/color_metadata": [
+          "global_time"
+        ],
+        "wrist/depth_metadata": [
+          "global_time"
+        ],
+        "scene/color_metadata": [
+          "global_time"
+        ],
+        "scene/depth_metadata": [
+          "global_time"
+        ]
+      }
+    },
+    "clock_models": [
+      {
+        "source": "host_ros_system:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+        "reference": "host_monotonic:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+        "segment": "0",
+        "source_origin_ns": 1792766931589010547,
+        "reference_origin_ns": 100846725603432,
+        "rate": 0.9999997242057715,
+        "uncertainty_ns": 38515,
+        "valid_from_ns": 1792766931589010547,
+        "valid_to_ns": 1792766943589447641,
+        "method": "simultaneous_pairs_affine_empirical_envelope"
+      }
+    ],
+    "robot_topics_subscribed": {},
+    "errors": [],
+    "original_report_sha256": "c4740e6de62343e884c0a30b6b62af4d5fb19056ad5f2486d4251135ffcee3f0",
+    "stored_compact_report_bytes": 3833002
+  }
+}

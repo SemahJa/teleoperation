@@ -1,0 +1,147 @@
+cameras-1  | [INFO] [launch]: All log files can be found below /root/.ros/log/2026-10-23-14-24-52-491714-gap-nuc-202-1
+cameras-1  | [INFO] [launch]: Default logging verbosity is set to INFO
+cameras-1  | [INFO] [launch.user]: wrist: serial=934222072657 color=640,480,30 depth=640,480,30; no automatic fallback
+cameras-1  | [INFO] [launch.user]: scene: serial=238222073675 color=640,480,30 depth=640,480,30; no automatic fallback
+cameras-1  | [INFO] [realsense2_camera_node-1]: process started with pid [17]
+cameras-1  | [INFO] [realsense2_camera_node-2]: process started with pid [19]
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765492.631669481] [cameras.scene]: RealSense ROS v4.56.4
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765492.631789028] [cameras.scene]: Built with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765492.631804527] [cameras.scene]: Running with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765492.631748751] [cameras.wrist]: RealSense ROS v4.56.4
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765492.631815037] [cameras.wrist]: Built with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765492.631824325] [cameras.wrist]: Running with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:52,659 WARNING [139955116430912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:52,669 WARNING [139955116430912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:52,752 WARNING [140644903265856] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:52,762 WARNING [140644903265856] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:52,856 WARNING [139955116430912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:52,866 WARNING [139955116430912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:52,968 WARNING [140644903265856] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:52,978 WARNING [140644903265856] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,068 WARNING [139955116430912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,078 WARNING [139955116430912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,171 ERROR [139955116430912] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,171 ERROR [139955477575232] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,172 ERROR [139955477575232] (rs.cpp:256) [rs2_create_device( info_list:0x7f49d0005c00, index:0 ) UNKNOWN] failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,172 ERROR [139955477575232] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:53,172 WARNING [139955477575232] (rs.cpp:392) null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765493.172874317] [cameras.scene]: Device 1/2 failed with exception: failed to set power state
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765493.188513044] [cameras.wrist]: Device with serial number 238222073675 was found.
+cameras-1  | [realsense2_camera_node-1] 
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765493.188590861] [cameras.wrist]: Device with physical ID 2-3-16 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765493.188601151] [cameras.wrist]: Device with name Intel RealSense D435I was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765493.188842959] [cameras.wrist]: Device with port number 2-3 was found.
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,283 WARNING [140644584506944] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,293 WARNING [140644584506944] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,356 ERROR [140644584506944] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,356 ERROR [140644928443968] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,356 ERROR [140644928443968] (rs.cpp:256) [rs2_create_device( info_list:0x7fea68005c00, index:1 ) UNKNOWN] failed to set power state
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,356 ERROR [140644928443968] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:53,356 WARNING [140644928443968] (rs.cpp:392) null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765493.356758116] [cameras.wrist]: Device 2/2 failed with exception: failed to set power state
+cameras-1  | [realsense2_camera_node-1] [ERROR] [1792765493.356828389] [cameras.wrist]: The requested device with serial number 934222072657 is NOT found. Will Try again.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765493.484101187] [cameras.scene]: Device with serial number 934222072657 was found.
+cameras-1  | [realsense2_camera_node-2] 
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765493.484170548] [cameras.scene]: Device with physical ID 3-2-14 was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765493.484179816] [cameras.scene]: Device with name Intel RealSense D435 was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765493.484491257] [cameras.scene]: Device with port number 3-2 was found.
+cameras-1  | [realsense2_camera_node-2] [ERROR] [1792765493.484508680] [cameras.scene]: The requested device with serial number 238222073675 is NOT found. Will Try again.
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,587 WARNING [139954898318912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,598 WARNING [139954898318912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:59,683 WARNING [140644693546560] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:24:59,693 WARNING [140644693546560] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,776 WARNING [139954898318912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,786 WARNING [139954898318912] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,875 ERROR [139954898318912] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,875 ERROR [139955477575232] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,876 ERROR [139955477575232] (rs.cpp:256) [rs2_create_device( info_list:0x7f49d003bde0, index:0 ) UNKNOWN] failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,876 ERROR [139955477575232] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2]  23/10 14:24:59,876 WARNING [139955477575232] (rs.cpp:392) null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765499.876450314] [cameras.scene]: Device 1/2 failed with exception: failed to set power state
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.011705708] [cameras.wrist]: Device with serial number 238222073675 was found.
+cameras-1  | [realsense2_camera_node-1] 
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.011793214] [cameras.wrist]: Device with physical ID 2-3-16 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.011805066] [cameras.wrist]: Device with name Intel RealSense D435I was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.012122669] [cameras.wrist]: Device with port number 2-3 was found.
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:00,123 WARNING [140644584506944] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:00,134 WARNING [140644584506944] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,219 WARNING [139955091252800] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,230 WARNING [139955091252800] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,319 ERROR [139955091252800] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,320 ERROR [139955477575232] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,320 ERROR [139955477575232] (rs.cpp:256) [rs2_create_device( info_list:0x7f49d003bde0, index:1 ) UNKNOWN] failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,320 ERROR [139955477575232] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:00,320 WARNING [139955477575232] (rs.cpp:392) null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765500.320904810] [cameras.scene]: Device 2/2 failed with exception: failed to set power state
+cameras-1  | [realsense2_camera_node-2] [ERROR] [1792765500.320962730] [cameras.scene]: The requested device with serial number 238222073675 is NOT found. Will Try again.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.424496560] [cameras.wrist]: Device with serial number 934222072657 was found.
+cameras-1  | [realsense2_camera_node-1] 
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.424568096] [cameras.wrist]: Device with physical ID 3-2-14 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.424578506] [cameras.wrist]: Device with name Intel RealSense D435 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.424871992] [cameras.wrist]: Device with port number 3-2 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.424890838] [cameras.wrist]: Device USB type: 3.2
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.424981600] [cameras.wrist]: getParameters...
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425496777] [cameras.wrist]: JSON file is not provided
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425518679] [cameras.wrist]: Device Name: Intel RealSense D435
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425532314] [cameras.wrist]: Device Serial No: 934222072657
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425543746] [cameras.wrist]: Device physical port: 3-2-14
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425554456] [cameras.wrist]: Device FW version: 5.17.0.10
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425565097] [cameras.wrist]: Device Product ID: 0x0B07
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765500.425575236] [cameras.wrist]: Sync Mode: On
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765504.027937286] [cameras.wrist]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765504.090774234] [cameras.wrist]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.093850627] [cameras.wrist]: Stopping Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.094026240] [cameras.wrist]: Stopping Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.207819225] [cameras.wrist]: Starting Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.293644033] [cameras.wrist]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,293 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,304 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,314 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.324870057] [cameras.wrist]: Starting Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.336243725] [cameras.wrist]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765504.341476447] [cameras.wrist]: RealSense Node Is Up!
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,615 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,625 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,635 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,645 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,655 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,666 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,977 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-1]  23/10 14:25:04,987 WARNING [140644584506944] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.776903492] [cameras.scene]: Device with serial number 238222073675 was found.
+cameras-1  | [realsense2_camera_node-2] 
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.776970719] [cameras.scene]: Device with physical ID 2-3-16 was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.776978574] [cameras.scene]: Device with name Intel RealSense D435I was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777147424] [cameras.scene]: Device with port number 2-3 was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777156973] [cameras.scene]: Device USB type: 2.1
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765506.777164216] [cameras.scene]: Device 238222073675 is connected using a 2.1 port. Reduced performance is expected.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777225042] [cameras.scene]: getParameters...
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777589934] [cameras.scene]: JSON file is not provided
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777605373] [cameras.scene]: Device Name: Intel RealSense D435I
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777613228] [cameras.scene]: Device Serial No: 238222073675
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777619860] [cameras.scene]: Device physical port: 2-3-16
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777626483] [cameras.scene]: Device FW version: 5.17.3.10
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777632635] [cameras.scene]: Device Product ID: 0x0B3A
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765506.777638496] [cameras.scene]: Sync Mode: On
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:06,849 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:09,857 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765510.371106393] [cameras.scene]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765510.716662406] [cameras.scene]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.719733750] [cameras.scene]: Stopping Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.719795397] [cameras.scene]: Stopping Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.809743314] [cameras.scene]: Starting Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.895686717] [cameras.scene]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:10,896 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.897631134] [cameras.scene]: Starting Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.912907723] [cameras.scene]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765510.919025324] [cameras.scene]: RealSense Node Is Up!
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,108 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,420 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,431 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,441 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,754 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,764 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,774 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:11,785 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:16,407 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:25:21,425 WARNING [139955099645504] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0

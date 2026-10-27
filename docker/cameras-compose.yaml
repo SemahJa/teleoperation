@@ -1,0 +1,19 @@
+name: franka-cameras
+# Standalone camera service. Does not extend or start panda-ros2.
+services:
+  cameras:
+    build:
+      context: ..
+      dockerfile: docker/cameras.Dockerfile
+    image: franka-dual-realsense:4.56.4-sdk2.56.5
+    network_mode: host
+    environment:
+      ROS_DOMAIN_ID: ${ROS_DOMAIN_ID:-0}
+      ROS_LOCALHOST_ONLY: ${ROS_LOCALHOST_ONLY:-0}
+    volumes:
+      - /dev/bus/usb:/dev/bus/usb
+      - /run/udev:/run/udev:ro
+    device_cgroup_rules:
+      - 'c 189:* rmw'
+    command: ["ros2", "launch", "camera_bringup", "cameras.launch.py", "cameras:=${CAMERAS:-both}", "wrist_profile:=${WRIST_PROFILE:-target}", "scene_profile:=${SCENE_PROFILE:-target}"]
+    stop_grace_period: 15s

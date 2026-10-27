@@ -1,0 +1,77 @@
+{
+  "seconds": 12.0,
+  "results": {
+    "scene/rgb": {
+      "count": 360,
+      "arrival_hz": 29.98,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "scene_color_optical_frame"
+      ],
+      "encodings": [
+        "rgb8"
+      ]
+    },
+    "scene/depth": {
+      "count": 360,
+      "arrival_hz": 29.98,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "scene_color_optical_frame"
+      ],
+      "encodings": [
+        "16UC1"
+      ]
+    },
+    "scene/rgb_info": {
+      "count": 360,
+      "arrival_hz": 30.0,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "scene_color_optical_frame"
+      ],
+      "encodings": [
+        ""
+      ]
+    },
+    "scene/depth_info": {
+      "count": 361,
+      "arrival_hz": 30.0,
+      "sizes": [
+        [
+          640,
+          480
+        ]
+      ],
+      "frames": [
+        "scene_color_optical_frame"
+      ],
+      "encodings": [
+        ""
+      ]
+    },
+    "scene/matching_rgb_depth_stamps": 360
+  },
+  "static_frames": [
+    "scene_color_frame",
+    "scene_color_optical_frame",
+    "scene_depth_frame",
+    "scene_depth_optical_frame"
+  ],
+  "failures": []
+}

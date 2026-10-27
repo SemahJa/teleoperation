@@ -1,0 +1,533 @@
+{
+  "status": "Phase 3 infrastructure complete, with hardware-validation limitations",
+  "duration_seconds": 60.017151568987174,
+  "serials": {
+    "wrist": "934222072657",
+    "scene": "238222073675"
+  },
+  "usb_mbps": {
+    "wrist": 5000,
+    "scene": 480
+  },
+  "requested_profile": "640x480 RGB8/Z16 at 30 FPS, aligned depth, per-camera sync",
+  "backend": "native installed SDK 2.56.5; wrapper 4.56.4; no RSUSB override in this completion run",
+  "tolerance_ns": 50000000,
+  "streams": {
+    "scene/color_metadata": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 1797,
+        "min": 33045899,
+        "median": 33345947,
+        "max": 33490235
+      },
+      "samples": 1798,
+      "header_gap_ns": {
+        "count": 1797,
+        "min": 33045899,
+        "median": 33345947,
+        "max": 33490235
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 0,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 1798,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1798,
+        "min": 30036544,
+        "median": 37830653.0,
+        "max": 54364196
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.976512393147225,
+      "full_window_count_hz": 29.958102858868187
+    },
+    "scene/depth_metadata": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 1797,
+        "min": 33046142,
+        "median": 33345947,
+        "max": 33490234
+      },
+      "samples": 1798,
+      "header_gap_ns": {
+        "count": 1797,
+        "min": 33045899,
+        "median": 33345947,
+        "max": 33490235
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 0,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 1798,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1798,
+        "min": 30302729,
+        "median": 37991566.0,
+        "max": 54665437
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.9765824059239,
+      "full_window_count_hz": 29.958102858868187
+    },
+    "wrist/color_metadata": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 1797,
+        "min": 31491699,
+        "median": 33357422,
+        "max": 33406250
+      },
+      "samples": 1798,
+      "header_gap_ns": {
+        "count": 1797,
+        "min": 31491699,
+        "median": 33357422,
+        "max": 33406250
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 0,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 1798,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1798,
+        "min": -2157896,
+        "median": 38444292.0,
+        "max": 47053343
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.977577344172783,
+      "full_window_count_hz": 29.958102858868187
+    },
+    "wrist/depth_metadata": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 1797,
+        "min": 31491700,
+        "median": 33357666,
+        "max": 33406250
+      },
+      "samples": 1798,
+      "header_gap_ns": {
+        "count": 1797,
+        "min": 31491699,
+        "median": 33357422,
+        "max": 33406250
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 0,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 1798,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1798,
+        "min": -1964068,
+        "median": 38548316.5,
+        "max": 47428856
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.97762588013058,
+      "full_window_count_hz": 29.958102858868187
+    },
+    "scene/aligned_depth": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 0
+      },
+      "samples": 1753,
+      "header_gap_ns": {
+        "count": 1752,
+        "min": 33052490,
+        "median": 33347168.0,
+        "max": 100028808
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 45,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 0,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1753,
+        "min": 28930913,
+        "median": 35297276,
+        "max": 40844008
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.22682538622939,
+      "full_window_count_hz": 29.208317192211307
+    },
+    "scene/rgb": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 0
+      },
+      "samples": 1780,
+      "header_gap_ns": {
+        "count": 1779,
+        "min": 33052490,
+        "median": 33346436,
+        "max": 66768799
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 17,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 0,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1780,
+        "min": 30798626,
+        "median": 37468433.0,
+        "max": 53432408
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.69345959441299,
+      "full_window_count_hz": 29.658188592205438
+    },
+    "wrist/aligned_depth": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 0
+      },
+      "samples": 1793,
+      "header_gap_ns": {
+        "count": 1792,
+        "min": 31491699,
+        "median": 33357666.0,
+        "max": 66714844
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 4,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 0,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1793,
+        "min": -1909871,
+        "median": 36173457,
+        "max": 46323769
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.91154110175281,
+      "full_window_count_hz": 29.874793340350756
+    },
+    "wrist/rgb": {
+      "hardware_timestamp_decreases": 0,
+      "native_timestamp_non_monotonic": 0,
+      "native_frame_gap_ns": {
+        "count": 0
+      },
+      "samples": 1794,
+      "header_gap_ns": {
+        "count": 1793,
+        "min": 31491699,
+        "median": 33357666,
+        "max": 66715332
+      },
+      "non_monotonic": 0,
+      "duplicated_stamps": 0,
+      "estimated_missing_from_header_gaps": 3,
+      "expected_fps": 30.0,
+      "frame_numbers_available": 0,
+      "counter_gaps": 0,
+      "counter_duplicates": 0,
+      "counter_resets_or_reorder": 0,
+      "arrival_ros_minus_header_ns": {
+        "count": 1794,
+        "min": -22991,
+        "median": 38078595.0,
+        "max": 43624152
+      },
+      "warning": "Arrival-minus-header includes clock error and transport/scheduling; not capture latency alone.",
+      "observed_arrival_hz": 29.928229303592506,
+      "full_window_count_hz": 29.891455244054242
+    }
+  },
+  "header_relationships": {
+    "wrist_rgb_to_aligned_depth_ns": {
+      "count": 1794,
+      "min": -33357178,
+      "median": 0.0,
+      "max": 33357178
+    },
+    "scene_rgb_to_aligned_depth_ns": {
+      "count": 1780,
+      "min": -33419434,
+      "median": 0.0,
+      "max": 33347656
+    },
+    "wrist_to_scene_rgb_ns": {
+      "count": 1794,
+      "min": -16230713,
+      "median": -4026001.5,
+      "max": 31311767
+    }
+  },
+  "exact_rgb_depth_headers": {
+    "wrist": {
+      "shared": 1791,
+      "rgb_without_depth": 3,
+      "depth_without_rgb": 2
+    },
+    "scene": {
+      "shared": 1751,
+      "rgb_without_depth": 29,
+      "depth_without_rgb": 2
+    }
+  },
+  "metadata_clock_domains": {
+    "scene/color_metadata": [
+      "global_time"
+    ],
+    "scene/depth_metadata": [
+      "global_time"
+    ],
+    "wrist/color_metadata": [
+      "global_time"
+    ],
+    "wrist/depth_metadata": [
+      "global_time"
+    ]
+  },
+  "native_rgb_depth_relationships": {
+    "wrist": {
+      "sdk_frame_depth_minus_color_ns": {
+        "count": 1798,
+        "min": -17090,
+        "median": -17090.0,
+        "max": -16113
+      },
+      "firmware_readout_depth_minus_color_ns": {
+        "count": 1798,
+        "min": -17000,
+        "median": -17000.0,
+        "max": -17000
+      },
+      "firmware_exposure_midpoint_depth_minus_color_ns": {
+        "count": 0
+      },
+      "color_header_minus_native_frame_ns": {
+        "count": 1798,
+        "min": 0,
+        "median": 0.0,
+        "max": 1
+      },
+      "warning": "Same-device paired metadata only; firmware counters may wrap; not a calibrated host capture-time bound."
+    },
+    "scene": {
+      "sdk_frame_depth_minus_color_ns": {
+        "count": 1798,
+        "min": -58350,
+        "median": -58105.0,
+        "max": -57373
+      },
+      "firmware_readout_depth_minus_color_ns": {
+        "count": 1798,
+        "min": -58000,
+        "median": -58000.0,
+        "max": -58000
+      },
+      "firmware_exposure_midpoint_depth_minus_color_ns": {
+        "count": 0
+      },
+      "color_header_minus_native_frame_ns": {
+        "count": 1798,
+        "min": 0,
+        "median": 0.0,
+        "max": 1
+      },
+      "warning": "Same-device paired metadata only; firmware counters may wrap; not a calibrated host capture-time bound."
+    }
+  },
+  "clock_models": [
+    {
+      "source": "host_ros_system:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+      "reference": "host_monotonic:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+      "segment": "0",
+      "source_origin_ns": 1792769764169461536,
+      "reference_origin_ns": 103679306052708,
+      "rate": 0.9999999958145255,
+      "uncertainty_ns": 37264,
+      "valid_from_ns": 1792769764169461536,
+      "valid_to_ns": 1792769824169742382,
+      "method": "simultaneous_pairs_affine_empirical_envelope"
+    }
+  ],
+  "host_clock_fit_drift_ppm": -0.00418547452252227,
+  "host_monotonic_minus_ros_offset_at_origin_ns": -1792666084863408828,
+  "camera_capture_uncertainty_ns": null,
+  "provisional_alignment": {
+    "anchors": 1794,
+    "rejected_records": 0,
+    "coverage": {
+      "wrist_rgb": 1794,
+      "wrist_depth": 1794,
+      "scene_rgb": 1794,
+      "scene_depth": 1794,
+      "robot_state": 0,
+      "gripper_state": 0,
+      "action": 0
+    },
+    "provisional_rows": 1794
+  },
+  "strict_alignment": {
+    "anchors": 1794,
+    "rejected_records": 0,
+    "coverage": {
+      "wrist_rgb": 0,
+      "wrist_depth": 0,
+      "scene_rgb": 0,
+      "scene_depth": 0,
+      "robot_state": 0,
+      "gripper_state": 0,
+      "action": 0
+    },
+    "provisional_rows": 0
+  },
+  "live_quest_mock": {
+    "duration_seconds": 20.00759277700854,
+    "diagnostic_errors": [],
+    "robot_topics_subscribed": {
+      "/panda_1/cartesian_teleop_command": "quest_teleop_interfaces/msg/CartesianTeleopCommand",
+      "/quest_usb_bridge/right/controller_state": "quest_teleop_interfaces/msg/QuestControllerState"
+    },
+    "camera_samples": {
+      "wrist/color_metadata": 600,
+      "wrist/depth_metadata": 600,
+      "scene/color_metadata": 599,
+      "scene/depth_metadata": 599,
+      "wrist/aligned_depth": 598,
+      "wrist/rgb": 592,
+      "scene/aligned_depth": 599,
+      "scene/rgb": 595
+    },
+    "quest_samples": 1347,
+    "command_samples": 2296,
+    "quest_source_time_valid": 1347,
+    "quest_pose_valid": 0,
+    "motion_enabled_commands": 0,
+    "command_source_comparisons": 2295,
+    "command_source_mismatches": 0,
+    "clock_conversion_comparisons": 1347,
+    "clock_conversion_mismatches": 0,
+    "quest_reported_clock_uncertainty_ns": {
+      "min": 402764,
+      "median": 485489,
+      "max": 621697
+    },
+    "host_clock_models": [
+      {
+        "source": "host_ros_system:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+        "reference": "host_monotonic:gap-nuc-202:6bf36af2-3da9-46dd-a03d-adc38027804e",
+        "segment": "0",
+        "source_origin_ns": 1792770389063391882,
+        "reference_origin_ns": 104304199984741,
+        "rate": 0.9999998753375072,
+        "uncertainty_ns": 32425,
+        "valid_from_ns": 1792770389063391882,
+        "valid_to_ns": 1792770409063990201,
+        "method": "simultaneous_pairs_affine_empirical_envelope"
+      }
+    ],
+    "execution_alignment_verified": false,
+    "limitations": [
+      "Mock measured pose only; no real robot or gripper controller.",
+      "No source/application execution relationship measured without TrackingSample.",
+      "Invalid tracking or inactive trigger remains disarmed; no input values fabricated."
+    ]
+  },
+  "live_provisional_alignment": {
+    "anchors": 592,
+    "rejected_records": 0,
+    "coverage": {
+      "wrist_rgb": 592,
+      "wrist_depth": 592,
+      "scene_rgb": 592,
+      "scene_depth": 592,
+      "robot_state": 0,
+      "gripper_state": 0,
+      "action": 0
+    },
+    "provisional_rows": 592
+  },
+  "tests": {
+    "synthetic": {
+      "passed": 23,
+      "failed": 0
+    },
+    "camera_configuration": {
+      "passed": 5,
+      "failed": 0
+    },
+    "colcon_total_including_two_wrappers": {
+      "passed": 30,
+      "failed": 0,
+      "skipped": 0
+    },
+    "quest_bridge_mapper_existing_mock_tests": {
+      "passed": 4,
+      "failed": 0
+    }
+  },
+  "parsing_errors": [],
+  "limitations": [
+    "Host clock-fit error does not bound camera capture accuracy.",
+    "SDK global_time compatibility permits provisional header matching, not independent exposure synchronization.",
+    "Scene aligned-depth observation gaps persist; metadata counters remain consecutive.",
+    "Live Quest pose was invalid: no motion-enabled commands or execution telemetry validated.",
+    "Real Panda/gripper telemetry, physical execution, and long-duration stability remain unverified."
+  ],
+  "raw_archives": {
+    "completion-60s.json.gz": {
+      "original_bytes": 16458212,
+      "compressed_bytes": 1051923,
+      "original_sha256": "6dce73bcdb3794ed6c70b6898dfd5155a0fc7a23a678040aa429ad6ef2a46905"
+    },
+    "completion-60s-provisional-alignment.json.gz": {
+      "original_bytes": 3839221,
+      "compressed_bytes": 198077,
+      "original_sha256": "8915cf2bd91959d29bccc57d309bcd40b0d26235c3bf54c8e6ae9c2bcd20ac11"
+    },
+    "completion-live-quest.json.gz": {
+      "original_bytes": 11637131,
+      "compressed_bytes": 611572,
+      "original_sha256": "438613b04a4c07680b6efeeb2678d0f5a800351d2c2b67b90b11bd1d232938b8"
+    },
+    "completion-live-provisional-alignment.json.gz": {
+      "original_bytes": 1263350,
+      "compressed_bytes": 66310,
+      "original_sha256": "9acf368f5f4d5737439c7c5b0434553c9d563efcf81de960a36335e817132381"
+    }
+  }
+}

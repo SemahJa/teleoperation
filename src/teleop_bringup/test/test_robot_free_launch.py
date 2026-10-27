@@ -135,7 +135,9 @@ class RobotFreeLaunchTest(unittest.TestCase):
                         for hand in publishers
                     )
                 )
-                wait_for(lambda: "Subscribed to topic" in log_path.read_text())
+                # The recorder now keeps rosbag output in its episode log.
+                # Count both this test's observer and the actual bag subscriber.
+                wait_for(lambda: node.count_subscribers(commands["left"]) >= 2)
                 send_pair(0.0, 0.0)
                 send_pair(0.8, 0.8)
                 wait_for(

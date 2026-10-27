@@ -1,10 +1,12 @@
 """Recording topic profiles and rosbag command planning."""
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import datetime, timezone
 import json
 from pathlib import Path
 import uuid
+from recording.profiles import demonstration_topics
+from recording.storage_options import mcap_storage_options
 from quest_teleop.configuration import full_topic, read_mapping, boolean, _TOKEN
 
 
@@ -28,6 +30,7 @@ class RecordingPlan:
     topics: list
     output: str
     command: list
+    options: dict = field(default_factory=dict)
 
 
 def recording_plan(path, arms, topics_override="", output_root_override=""):
@@ -53,8 +56,22 @@ def recording_plan(path, arms, topics_override="", output_root_override=""):
         }
     config = dict(config)
     config.pop("menu_debounce_seconds", None)
-    if set(config) - {"include_default_topics", "topics", "output_root", "storage_id"}:
+    if set(config) - {"include_default_topics", "topics", "output_root", "storage_id", "profile", "record_late_topics", "max_cache_size", "clock_provenance", "mcap_compression", "mcap_compression_level"}:
         raise ValueError("unknown recording configuration key")
+    profile = config.get("profile", "teleop")
+    if profile not in ("teleop", "demonstration"):
+        raise ValueError("recording profile must be teleop/demonstration")
+    late = config.get("record_late_topics", profile == "demonstration")
+    late = boolean(late, "record_late_topics")
+    cache = config.get("max_cache_size", 104857600)
+    if type(cache) is not int or cache < 0:
+        raise ValueError("max_cache_size must be a nonnegative integer")
+    provenance = config.get("clock_provenance", "unverified")
+    if provenance not in ("unverified", "same_host"):
+        raise ValueError("clock_provenance must be unverified/same_host")
+    compression = config.get("mcap_compression", "None")
+    compression_level = config.get("mcap_compression_level", "Fast")
+    mcap_storage_options(compression, compression_level)
     if topics_override:
         topics = json.loads(topics_override)
     else:
@@ -68,6 +85,8 @@ def recording_plan(path, arms, topics_override="", output_root_override=""):
                 [bridge_controller_topic(source, "left")]
                 + default_recording_topics(arms)
                 + topics
+                + (demonstration_topics(arms)
+                   if profile == "demonstration" else [])
             )
     if not isinstance(topics, list) or not topics:
         raise ValueError(
@@ -91,4 +110,6 @@ def recording_plan(path, arms, topics_override="", output_root_override=""):
         topics,
         output,
         ["ros2", "bag", "record", "--storage", storage, "--output", output, *topics],
+        dict(profile=profile,record_late_topics=late,max_cache_size=cache,clock_provenance=provenance,
+             mcap_compression=compression,mcap_compression_level=compression_level),
     )

@@ -1,0 +1,26 @@
+[
+  {
+    "source": "synthetic_camera:wrist",
+    "reference": "host_monotonic:synthetic:boot",
+    "segment": "0",
+    "source_origin_ns": 0,
+    "reference_origin_ns": 10000000000,
+    "rate": 1.0,
+    "uncertainty_ns": 100,
+    "valid_from_ns": 0,
+    "valid_to_ns": 500000000,
+    "method": "synthetic_known_simultaneous_pairs"
+  },
+  {
+    "source": "synthetic_camera:scene",
+    "reference": "host_monotonic:synthetic:boot",
+    "segment": "0",
+    "source_origin_ns": 0,
+    "reference_origin_ns": 10005000000,
+    "rate": 1.00002,
+    "uncertainty_ns": 100,
+    "valid_from_ns": 0,
+    "valid_to_ns": 500000000,
+    "method": "synthetic_known_simultaneous_pairs"
+  }
+]

@@ -1,0 +1,15 @@
+# Opt-in full demonstration profile; existing sqlite3 profiles are unchanged.
+profile: demonstration
+record_late_topics: true
+include_default_topics: true
+# Extend the profile with actual installation-specific topics if needed.
+topics: []
+output_root: /tmp/franka_demonstrations
+storage_id: mcap
+# Lossless indexed chunk compression; existing sqlite3 profiles are unchanged.
+mcap_compression: Zstd
+mcap_compression_level: Fast
+max_cache_size: 268435456
+# Explicit assertion: these publishers share this host's ROS/system and monotonic
+# clocks. Camera capture-time uncertainty remains unknown even on the same host.
+clock_provenance: same_host

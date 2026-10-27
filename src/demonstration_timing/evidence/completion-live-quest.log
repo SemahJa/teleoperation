@@ -1,0 +1,60 @@
+[INFO] [launch]: All log files can be found below /home/mirmi/.ros/log/2026-10-23-17-46-28-156789-gap-nuc-202-69091
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [quest_usb_bridge-1]: process started with pid [69092]
+[INFO] [pose_mapper-2]: process started with pid [69094]
+[INFO] [mock_measured_pose-3]: process started with pid [69096]
+[quest_usb_bridge-1] [INFO] [1792770388.251856542] [quest_usb_bridge]: Quest USB TCP bridge listening on 127.0.0.1:45454
+[mock_measured_pose-3] [WARN] [1792770388.481335468] [panda_1.mock_measured_pose]: MOCK measured pose: fixed synthetic fixture, no robot connection
+[pose_mapper-2] [INFO] [1792770388.484742551] [panda_1.pose_mapper]: Quest mapper active; hardware ownership belongs to the separately launched controller
+[quest_usb_bridge-1] [INFO] [1792770388.504423964] [quest_usb_bridge]: Quest TCP client connected
+[quest_usb_bridge-1] [INFO] [1792770388.504721729] [quest_usb_bridge]: Clock sync reply sent: sync_id=280
+[quest_usb_bridge-1] [INFO] [1792770389.516832670] [quest_usb_bridge]: Clock sync reply sent: sync_id=281
+[quest_usb_bridge-1] [INFO] [1792770390.530005515] [quest_usb_bridge]: Clock sync reply sent: sync_id=282
+[quest_usb_bridge-1] [INFO] [1792770391.544185600] [quest_usb_bridge]: Clock sync reply sent: sync_id=283
+[quest_usb_bridge-1] [INFO] [1792770392.558443264] [quest_usb_bridge]: Clock sync reply sent: sync_id=284
+[quest_usb_bridge-1] [INFO] [1792770393.571979006] [quest_usb_bridge]: Clock sync reply sent: sync_id=285
+[quest_usb_bridge-1] [INFO] [1792770394.585548724] [quest_usb_bridge]: Clock sync reply sent: sync_id=286
+[quest_usb_bridge-1] [INFO] [1792770395.599901637] [quest_usb_bridge]: Clock sync reply sent: sync_id=287
+[quest_usb_bridge-1] [INFO] [1792770396.613226430] [quest_usb_bridge]: Clock sync reply sent: sync_id=288
+[quest_usb_bridge-1] [INFO] [1792770397.627385625] [quest_usb_bridge]: Clock sync reply sent: sync_id=289
+[quest_usb_bridge-1] [INFO] [1792770398.640750935] [quest_usb_bridge]: Clock sync reply sent: sync_id=290
+[quest_usb_bridge-1] [INFO] [1792770399.654519989] [quest_usb_bridge]: Clock sync reply sent: sync_id=291
+[quest_usb_bridge-1] [INFO] [1792770400.668675598] [quest_usb_bridge]: Clock sync reply sent: sync_id=292
+[quest_usb_bridge-1] [INFO] [1792770401.683342315] [quest_usb_bridge]: Clock sync reply sent: sync_id=293
+[quest_usb_bridge-1] [INFO] [1792770402.696401002] [quest_usb_bridge]: Clock sync reply sent: sync_id=294
+[quest_usb_bridge-1] [INFO] [1792770403.709945872] [quest_usb_bridge]: Clock sync reply sent: sync_id=295
+[quest_usb_bridge-1] [INFO] [1792770404.711092914] [quest_usb_bridge]: Clock sync reply sent: sync_id=296
+[quest_usb_bridge-1] [INFO] [1792770405.724660366] [quest_usb_bridge]: Clock sync reply sent: sync_id=297
+[quest_usb_bridge-1] [INFO] [1792770406.737695668] [quest_usb_bridge]: Clock sync reply sent: sync_id=298
+[quest_usb_bridge-1] [INFO] [1792770407.752042799] [quest_usb_bridge]: Clock sync reply sent: sync_id=299
+[quest_usb_bridge-1] [INFO] [1792770408.766356436] [quest_usb_bridge]: Clock sync reply sent: sync_id=300
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [mock_measured_pose-3]: sending signal 'SIGINT' to process[mock_measured_pose-3]
+[INFO] [pose_mapper-2]: sending signal 'SIGINT' to process[pose_mapper-2]
+[INFO] [quest_usb_bridge-1]: sending signal 'SIGINT' to process[quest_usb_bridge-1]
+[quest_usb_bridge-1] [INFO] [1792770409.525181831] [rclcpp]: signal_handler(signum=2)
+[quest_usb_bridge-1] [WARN] [1792770409.525530252] [quest_usb_bridge]: Quest TCP client disconnected; motion input invalidated
+[mock_measured_pose-3] Traceback (most recent call last):
+[mock_measured_pose-3]   File "/tmp/phase3-finish/native-install/quest_teleop/lib/quest_teleop/mock_measured_pose", line 67, in <module>
+[mock_measured_pose-3]     main()
+[mock_measured_pose-3]   File "/tmp/phase3-finish/native-install/quest_teleop/lib/quest_teleop/mock_measured_pose", line 61, in main
+[mock_measured_pose-3]     node.destroy_node()
+[mock_measured_pose-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/node.py", line 1685, in destroy_node
+[quest_usb_bridge-1] [INFO] [1792770409.528544279] [rclcpp]: signal_handler(signum=2)
+[mock_measured_pose-3]     self.destroy_service(self._services[0])
+[mock_measured_pose-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/node.py", line 1609, in destroy_service
+[mock_measured_pose-3]     service.destroy()
+[mock_measured_pose-3]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/service.py", line 87, in destroy
+[mock_measured_pose-3]     self.__service.destroy_when_not_in_use()
+[mock_measured_pose-3] KeyboardInterrupt
+[pose_mapper-2] Traceback (most recent call last):
+[pose_mapper-2]   File "/tmp/phase3-finish/native-install/quest_teleop/lib/quest_teleop/pose_mapper", line 534, in <module>
+[pose_mapper-2]     main()
+[pose_mapper-2]   File "/tmp/phase3-finish/native-install/quest_teleop/lib/quest_teleop/pose_mapper", line 528, in main
+[pose_mapper-2]     node.destroy_node()
+[pose_mapper-2]   File "/opt/ros/humble/local/lib/python3.10/dist-packages/rclpy/node.py", line 1690, in destroy_node
+[pose_mapper-2]     self.__node.destroy_when_not_in_use()
+[pose_mapper-2] KeyboardInterrupt
+[ERROR] [mock_measured_pose-3]: process has died [pid 69096, exit code -2, cmd '/tmp/phase3-finish/native-install/quest_teleop/lib/quest_teleop/mock_measured_pose --ros-args -r __ns:=/panda_1 --params-file /tmp/launch_params_z73x0ci9'].
+[ERROR] [pose_mapper-2]: process has died [pid 69094, exit code -2, cmd '/tmp/phase3-finish/native-install/quest_teleop/lib/quest_teleop/pose_mapper --ros-args -r __node:=pose_mapper -r __ns:=/panda_1 --params-file /tmp/launch_params_8ue92pu6'].
+[INFO] [quest_usb_bridge-1]: process has finished cleanly [pid 69092]

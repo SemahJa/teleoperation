@@ -52,7 +52,16 @@ class RuntimeConfigurationTest(unittest.TestCase):
         pipeline, bridge, recording = unified_settings(data)
         self.assertEqual(set(data["pipeline"]), set(PIPELINE_DEFAULTS))
         self.assertEqual(set(data["quest"]["bridge"]), set(BRIDGE_DEFAULTS))
-        self.assertEqual(set(data["recording"]), set(RECORDING_DEFAULTS))
+        # Demonstration recording is opt-in; existing operator templates keep
+        # their legacy fields and inherit the new conservative defaults.
+        optional = {"profile", "max_cache_size", "record_late_topics", "clock_provenance",
+                    "mcap_compression", "mcap_compression_level"}
+        self.assertEqual(set(data["recording"]), set(RECORDING_DEFAULTS) - optional)
+        self.assertEqual({k: recording[k] for k in optional}, {
+            "profile": "teleop", "max_cache_size": 104857600,
+            "record_late_topics": False, "clock_provenance": "unverified",
+            "mcap_compression": "None", "mcap_compression_level": "Fast",
+        })
         for section in ALLOWED:
             expected = ALLOWED[section] - (
                 {"inter_arm_minimum_clearance"} if section == "cbf" else set()
@@ -192,6 +201,8 @@ class RuntimeConfigurationTest(unittest.TestCase):
             dict(quest={"bridge": {"listen_port": True}}),
             dict(quest={"bridge": {"namespace": "bad name"}}),
             dict(recording={"typo": 3}),
+            dict(recording={"mcap_compression": "jpeg"}),
+            dict(recording={"mcap_compression_level": "typo"}),
             dict(recording={"menu_debounce_seconds": float("nan")}),
             dict(controller={"typo": 3}),
             dict(arm_settings={"unknown": {}}),

@@ -1,0 +1,150 @@
+pipeline:
+  mode: single
+  single_controller: right
+  backend: hardware
+  start_bridge: true
+  start_mapper: true
+  start_controller: true
+  start_hand: true
+  homing_enabled: true
+  cbf_enabled: false
+  recording_enabled: true
+  mock_measured_pose: false
+quest:
+  bridge:
+    namespace: /
+    listen_port: 45454
+    bind_address: 127.0.0.1
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10
+    max_clock_sync_age_ms: 3000
+    max_source_future_ms: 10
+    client_receive_timeout_ms: 500
+arms:
+  panda_1:
+    robot_ip: 192.168.3.101
+    namespace: /panda_1
+    base_frame: panda_1/panda_link0
+    command_topic: cartesian_teleop_command
+    target_pose_topic: target_pose
+    measured_pose_topic: teleop_anchor_pose
+    state_topic: robot_state
+    reference_to_robot_xyzw:
+    - 0.5
+    - 0.5
+    - 0.5
+    - 0.5
+    translation_scale: 0.75
+    rotation_scale: 0.33
+    feedforward_scale: 0.0
+    twist_filter_cutoff_hz: 10.0
+    pose_filter: none
+    velocity_filter: low_pass
+    pose_filter_cutoff_hz: 10.0
+    velocity_filter_cutoff_hz: 10.0
+    pose_interpolation: none
+    velocity_interpolation: none
+    pose_interpolation_duration_ms: 40.0
+    velocity_interpolation_duration_ms: 40.0
+    command_timeout_ms: 100
+    max_clock_uncertainty_ms: 10.0
+    max_source_future_ms: 10.0
+    min_derivative_dt_ms: 1.0
+    max_derivative_dt_ms: 100.0
+    trigger_engage: 0.75
+    trigger_release: 0.25
+controller:
+  lambda_translation: 15.0
+  lambda_rotation: 15.0
+  gain_translation: 50.0
+  gain_rotation: 5.0
+  hold_stiffness:
+  - 600.0
+  - 600.0
+  - 600.0
+  - 600.0
+  - 250.0
+  - 150.0
+  - 75.0
+  hold_damping:
+  - 50.0
+  - 50.0
+  - 50.0
+  - 50.0
+  - 20.0
+  - 15.0
+  - 10.0
+  hold_stiffness_ramp_seconds: 0.25
+  maximum_torque_rate: 900.0
+  torque_limits:
+  - 87.0
+  - 87.0
+  - 87.0
+  - 87.0
+  - 12.0
+  - 12.0
+  - 12.0
+  tool_offset_m: 0.1034
+  envelope_margin_m: 0.001
+  envelope_center:
+  - 0.0
+  - 0.0
+  - 0.333
+  homing_speed_factor: 0.15
+  homing_timeout_seconds: 30.0
+  homing_stop_duration_seconds: 0.5
+  homing_stop_acceleration: 0.75
+  homing_stop_timeout_seconds: 5.0
+  homing_stiffness:
+  - 300.0
+  - 300.0
+  - 300.0
+  - 300.0
+  - 120.0
+  - 100.0
+  - 50.0
+  homing_damping:
+  - 30.0
+  - 30.0
+  - 30.0
+  - 30.0
+  - 10.0
+  - 10.0
+  - 5.0
+hand:
+  close_width_m: 0.0
+  close_retry_interval_ms: 200.0
+  worker_poll_ms: 1.0
+  open_speed_mps: 0.1
+  speed_mps: 0.05
+  open_width_m: 0.025
+  grip_press: 0.75
+  grip_release: 0.25
+  grip_debounce_ms: 0.0
+  command_timeout_ms: 100.0
+  max_clock_uncertainty_ms: 10.0
+  mock_operation_duration_ms: 100.0
+cbf:
+  torque_limit_scale: 0.35
+  torque_rate_limit_scale: 0.35
+  table_height: 0.0
+  table_minimum_clearance: 0.02
+  self_minimum_clearance: 0.03
+  maximum_failures: 20
+  obstacle_centers: []
+  obstacle_radii: []
+recording:
+  mode: menu
+  namespace: /quest
+  left_controller_state_topic: ''
+  menu_debounce_seconds: 0.35
+  include_default_topics: true
+  topics: []
+  output_root: /camera_ws/log/real_demonstrations
+  storage_id: mcap
+  profile: demonstration
+  record_late_topics: true
+  max_cache_size: 268435456
+  clock_provenance: same_host
+  mcap_compression: Zstd
+  mcap_compression_level: Fast

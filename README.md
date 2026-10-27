@@ -17,6 +17,8 @@ pipeline holds measured joint position after normal trigger release and uses
 | **Host 2** | PC host, `~/franka_teleoperation`: edit configs and start Quest |
 | **CONTAINER 2** | Optional second container shell: standalone commands / launch help |
 
+For the prepared dual-camera lab setup, follow the short [data collection guide](DATA_COLLECTION.md).
+
 ## 1. Open and build the Docker workspace
 
 **Host 1 — first setup:**

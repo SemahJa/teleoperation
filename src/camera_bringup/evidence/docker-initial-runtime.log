@@ -1,0 +1,208 @@
+cameras-1  | [INFO] [launch]: All log files can be found below /root/.ros/log/2026-10-23-14-21-34-427029-gap-nuc-202-1
+cameras-1  | [INFO] [launch]: Default logging verbosity is set to INFO
+cameras-1  | [INFO] [launch.user]: wrist: serial=934222072657 color=640,480,30 depth=640,480,30; no automatic fallback
+cameras-1  | [INFO] [launch.user]: scene: serial=238222073675 color=640,480,30 depth=640,480,30; no automatic fallback
+cameras-1  | [INFO] [realsense2_camera_node-1]: process started with pid [17]
+cameras-1  | [INFO] [realsense2_camera_node-2]: process started with pid [19]
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765294.664305375] [cameras.wrist]: RealSense ROS v4.56.4
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765294.664302229] [cameras.scene]: RealSense ROS v4.56.4
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765294.664425172] [cameras.wrist]: Built with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765294.664435722] [cameras.wrist]: Running with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765294.664425122] [cameras.scene]: Built with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765294.664434941] [cameras.scene]: Running with LibRealSense v2.56.5
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:34,792 WARNING [139777588307520] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:34,864 WARNING [139972824778304] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:34,874 WARNING [139972824778304] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:34,973 WARNING [139777588307520] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:34,983 WARNING [139777588307520] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:35,080 WARNING [139972824778304] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,171 WARNING [139777588307520] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,182 WARNING [139777588307520] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,271 ERROR [139777588307520] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,272 ERROR [139777613485632] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,273 ERROR [139777613485632] (rs.cpp:256) [rs2_create_device( info_list:0x7f207c01bce0, index:0 ) UNKNOWN] failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,273 ERROR [139777613485632] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,273 WARNING [139777613485632] (rs.cpp:392) null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765295.273161464] [cameras.scene]: Device 1/2 failed with exception: failed to set power state
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.375727690] [cameras.wrist]: Device with serial number 238222073675 was found.
+cameras-1  | [realsense2_camera_node-1] 
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.375810437] [cameras.wrist]: Device with physical ID 2-3-16 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.375823491] [cameras.wrist]: Device with name Intel RealSense D435I was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.376030855] [cameras.wrist]: Device with port number 2-3 was found.
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,511 WARNING [139777445697088] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,521 WARNING [139777445697088] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,615 ERROR [139777445697088] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,615 ERROR [139777613485632] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,616 ERROR [139777613485632] (rs.cpp:256) [rs2_create_device( info_list:0x7f207c01bce0, index:1 ) UNKNOWN] failed to set power state
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,616 ERROR [139777613485632] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:35,616 WARNING [139777613485632] (rs.cpp:392) null pointer passed for argument "device"
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765295.616669904] [cameras.scene]: Device 2/2 failed with exception: failed to set power state
+cameras-1  | [realsense2_camera_node-2] [ERROR] [1792765295.616741379] [cameras.scene]: The requested device with serial number 238222073675 is NOT found. Will Try again.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.725086885] [cameras.wrist]: Device with serial number 934222072657 was found.
+cameras-1  | [realsense2_camera_node-1] 
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.725158230] [cameras.wrist]: Device with physical ID 3-2-14 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.725165815] [cameras.wrist]: Device with name Intel RealSense D435 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.725418053] [cameras.wrist]: Device with port number 3-2 was found.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.725429074] [cameras.wrist]: Device USB type: 3.2
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.725490030] [cameras.wrist]: getParameters...
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726007581] [cameras.wrist]: JSON file is not provided
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726027048] [cameras.wrist]: Device Name: Intel RealSense D435
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726033580] [cameras.wrist]: Device Serial No: 934222072657
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726039001] [cameras.wrist]: Device physical port: 3-2-14
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726044321] [cameras.wrist]: Device FW version: 5.17.0.10
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726050112] [cameras.wrist]: Device Product ID: 0x0B07
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765295.726055312] [cameras.wrist]: Sync Mode: On
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765299.206925284] [cameras.wrist]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765299.264876909] [cameras.wrist]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.267650218] [cameras.wrist]: Stopping Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.267805192] [cameras.wrist]: Stopping Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.356968970] [cameras.wrist]: Starting Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.424510601] [cameras.wrist]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,424 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,434 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.445477484] [cameras.wrist]: Starting Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.456452268] [cameras.wrist]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-1] [INFO] [1792765299.462286703] [cameras.wrist]: RealSense Node Is Up!
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,745 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,756 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,766 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,776 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,786 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,897 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,907 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,917 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,927 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,938 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,948 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,958 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,968 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,978 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,989 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:39,999 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,009 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,019 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,030 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,040 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,050 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,060 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,071 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,081 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,091 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,101 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,112 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,122 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,132 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,142 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,152 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,162 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,173 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,183 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,193 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,203 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,214 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,224 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,234 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,244 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,254 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,265 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,275 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,285 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,295 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,306 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,316 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,326 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,336 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,347 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,357 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,367 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,377 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,388 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,398 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,408 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,418 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,422 ERROR [139972547950144] (uvc-streamer.cpp:105) uvc streamer watchdog triggered on endpoint: 130
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,430 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,440 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,451 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,461 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,471 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,482 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,492 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,502 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,513 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,523 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,533 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,543 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,553 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,564 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,574 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,584 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,594 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,604 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,615 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,625 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,635 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,645 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,656 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,666 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,676 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,687 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,697 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,707 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,717 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,728 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,738 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,748 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,758 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,769 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,779 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,790 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,800 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,810 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,820 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,831 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,841 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,851 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,861 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:40,872 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1]  23/10 14:21:41,082 WARNING [139972514379328] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765301.357702366] [cameras.wrist]: XXX Hardware Notification:Depth stream start failure,1.79277e+12,Error,Hardware Error
+cameras-1  | [realsense2_camera_node-1] [WARN] [1792765301.357777168] [cameras.wrist]: Hardware Notification:Depth stream start failure,1.79277e+12,Error,Hardware Error
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.100659491] [cameras.scene]: Device with serial number 238222073675 was found.
+cameras-1  | [realsense2_camera_node-2] 
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.100724835] [cameras.scene]: Device with physical ID 2-3-16 was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.100732920] [cameras.scene]: Device with name Intel RealSense D435I was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.100924423] [cameras.scene]: Device with port number 2-3 was found.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.100939362] [cameras.scene]: Device USB type: 2.1
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765302.100948820] [cameras.scene]: Device 238222073675 is connected using a 2.1 port. Reduced performance is expected.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101016248] [cameras.scene]: getParameters...
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101413030] [cameras.scene]: JSON file is not provided
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101430754] [cameras.scene]: Device Name: Intel RealSense D435I
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101439300] [cameras.scene]: Device Serial No: 238222073675
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101446483] [cameras.scene]: Device physical port: 2-3-16
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101453577] [cameras.scene]: Device FW version: 5.17.3.10
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101460590] [cameras.scene]: Device Product ID: 0x0B3A
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765302.101467012] [cameras.scene]: Sync Mode: On
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765305.808173663] [cameras.scene]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-2] [WARN] [1792765306.160979401] [cameras.scene]: re-enable the stream for the change to take effect.
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.164839943] [cameras.scene]: Stopping Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.164906479] [cameras.scene]: Stopping Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.258325496] [cameras.scene]: Starting Sensor: Depth Module
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.359170837] [cameras.scene]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.361073014] [cameras.scene]: Starting Sensor: RGB Camera
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.374186213] [cameras.scene]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+cameras-1  | [realsense2_camera_node-2] [INFO] [1792765306.380572144] [cameras.scene]: RealSense Node Is Up!
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,561 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,672 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,682 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,693 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,703 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,713 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,825 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:46,936 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:47,047 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:47,057 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:47,068 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:47,078 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:47,088 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+cameras-1  | [realsense2_camera_node-2]  23/10 14:21:49,910 WARNING [139777361835584] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0

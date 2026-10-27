@@ -34,13 +34,7 @@ def setup(context):
         value("recording_topics"),
         value("recording_output_root"),
     )
-    if value("recording_mode") == "continuous":
-        Path(plan.output).parent.mkdir(parents=True, exist_ok=True)
-        return [
-            LogInfo(msg=f"Recording selected topics to {plan.output}"),
-            ExecuteProcess(cmd=plan.command, output="screen"),
-        ]
-    if value("recording_mode") != "menu":
+    if value("recording_mode") not in ("menu", "continuous"):
         raise ValueError("recording_mode must be menu/continuous")
     inactive = [
         a.namespace for a in configured if a.name not in {b.name for b in active}
@@ -67,6 +61,10 @@ def setup(context):
                     menu_debounce_seconds=float(debounce),
                     output_root=str(Path(plan.output).parent),
                     storage_id=plan.command[4],
+                    mock_measured_pose=launch_bool(value("mock_measured_pose")),
+                    autostart=value("recording_mode")=="continuous",
+                    menu_enabled=value("recording_mode")=="menu",
+                    **dict(plan.options,record_late_topics=plan.options["record_late_topics"] or value("recording_mode")=="continuous"),
                 )
             ],
         )
@@ -88,6 +86,7 @@ def generate_launch_description():
         recording_output_root="",
         left_controller_state_topic="",
         recording_namespace="/quest",
+        mock_measured_pose="false",
     )
     return LaunchDescription(
         [DeclareLaunchArgument(k, default_value=v) for k, v in defaults.items()]

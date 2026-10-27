@@ -1,0 +1,15 @@
+# Explicit selection only: no USB-speed-based automatic downgrade.
+serial: "238222073675"
+profiles:
+  target:
+    color_profile: "640,480,30"
+    depth_profile: "640,480,30"
+    enable_color: true
+    enable_depth: true
+    align_depth: true
+  usb2_15fps:
+    color_profile: "640,480,15"
+    depth_profile: "640,480,15"
+    enable_color: true
+    enable_depth: true
+    align_depth: true

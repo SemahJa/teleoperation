@@ -1,0 +1,42 @@
+# Phase 5 acceptance report — 2026-10-26
+
+**Recording infrastructure and short native/mock validation complete, with limitations below. Real-robot collection is not qualified.** No physical Panda controller, gripper, torque/safety configuration or FCI was operated or modified. Original checkout and pre-existing camera/Phase3 work remain preserved. No commit/merge. Phase2 long-duration stability and Phase4 physical extrinsics were not performed.
+
+## Changes
+
+Reused existing `recording/MenuRecorder`, MenuGate and rosbag2 subprocess. Added optional MCAP while retaining sqlite3, explicit demonstration topic/QoS profile, late discovery, partial-episode preservation, non-real-time timing/health observer, per-episode manifest, image/readback and original-payload checks, and existing Phase3 offline alignment. Clock uncertainty and missing data remain explicit. Fixed the native Humble-incompatible `--node-name` recorder argument. Continuous recording uses the same existing recorder with autostart.
+
+Changed files: `src/recording/{CMakeLists.txt,package.xml,launch/recording.launch.py,recording/configuration.py,recording/menu_recorder.py}` and `src/quest_teleop/quest_teleop/runtime_configuration.py`. Added recording profile, integrated mock launch, `profiles.py`, `episode_monitor.py`, `image_tools.py`, `validate_episode.py` and `test_demonstration.py`; added native startup script, optional isolated Dockerfile and package documentation. Adapted runtime-template test for optional conservative defaults and robot-free test to observe actual bag subscription readiness rather than redirected stdout. Operator YAML unchanged. Existing gripper/control behavior and Phase3 algorithms unchanged.
+
+## Tests and evidence
+
+- 79 relevant tests passed: recording17, timing23, camera5, Quest33, robot-free launch1. Run packages separately because the installed launch-testing plugin collides on repeated test module names. Initial combined collection failed. Broader native launch suite had10 failures from absent teleop_controllers/teleop_gripper packages; these were not silently counted as passes or built to launch owners. The initial robot-free stdout-readiness failure was corrected and rerun passed.
+- Wrist-only, scene-only and both-cameras-late recordings are readable MCAP, with both CameraInfo/metadata streams. Starting the bag before cameras verified discovery. Missing cameras remain recorded in manifests and do not prevent other streams.
+- Actual Quest left Menu start/stop finalized two episodes (33.886s/3,099,697,950bytes and5.610s/468,009,056bytes). Recorded both Quest hands, mapper commands, fixed mock pose, cameras, tf_static and timing/health. Reported physical attempt initially had no observed press; subsequent observed physical edges passed. Presses during validation are ignored. ADB authorization had to be accepted again after headset restart; persistent host keys were retained.
+- Enabled-action mock episode `log/demonstrations/quest_20261026T103333Z_c73d64a1`:11.433s,1,040,225,405bytes,1002 mapper commands,542 enabled/valid. All542 matched a unique recorded right Quest sample by session/sequence/reference generation; original acquisition, OpenXR location, mapped host source and uncertainty fields matched exactly. Requested target x varied0.281–0.610m in mock space. No physical movement.335 camera anchors all provisionally matched four RGB-D streams within50ms;223 had a past valid source-intent sample within50ms. This separate diagnostic is not execution alignment: existing `action_t` stays masked without actual TrackingSample receipt/output observations.
+- Native sqlite3 test recorded/read35/35 disposable String messages. Deliberately SIGKILLing a disposable MCAP recorder preserved a readable1,572,864-byte prefix with12 recovered messages, `status=incomplete`, no metadata.yaml. Readability does not imply completeness. Raw partial files were retained.
+- Optional image `franka-demonstration-recording:phase5` built all six packages, discovered MCAP+sqlite3 and passed MCAP payload/exact-timestamp write/read in a container with no hardware/network. Live container USB/DDS streaming not tested. Original working Panda image/containers unchanged; optional image derives from existing camera SDK image and installs no second SDK.
+- Shell syntax and `git diff --check` passed. No further production code changed after the79-test run; later additions were documentation/Docker deployment.
+
+Small results, event logs and executable reproducer scripts are preserved under `log/phase5-validation/resume_20261026` and `log/phase5-validation/enabled_actions_20261026`. Actual raw episodes remain under `log/demonstrations`; initial single-camera/late-discovery bags under `log/phase5-validation`. Disposable sqlite3/interrupted MCAP/loss-probe evidence was copied from/tmp into the latter validation directory to survive reboot.
+
+## Timing, losses and performance
+
+Native wrapper4.56.4 was compiled with SDK2.56.4 and runsSDK2.56.5; warning retained. Runtime dependencies were reused. Scene238222073675 remains USB2.1/480Mbps; wrist934222072657 USB3.2/5000Mbps. Both negotiated640x480,30FPS without automatic fallback. Wrist startup hardware warning did not prevent subsequent reception. Representative RGB/depth decoded, nonzero raw depth present. Sparse payload fingerprints compared raw pixel bytes with zero mismatches; all original messages remain in bag.
+
+Enabled episode recorded FPS: wristRGB29.36/depth29.98;sceneRGB29.45/depth29.80. Both cameras metadata reported `global_time`; that label alone does not establish a calibrated cross-device capture bound. Longer Menu episode's nearest cross-camera header offset median9.461ms. Host ROS/monotonic empirical fit envelope61.343us in that episode; this is host clock conversion only, not capture accuracy. Camera exposure uncertainty remains unknown/null. Extrinsics remain uncalibrated.
+
+Longer Menu episode: estimated image header gaps wristRGB13/depth5,sceneRGB9/depth4; metadata counters0gaps. Independent observer proved4 wristRGB/4 wristdepth/2 sceneRGB/3 scenedepth identities missing from bag inside the common observation window. Empty storage warnings are not proof of zero losses. Disk throughput91.47MB/s (decimal) for33.886s; enabled episode90.98MB/s. Uncompressed raw recording needs roughly5.5GB/min at this observed load, not a long-duration guarantee.
+
+Additional7.706s controlled camera-only recording:697,864,265bytes; header gaps wristRGB4/depth1,sceneRGB5/depth0; metadata0gaps. Both depth5 and depth30 independent subscribers missed many RGB samples that the bag retained. Increasing subscriber history alone did not establish lossless reception. Shared losses cannot distinguish image publication gaps from common transport/subscriber failures. We did not silently tune kernel/DDS settings or downgrade profiles. The earlier45 scene-depth gap estimate over60s is not extrapolated to these short runs.
+
+## Outstanding requirements
+
+1. Establish an acceptable recording-loss budget and diagnose/reduce DDS/subscriber losses before assuming complete training examples. Preserve missing-data masks now; do not block further recorder development solely on absent hardware exposure synchronization.
+2. Validate real Panda TrackingSample/joint state and physical gripper contracts read-only when safely available. Mock command timestamps verify intent/source preservation only; actual controller receipt/output and physical actuation remain unverified. Resolve the Panda joint-limit safety issue separately before enabling physical teleoperation.
+3. Phase2 sustained dual streaming/storage and Phase4 surveyed extrinsics remain outstanding. No calibrated camera exposure synchronization or metric depth-scale verification was performed.
+4. Validate the optional container on live USB/DDS if container deployment is selected. Native complete startup is the hardware-tested procedure.
+
+See [README.md](README.md) for one-command startup, physical Menu instructions, Docker deployment, inspection/revalidation and exact automated-test commands. Stop here for Phase5 review.
+
+Follow-up: the native camera loss investigation and requested five-minute test passed with an explicitly selected large shared-memory profile; see [subsequent measurements and limits](../camera_bringup/STABILITY_TEST_RESULTS.md). The earlier loss measurements above remain historical evidence for the default transport.

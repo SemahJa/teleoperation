@@ -1,0 +1,121 @@
+[INFO] [launch]: All log files can be found below /home/mirmi/.ros/log/2026-10-23-17-36-01-212808-gap-nuc-202-61802
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: wrist: serial=934222072657 color=640,480,30 depth=640,480,30; no automatic fallback
+[INFO] [launch.user]: scene: serial=238222073675 color=640,480,30 depth=640,480,30; no automatic fallback
+[INFO] [realsense2_camera_node-1]: process started with pid [61803]
+[INFO] [realsense2_camera_node-2]: process started with pid [61805]
+[realsense2_camera_node-2] [INFO] [1792769761.439612482] [cameras.scene]: RealSense ROS v4.56.4
+[realsense2_camera_node-2] [INFO] [1792769761.439706250] [cameras.scene]: Built with LibRealSense v2.56.4
+[realsense2_camera_node-2] [INFO] [1792769761.439713404] [cameras.scene]: Running with LibRealSense v2.56.5
+[realsense2_camera_node-2] [WARN] [1792769761.439720647] [cameras.scene]: ***************************************************
+[realsense2_camera_node-2] [WARN] [1792769761.439726869] [cameras.scene]: ** running with a different librealsense version **
+[realsense2_camera_node-1] [INFO] [1792769761.439608084] [cameras.wrist]: RealSense ROS v4.56.4
+[realsense2_camera_node-1] [INFO] [1792769761.439706871] [cameras.wrist]: Built with LibRealSense v2.56.4
+[realsense2_camera_node-1] [INFO] [1792769761.439714325] [cameras.wrist]: Running with LibRealSense v2.56.5
+[realsense2_camera_node-1] [WARN] [1792769761.439723352] [cameras.wrist]: ***************************************************
+[realsense2_camera_node-1] [WARN] [1792769761.439728622] [cameras.wrist]: ** running with a different librealsense version **
+[realsense2_camera_node-1] [WARN] [1792769761.439732420] [cameras.wrist]: ** than the one the wrapper was compiled with!   **
+[realsense2_camera_node-1] [WARN] [1792769761.439735856] [cameras.wrist]: ***************************************************
+[realsense2_camera_node-2] [WARN] [1792769761.439730466] [cameras.scene]: ** than the one the wrapper was compiled with!   **
+[realsense2_camera_node-2] [WARN] [1792769761.439734193] [cameras.scene]: ***************************************************
+[realsense2_camera_node-1] [INFO] [1792769761.467411617] [cameras.wrist]: Device with serial number 238222073675 was found.
+[realsense2_camera_node-1] 
+[realsense2_camera_node-1] [INFO] [1792769761.467545381] [cameras.wrist]: Device with physical ID /sys/devices/pci0000:00/0000:00:08.1/0000:05:00.3/usb2/2-3/2-3:1.0/video4linux/video0 was found.
+[realsense2_camera_node-1] [INFO] [1792769761.467557394] [cameras.wrist]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-1] [INFO] [1792769761.467774105] [cameras.wrist]: Device with port number 2-3 was found.
+[realsense2_camera_node-2] [INFO] [1792769761.468451560] [cameras.scene]: Device with serial number 238222073675 was found.
+[realsense2_camera_node-2] 
+[realsense2_camera_node-2] [INFO] [1792769761.468511955] [cameras.scene]: Device with physical ID /sys/devices/pci0000:00/0000:00:08.1/0000:05:00.3/usb2/2-3/2-3:1.0/video4linux/video0 was found.
+[realsense2_camera_node-2] [INFO] [1792769761.468523957] [cameras.scene]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-2] [INFO] [1792769761.468724428] [cameras.scene]: Device with port number 2-3 was found.
+[realsense2_camera_node-2] [INFO] [1792769761.468733094] [cameras.scene]: Device USB type: 2.1
+[realsense2_camera_node-2] [WARN] [1792769761.468739336] [cameras.scene]: Device 238222073675 is connected using a 2.1 port. Reduced performance is expected.
+[realsense2_camera_node-2] [INFO] [1792769761.468787016] [cameras.scene]: getParameters...
+[realsense2_camera_node-2] [INFO] [1792769761.469077006] [cameras.scene]: JSON file is not provided
+[realsense2_camera_node-2] [INFO] [1792769761.469089811] [cameras.scene]: Device Name: Intel RealSense D435I
+[realsense2_camera_node-2] [INFO] [1792769761.469098106] [cameras.scene]: Device Serial No: 238222073675
+[realsense2_camera_node-2] [INFO] [1792769761.469104739] [cameras.scene]: Device physical port: /sys/devices/pci0000:00/0000:00:08.1/0000:05:00.3/usb2/2-3/2-3:1.0/video4linux/video0
+[realsense2_camera_node-2] [INFO] [1792769761.469110019] [cameras.scene]: Device FW version: 5.17.3.10
+[realsense2_camera_node-2] [INFO] [1792769761.469115049] [cameras.scene]: Device Product ID: 0x0B3A
+[realsense2_camera_node-2] [INFO] [1792769761.469119928] [cameras.scene]: Sync Mode: On
+[realsense2_camera_node-1] [INFO] [1792769761.469624425] [cameras.wrist]: Device with serial number 934222072657 was found.
+[realsense2_camera_node-1] 
+[realsense2_camera_node-1] [INFO] [1792769761.469642880] [cameras.wrist]: Device with physical ID /sys/devices/pci0000:00/0000:00:08.1/0000:05:00.3/usb3/3-2/3-2:1.0/video4linux/video6 was found.
+[realsense2_camera_node-1] [INFO] [1792769761.469650164] [cameras.wrist]: Device with name Intel RealSense D435 was found.
+[realsense2_camera_node-1] [INFO] [1792769761.469846697] [cameras.wrist]: Device with port number 3-2 was found.
+[realsense2_camera_node-1] [INFO] [1792769761.469853409] [cameras.wrist]: Device USB type: 3.2
+[realsense2_camera_node-1] [INFO] [1792769761.469881763] [cameras.wrist]: getParameters...
+[realsense2_camera_node-1] [INFO] [1792769761.470082554] [cameras.wrist]: JSON file is not provided
+[realsense2_camera_node-1] [INFO] [1792769761.470092282] [cameras.wrist]: Device Name: Intel RealSense D435
+[realsense2_camera_node-1] [INFO] [1792769761.470097703] [cameras.wrist]: Device Serial No: 934222072657
+[realsense2_camera_node-1] [INFO] [1792769761.470102872] [cameras.wrist]: Device physical port: /sys/devices/pci0000:00/0000:00:08.1/0000:05:00.3/usb3/3-2/3-2:1.0/video4linux/video6
+[realsense2_camera_node-1] [INFO] [1792769761.470108092] [cameras.wrist]: Device FW version: 5.17.0.10
+[realsense2_camera_node-1] [INFO] [1792769761.470112851] [cameras.wrist]: Device Product ID: 0x0B07
+[realsense2_camera_node-1] [INFO] [1792769761.470117190] [cameras.wrist]: Sync Mode: On
+[realsense2_camera_node-1] [WARN] [1792769761.549799136] [cameras.wrist]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [WARN] [1792769761.551660908] [cameras.wrist]: Could not set param: rgb_camera.power_line_frequency with 3 Range: [0, 2]: parameter 'rgb_camera.power_line_frequency' could not be set: Parameter {rgb_camera.power_line_frequency} doesn't comply with integer range.
+[realsense2_camera_node-1] [WARN] [1792769761.553916837] [cameras.wrist]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [INFO] [1792769761.555988767] [cameras.wrist]: Stopping Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1792769761.556093416] [cameras.wrist]: Stopping Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1792769761.571053475] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792769761.571075477] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792769761.576129394] [cameras.wrist]: Starting Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1792769761.577483262] [cameras.wrist]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-1] [INFO] [1792769761.578023948] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792769761.578034398] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792769761.578991634] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792769761.579001252] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792769761.608503988] [cameras.wrist]: Starting Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1792769761.609905747] [cameras.wrist]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-1] [INFO] [1792769761.611933203] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792769761.611947621] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [WARN] [1792769761.612949040] [cameras.scene]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [INFO] [1792769761.614026705] [cameras.wrist]: RealSense Node Is Up!
+[realsense2_camera_node-1] [INFO] [1792769761.614774543] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792769761.614787147] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792769761.616211149] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792769761.616222450] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [WARN] [1792769761.618776516] [cameras.scene]: Could not set param: rgb_camera.power_line_frequency with 3 Range: [0, 2]: parameter 'rgb_camera.power_line_frequency' could not be set: Parameter {rgb_camera.power_line_frequency} doesn't comply with integer range.
+[realsense2_camera_node-2] [WARN] [1792769761.620026978] [cameras.scene]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [INFO] [1792769761.622270534] [cameras.scene]: Stopping Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1792769761.622314427] [cameras.scene]: Stopping Sensor: RGB Camera
+[realsense2_camera_node-2] [INFO] [1792769761.637011968] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792769761.637034651] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792769761.642870311] [cameras.scene]: Starting Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1792769761.650401157] [cameras.scene]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-2] [INFO] [1792769761.650917166] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792769761.650939298] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792769761.651960395] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792769761.651969973] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792769761.652809856] [cameras.scene]: Starting Sensor: RGB Camera
+[realsense2_camera_node-2] [INFO] [1792769761.657647844] [cameras.scene]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-2] [INFO] [1792769761.659616188] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792769761.659631627] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792769761.661671016] [cameras.scene]: RealSense Node Is Up!
+[realsense2_camera_node-2] [INFO] [1792769761.662384089] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792769761.662394949] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792769761.663474528] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792769761.663485629] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [WARN] [1792769763.576807546] [cameras.wrist]: XXX Hardware Notification:Depth stream start failure,1.79277e+12,Error,Hardware Error
+[realsense2_camera_node-1] [WARN] [1792769763.576900062] [cameras.wrist]: Hardware Notification:Depth stream start failure,1.79277e+12,Error,Hardware Error
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[INFO] [realsense2_camera_node-2]: sending signal 'SIGINT' to process[realsense2_camera_node-2]
+[INFO] [realsense2_camera_node-1]: sending signal 'SIGINT' to process[realsense2_camera_node-1]
+[realsense2_camera_node-2] [INFO] [1792769825.704749824] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-2] [INFO] [1792769825.705231367] [cameras.scene]: Stop Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1792769825.705246075] [cameras.scene]: Close Sensor. 
+[realsense2_camera_node-1] [INFO] [1792769825.704762768] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-1] [INFO] [1792769825.705248369] [cameras.wrist]: Stop Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1792769825.705262887] [cameras.wrist]: Close Sensor. 
+[realsense2_camera_node-1] [INFO] [1792769825.706866970] [cameras.wrist]: Close Sensor - Done. 
+[realsense2_camera_node-1] [INFO] [1792769825.706882229] [cameras.wrist]: Stop Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1792769825.706889863] [cameras.wrist]: Close Sensor. 
+[realsense2_camera_node-2] [INFO] [1792769825.707085454] [cameras.scene]: Close Sensor - Done. 
+[realsense2_camera_node-2] [INFO] [1792769825.707094992] [cameras.scene]: Stop Sensor: RGB Camera
+[realsense2_camera_node-2] [INFO] [1792769825.707099381] [cameras.scene]: Close Sensor. 
+[realsense2_camera_node-1] [INFO] [1792769825.707471687] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-2] [INFO] [1792769825.707490292] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-1] [INFO] [1792769826.057942299] [cameras.wrist]: Close Sensor - Done. 
+[realsense2_camera_node-2] [INFO] [1792769826.480458510] [cameras.scene]: Close Sensor - Done. 
+[INFO] [realsense2_camera_node-1]: process has finished cleanly [pid 61803]
+[INFO] [realsense2_camera_node-2]: process has finished cleanly [pid 61805]

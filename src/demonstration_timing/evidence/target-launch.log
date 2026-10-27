@@ -1,0 +1,162 @@
+[INFO] [launch]: All log files can be found below /home/mirmi/.ros/log/2026-10-23-16-49-08-419229-gap-nuc-202-55518
+[INFO] [launch]: Default logging verbosity is set to INFO
+[INFO] [launch.user]: wrist: serial=934222072657 color=640,480,30 depth=640,480,30; no automatic fallback
+[INFO] [launch.user]: scene: serial=238222073675 color=640,480,30 depth=640,480,30; no automatic fallback
+[INFO] [realsense2_camera_node-1]: process started with pid [55519]
+[INFO] [realsense2_camera_node-2]: process started with pid [55521]
+[realsense2_camera_node-2] [INFO] [1792766948.554989211] [cameras.scene]: RealSense ROS v4.56.4
+[realsense2_camera_node-2] [INFO] [1792766948.555077609] [cameras.scene]: Built with LibRealSense v2.56.4
+[realsense2_camera_node-2] [INFO] [1792766948.555085453] [cameras.scene]: Running with LibRealSense v2.56.5
+[realsense2_camera_node-2] [WARN] [1792766948.555090693] [cameras.scene]: ***************************************************
+[realsense2_camera_node-2] [WARN] [1792766948.555094972] [cameras.scene]: ** running with a different librealsense version **
+[realsense2_camera_node-2] [WARN] [1792766948.555098889] [cameras.scene]: ** than the one the wrapper was compiled with!   **
+[realsense2_camera_node-2] [WARN] [1792766948.555102646] [cameras.scene]: ***************************************************
+[realsense2_camera_node-1] [INFO] [1792766948.555334887] [cameras.wrist]: RealSense ROS v4.56.4
+[realsense2_camera_node-1] [INFO] [1792766948.555395312] [cameras.wrist]: Built with LibRealSense v2.56.4
+[realsense2_camera_node-1] [INFO] [1792766948.555404750] [cameras.wrist]: Running with LibRealSense v2.56.5
+[realsense2_camera_node-1] [WARN] [1792766948.555410731] [cameras.wrist]: ***************************************************
+[realsense2_camera_node-1] [WARN] [1792766948.555435979] [cameras.wrist]: ** running with a different librealsense version **
+[realsense2_camera_node-1] [WARN] [1792766948.555443664] [cameras.wrist]: ** than the one the wrapper was compiled with!   **
+[realsense2_camera_node-1] [WARN] [1792766948.555450116] [cameras.wrist]: ***************************************************
+[realsense2_camera_node-1]  23/10 16:49:08,646 WARNING [140206062835264] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+[realsense2_camera_node-1]  23/10 16:49:08,656 WARNING [140206062835264] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+[realsense2_camera_node-2]  23/10 16:49:08,751 WARNING [140377566729792] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+[realsense2_camera_node-1]  23/10 16:49:08,753 WARNING [140206062835264] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Device or resource busy, number: 16
+[realsense2_camera_node-2]  23/10 16:49:08,762 WARNING [140377566729792] (handle-libusb.h:110) failed to claim usb interface, interface 0, is busy - retrying...
+[realsense2_camera_node-2]  23/10 16:49:08,772 ERROR [140377566729792] (handle-libusb.h:125) failed to claim usb interface: 0, error: RS2_USB_STATUS_BUSY
+[realsense2_camera_node-2]  23/10 16:49:08,772 ERROR [140377929410112] (uvc-sensor.cpp:428) acquire_power failed: failed to set power state
+[realsense2_camera_node-2]  23/10 16:49:08,772 ERROR [140377929410112] (rs.cpp:256) [rs2_create_device( info_list:0x7fac2c01bcd0, index:0 ) UNKNOWN] failed to set power state
+[realsense2_camera_node-2]  23/10 16:49:08,772 ERROR [140377929410112] (rs.cpp:256) [rs2_delete_device( device:nullptr ) UNKNOWN] null pointer passed for argument "device"
+[realsense2_camera_node-2]  23/10 16:49:08,773 WARNING [140377929410112] (rs.cpp:392) null pointer passed for argument "device"
+[realsense2_camera_node-2] [WARN] [1792766948.773019414] [cameras.scene]: Device 1/2 failed with exception: failed to set power state
+[realsense2_camera_node-2] [INFO] [1792766949.423716391] [cameras.scene]: Device with serial number 934222072657 was found.
+[realsense2_camera_node-2] 
+[realsense2_camera_node-2] [INFO] [1792766949.423807273] [cameras.scene]: Device with physical ID 3-2-14 was found.
+[realsense2_camera_node-2] [INFO] [1792766949.423822673] [cameras.scene]: Device with name Intel RealSense D435 was found.
+[realsense2_camera_node-2] [INFO] [1792766949.424191734] [cameras.scene]: Device with port number 3-2 was found.
+[realsense2_camera_node-2] [ERROR] [1792766949.424215208] [cameras.scene]: The requested device with serial number 238222073675 is NOT found. Will Try again.
+[realsense2_camera_node-1] [INFO] [1792766949.430530230] [cameras.wrist]: Device with serial number 238222073675 was found.
+[realsense2_camera_node-1] 
+[realsense2_camera_node-1] [INFO] [1792766949.430602317] [cameras.wrist]: Device with physical ID 2-3-16 was found.
+[realsense2_camera_node-1] [INFO] [1792766949.430611835] [cameras.wrist]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-1] [INFO] [1792766949.430793009] [cameras.wrist]: Device with port number 2-3 was found.
+[realsense2_camera_node-1] [INFO] [1792766949.769194885] [cameras.wrist]: Device with serial number 934222072657 was found.
+[realsense2_camera_node-1] 
+[realsense2_camera_node-1] [INFO] [1792766949.769272101] [cameras.wrist]: Device with physical ID 3-2-14 was found.
+[realsense2_camera_node-1] [INFO] [1792766949.769284234] [cameras.wrist]: Device with name Intel RealSense D435 was found.
+[realsense2_camera_node-1] [INFO] [1792766949.769690917] [cameras.wrist]: Device with port number 3-2 was found.
+[realsense2_camera_node-1] [INFO] [1792766949.769715874] [cameras.wrist]: Device USB type: 3.2
+[realsense2_camera_node-1] [INFO] [1792766949.769798571] [cameras.wrist]: getParameters...
+[realsense2_camera_node-1] [INFO] [1792766949.770178974] [cameras.wrist]: JSON file is not provided
+[realsense2_camera_node-1] [INFO] [1792766949.770197809] [cameras.wrist]: Device Name: Intel RealSense D435
+[realsense2_camera_node-1] [INFO] [1792766949.770207097] [cameras.wrist]: Device Serial No: 934222072657
+[realsense2_camera_node-1] [INFO] [1792766949.770215613] [cameras.wrist]: Device physical port: 3-2-14
+[realsense2_camera_node-1] [INFO] [1792766949.770224410] [cameras.wrist]: Device FW version: 5.17.0.10
+[realsense2_camera_node-1] [INFO] [1792766949.770233908] [cameras.wrist]: Device Product ID: 0x0B07
+[realsense2_camera_node-1] [INFO] [1792766949.770239709] [cameras.wrist]: Sync Mode: On
+[realsense2_camera_node-1] [WARN] [1792766953.079831468] [cameras.wrist]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [WARN] [1792766953.135596903] [cameras.wrist]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-1] [INFO] [1792766953.138376762] [cameras.wrist]: Stopping Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1792766953.138534872] [cameras.wrist]: Stopping Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1792766953.156002052] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792766953.156027520] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792766953.284087300] [cameras.wrist]: Starting Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1792766953.389136834] [cameras.wrist]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-1]  23/10 16:49:13,389 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1] [INFO] [1792766953.390058424] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792766953.390070827] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792766953.391240949] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792766953.391252782] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1]  23/10 16:49:13,399 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1]  23/10 16:49:13,409 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1] [INFO] [1792766953.420359064] [cameras.wrist]: Starting Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1792766953.430917714] [cameras.wrist]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-1] [INFO] [1792766953.433306159] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792766953.433326508] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792766953.435867203] [cameras.wrist]: RealSense Node Is Up!
+[realsense2_camera_node-1] [INFO] [1792766953.437055530] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792766953.437075477] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1] [INFO] [1792766953.438929188] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-1] [INFO] [1792766953.438945689] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-1]  23/10 16:49:13,610 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1]  23/10 16:49:13,620 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1]  23/10 16:49:13,630 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1]  23/10 16:49:13,640 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1]  23/10 16:49:13,751 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-1]  23/10 16:49:13,761 WARNING [140205482817088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Resource temporarily unavailable, number: 11
+[realsense2_camera_node-2] [INFO] [1792766955.852980156] [cameras.scene]: Device with serial number 238222073675 was found.
+[realsense2_camera_node-2] 
+[realsense2_camera_node-2] [INFO] [1792766955.853045801] [cameras.scene]: Device with physical ID 2-3-16 was found.
+[realsense2_camera_node-2] [INFO] [1792766955.853054588] [cameras.scene]: Device with name Intel RealSense D435I was found.
+[realsense2_camera_node-2] [INFO] [1792766955.853246031] [cameras.scene]: Device with port number 2-3 was found.
+[realsense2_camera_node-2] [INFO] [1792766955.853255730] [cameras.scene]: Device USB type: 2.1
+[realsense2_camera_node-2] [WARN] [1792766955.853263344] [cameras.scene]: Device 238222073675 is connected using a 2.1 port. Reduced performance is expected.
+[realsense2_camera_node-2] [INFO] [1792766955.853326404] [cameras.scene]: getParameters...
+[realsense2_camera_node-2] [INFO] [1792766955.853588762] [cameras.scene]: JSON file is not provided
+[realsense2_camera_node-2] [INFO] [1792766955.853600074] [cameras.scene]: Device Name: Intel RealSense D435I
+[realsense2_camera_node-2] [INFO] [1792766955.853605905] [cameras.scene]: Device Serial No: 238222073675
+[realsense2_camera_node-2] [INFO] [1792766955.853611365] [cameras.scene]: Device physical port: 2-3-16
+[realsense2_camera_node-2] [INFO] [1792766955.853616004] [cameras.scene]: Device FW version: 5.17.3.10
+[realsense2_camera_node-2] [INFO] [1792766955.853621053] [cameras.scene]: Device Product ID: 0x0B3A
+[realsense2_camera_node-2] [INFO] [1792766955.853625943] [cameras.scene]: Sync Mode: On
+[realsense2_camera_node-2] [WARN] [1792766959.667015396] [cameras.scene]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [WARN] [1792766960.006891566] [cameras.scene]: re-enable the stream for the change to take effect.
+[realsense2_camera_node-2] [INFO] [1792766960.010268578] [cameras.scene]: Stopping Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1792766960.010331638] [cameras.scene]: Stopping Sensor: RGB Camera
+[realsense2_camera_node-2] [INFO] [1792766960.029511139] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792766960.029542127] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792766960.132291961] [cameras.scene]: Starting Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1792766960.238295594] [cameras.scene]: Open profile: stream_type: Depth(0), Format: Z16, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-2]  23/10 16:49:20,239 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2] [INFO] [1792766960.239314018] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792766960.239328585] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792766960.240613706] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792766960.240628013] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792766960.241698155] [cameras.scene]: Starting Sensor: RGB Camera
+[realsense2_camera_node-2]  23/10 16:49:20,249 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2] [INFO] [1792766960.255098881] [cameras.scene]: Open profile: stream_type: Color(0), Format: RGB8, Width: 640, Height: 480, FPS: 30
+[realsense2_camera_node-2] [INFO] [1792766960.257460877] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792766960.257484381] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792766960.260323994] [cameras.scene]: RealSense Node Is Up!
+[realsense2_camera_node-2] [INFO] [1792766960.261095929] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792766960.261111699] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2] [INFO] [1792766960.262423330] [FFMPEGEncoder]: enc: libx264 prof:  preset: 
+[realsense2_camera_node-2] [INFO] [1792766960.262435052] [FFMPEGEncoder]: qmax: 10 bitrate: 8242880 gop: 15
+[realsense2_camera_node-2]  23/10 16:49:20,461 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,471 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,482 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,492 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,502 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,513 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,724 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,937 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,947 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,957 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:20,967 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:21,483 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:26,803 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:27,814 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:29,827 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2]  23/10 16:49:33,841 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[WARNING] [launch]: user interrupted with ctrl-c (SIGINT)
+[realsense2_camera_node-2] [INFO] [1792766975.442746722] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-1] [INFO] [1792766975.442748385] [rclcpp]: signal_handler(signum=2)
+[INFO] [realsense2_camera_node-2]: sending signal 'SIGINT' to process[realsense2_camera_node-2]
+[INFO] [realsense2_camera_node-1]: sending signal 'SIGINT' to process[realsense2_camera_node-1]
+[realsense2_camera_node-2] [INFO] [1792766975.443116104] [cameras.scene]: Stop Sensor: Depth Module
+[realsense2_camera_node-2] [INFO] [1792766975.443133076] [cameras.scene]: Close Sensor. 
+[realsense2_camera_node-1] [INFO] [1792766975.443118528] [cameras.wrist]: Stop Sensor: Depth Module
+[realsense2_camera_node-1] [INFO] [1792766975.443132274] [cameras.wrist]: Close Sensor. 
+[realsense2_camera_node-2] [INFO] [1792766975.444931020] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-1] [INFO] [1792766975.445182959] [rclcpp]: signal_handler(signum=2)
+[realsense2_camera_node-2] [INFO] [1792766975.616653917] [cameras.scene]: Close Sensor - Done. 
+[realsense2_camera_node-2] [INFO] [1792766975.616691538] [cameras.scene]: Stop Sensor: RGB Camera
+[realsense2_camera_node-2] [INFO] [1792766975.616705174] [cameras.scene]: Close Sensor. 
+[realsense2_camera_node-1] [INFO] [1792766975.751854033] [cameras.wrist]: Close Sensor - Done. 
+[realsense2_camera_node-1] [INFO] [1792766975.751891303] [cameras.wrist]: Stop Sensor: RGB Camera
+[realsense2_camera_node-1] [INFO] [1792766975.751904368] [cameras.wrist]: Close Sensor. 
+[realsense2_camera_node-2]  23/10 16:49:35,956 WARNING [140377558337088] (messenger-libusb.cpp:42) control_transfer returned error, index: 768, error: Success, number: 0
+[realsense2_camera_node-2] [INFO] [1792766977.057674941] [cameras.scene]: Close Sensor - Done. 
+[realsense2_camera_node-1] [INFO] [1792766977.062449487] [cameras.wrist]: Close Sensor - Done. 
+[INFO] [realsense2_camera_node-2]: process has finished cleanly [pid 55521]
+[INFO] [realsense2_camera_node-1]: process has finished cleanly [pid 55519]

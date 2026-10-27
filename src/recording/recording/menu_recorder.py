@@ -2,7 +2,7 @@
 """Left Menu episode toggle, adapted from thesis_ws for ROS Humble rosbag2.
 
 Recording runs in its own non-RT process. The topic selection is the current
-publisher graph intersected with the configured list and active arm namespaces.
+configured list and active arm namespaces. Demonstration profiles retain late topics.
 """
 import json
 import math
@@ -13,6 +13,9 @@ import subprocess
 import time
 from datetime import datetime, timezone
 import uuid
+import sys
+from recording.profiles import qos_overrides, selected_topics
+from recording.storage_options import mcap_storage_options
 import rclpy
 from rclpy.node import Node
 from rclpy.qos import DurabilityPolicy, QoSProfile
@@ -107,6 +110,24 @@ class MenuRecorder(Node):
         self.declare_parameter("output_root", "/ws/log/quest_bags")
         self.declare_parameter("storage_id", "sqlite3")
         self.declare_parameter("menu_debounce_seconds", 0.35)
+        self.declare_parameter("profile", "teleop")
+        self.declare_parameter("record_late_topics", False)
+        self.declare_parameter("max_cache_size", 104857600)
+        self.declare_parameter("clock_provenance", "unverified")
+        self.declare_parameter("mcap_compression", "None")
+        self.declare_parameter("mcap_compression_level", "Fast")
+        self.mcap_options = mcap_storage_options(
+            self.get_parameter("mcap_compression").value,
+            self.get_parameter("mcap_compression_level").value)
+        self.declare_parameter("autostart", False)
+        self.declare_parameter("menu_enabled", True)
+        self.declare_parameter("mock_measured_pose", False)
+        self.demo = self.get_parameter("profile").value == "demonstration"
+        self.late = self.get_parameter("record_late_topics").value
+        self.monitor = self.validation = self.validation_log = None
+        self.manifest = {}
+        self.last_flush = 0
+        self.autostart_timer = None
         self.topics = json.loads(self.get_parameter("topics_json").value)
         self.inactive = json.loads(self.get_parameter("inactive_namespaces_json").value)
         if not isinstance(self.topics, list) or not self.topics:
@@ -119,8 +140,9 @@ class MenuRecorder(Node):
         if not self.root.is_absolute():
             raise ValueError("output_root must be absolute")
         self.storage = self.get_parameter("storage_id").value
-        if self.storage != "sqlite3":
-            raise ValueError("this Humble environment provides sqlite3 recording")
+        import rosbag2_py
+        if self.storage not in ("sqlite3", "mcap") or self.storage not in rosbag2_py.get_registered_writers():
+            raise ValueError(f"storage {self.storage} is unavailable; install the matching Humble storage plugin")
         debounce = self.get_parameter("menu_debounce_seconds").value
         if not math.isfinite(debounce) or debounce < 0:
             raise ValueError("invalid Menu debounce")
@@ -143,6 +165,21 @@ class MenuRecorder(Node):
         )
         self.create_timer(0.05, self.tick)
         self.publish()
+        if self.get_parameter("autostart").value:
+            self.autostart_timer = self.create_timer(0.5, self.auto_start)
+
+    def auto_start(self):
+        self.autostart_timer.cancel()
+        self.start()
+
+    def flush_manifest(self):
+        if not self.demo or not self.output: return
+        from recording.episode_monitor import atomic_json
+        if self.monitor: self.manifest.update(self.monitor.snapshot())
+        self.manifest["phase"] = self.phase
+        atomic_json(self.output + ".manifest.json", self.manifest)
+        if Path(self.output).is_dir():
+            atomic_json(Path(self.output) / "episode_manifest.json", self.manifest)
 
     def publish(self):
         if not self.context.ok():
@@ -154,13 +191,14 @@ class MenuRecorder(Node):
                 message=self.message,
                 output=self.output,
                 topics=self.selected,
+                manifest=self.output + ".manifest.json" if self.demo and self.output else "",
             )
         )
         self.events.publish(msg)
 
     def on_input(self, msg):
-        if self.gate.update(msg, time.monotonic_ns()):
-            if self.phase == "stopping":
+        if self.get_parameter("menu_enabled").value and self.gate.update(msg, time.monotonic_ns()):
+            if self.phase in ("stopping", "validating"):
                 return  # No queued episode while the previous bag finalizes.
             if self.process is None:
                 self.start()
@@ -168,12 +206,8 @@ class MenuRecorder(Node):
                 self.stop()
 
     def start(self):
-        self.selected = [
-            t
-            for t in self.topics
-            if not any(t == ns or t.startswith(ns + "/") for ns in self.inactive)
-            and self.get_publishers_info_by_topic(t)
-        ]
+        published = {t for t in self.topics if self.get_publishers_info_by_topic(t)}
+        self.selected = selected_topics(self.topics, self.inactive, published, self.late)
         if not self.selected:
             self.phase = "idle"
             self.message = "no selected topics currently have publishers"
@@ -184,6 +218,18 @@ class MenuRecorder(Node):
         try:
             self.root.mkdir(parents=True, exist_ok=True)
             self.log = Path(self.output + ".recorder.log").open("w")
+            if self.demo:
+                from recording.episode_monitor import EpisodeMonitor
+                self.manifest = dict(schema_version=1,episode_id=Path(self.output).name,
+                    status="recording",storage_id=self.storage,requested_topics=self.selected,
+                    mock_measured_pose=self.get_parameter("mock_measured_pose").value,
+                    available_topics_at_start=sorted(published),start_request_ros_ns=self.get_clock().now().nanoseconds,
+                    start_request_monotonic_ns=time.monotonic_ns(),calibration_status="uncalibrated_extrinsics",
+                    warnings=[],storage_drop_count=None)
+                if self.storage == "mcap":
+                    self.manifest["mcap_storage_options"] = dict(self.mcap_options)
+                self.monitor = EpisodeMonitor(self,self.selected,self.output,self.get_parameter("clock_provenance").value)
+                self.flush_manifest()
             command = [
                 "ros2",
                 "bag",
@@ -192,9 +238,18 @@ class MenuRecorder(Node):
                 self.storage,
                 "--output",
                 self.output,
-                "--node-name",
-                "quest_episode_recorder_" + uuid.uuid4().hex[:8],
-                *self.selected,
+                "--max-cache-size", str(self.get_parameter("max_cache_size").value),
+            ]
+            if self.demo:
+                import yaml
+                qos_path = self.output + ".qos.yaml"
+                Path(qos_path).write_text(yaml.safe_dump(qos_overrides(self.selected)))
+                command += ["--qos-profile-overrides-path", qos_path]
+                if self.storage == "mcap":
+                    options_path = self.output + ".storage.yaml"
+                    Path(options_path).write_text(yaml.safe_dump(self.mcap_options))
+                    command += ["--storage-config-file", options_path]
+            command += [*self.selected
             ]
             self.process = subprocess.Popen(
                 command,
@@ -204,13 +259,20 @@ class MenuRecorder(Node):
                 start_new_session=True,
             )
             self.phase = "recording"
-            self.message = "started by left Menu"
+            self.message = "recorder started; graph discovery remains enabled"
+            if self.demo:
+                self.manifest["recorder_command"]=command
+                self.flush_manifest()
         except Exception as error:
             if self.log:
                 self.log.close()
             self.process = self.log = None
             self.phase = "error"
             self.message = str(error)
+            if self.demo:
+                self.manifest.update(status="start_failed",error=str(error))
+                if self.monitor:self.monitor.close();self.monitor=None
+                self.flush_manifest()
         self.publish()
 
     def stop(self):
@@ -220,11 +282,36 @@ class MenuRecorder(Node):
             os.killpg(self.process.pid, signal.SIGINT)
         except ProcessLookupError:
             pass
+        if self.demo:
+            self.manifest["stop_request_monotonic_ns"] = time.monotonic_ns()
         self.phase = "stopping"
         self.message = "finalizing bag"
         self.publish()
 
+    def finalize(self, normal, code):
+        self.log.close()
+        self.log = self.process = None
+        if self.demo:
+            self.manifest.update(status="bag_finalized" if normal else "incomplete",recorder_returncode=code)
+            self.flush_manifest()
+            if self.monitor:self.monitor.close();self.monitor=None
+            self.validation_log=Path(self.output+".validation.log").open("w")
+            self.validation=subprocess.Popen([sys.executable,"-m","recording.validate_episode",self.output],
+                stdout=self.validation_log,stderr=subprocess.STDOUT)
+            self.phase="validating"
+        else:self.phase="idle" if normal else "error"
+        self.publish()
+
     def tick(self):
+        if self.validation is not None:
+            code=self.validation.poll()
+            if code is not None:
+                self.validation_log.close();self.validation_log=self.validation=None
+                self.phase="idle" if code==0 else "error"
+                self.message="episode validation complete" if code==0 else "validation failed; raw episode preserved"
+                self.publish()
+        if self.demo and self.process is not None and time.monotonic()-self.last_flush>1:
+            self.last_flush=time.monotonic();self.flush_manifest()
         self.gate.watchdog(time.monotonic_ns())
         if self.process is not None:
             code = self.process.poll()
@@ -240,13 +327,20 @@ class MenuRecorder(Node):
                     if normal
                     else f"recorder exited with code {code}; see {self.output}.recorder.log"
                 )
-                self.log.close()
-                self.log = self.process = None
-                self.publish()
+                self.finalize(normal,code)
 
     def close(self):
-        if self.process is None:
-            return
+        if self.process is not None:
+            self.close_process()
+        if self.validation is not None:
+            try:self.validation.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                # Keep the independent offline validator running; raw data and
+                # the pending manifest are preserved if application shutdown wins.
+                pass
+            self.validation_log.close();self.validation_log=self.validation=None
+
+    def close_process(self):
         self.stop()
         try:
             self.process.wait(timeout=10)
@@ -257,8 +351,8 @@ class MenuRecorder(Node):
             except subprocess.TimeoutExpired:
                 os.killpg(self.process.pid, signal.SIGKILL)
                 self.process.wait()
-        self.log.close()
-        self.log = self.process = None
+        normal = self.process.returncode in (0,-signal.SIGINT) and (Path(self.output)/"metadata.yaml").exists()
+        self.finalize(normal,self.process.returncode)
 
 
 def main(args=None):

@@ -1,0 +1,94 @@
+Starting >>> camera_bringup
+Starting >>> demonstration_timing
+UpdateCTestConfiguration  from :/tmp/phase3-build/camera_bringup/CTestConfiguration.ini
+Parse Config file:/tmp/phase3-build/camera_bringup/CTestConfiguration.ini
+   Site: gap-nuc-202
+   Build name: (empty)
+ Add coverage exclude regular expressions.
+Create new tag: 20261023-1537 - Experimental
+UpdateCTestConfiguration  from :/tmp/phase3-build/camera_bringup/CTestConfiguration.ini
+Parse Config file:/tmp/phase3-build/camera_bringup/CTestConfiguration.ini
+Test project /tmp/phase3-build/camera_bringup
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: test_configuration
+
+1: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/tmp/phase3-build/camera_bringup/test_results/camera_bringup/test_configuration.xunit.xml" "--package-name" "camera_bringup" "--output-file" "/tmp/phase3-build/camera_bringup/ament_cmake_pytest/test_configuration.txt" "--command" "/usr/bin/python3" "-u" "-m" "pytest" "/home/mirmi/aljabnouni/franka_teleoperation_cameras/src/camera_bringup/test/test_configuration.py" "-o" "cache_dir=/tmp/phase3-build/camera_bringup/ament_cmake_pytest/test_configuration/.cache" "--junit-xml=/tmp/phase3-build/camera_bringup/test_results/camera_bringup/test_configuration.xunit.xml" "--junit-prefix=camera_bringup"
+1: Test timeout computed to be: 60
+UpdateCTestConfiguration  from :/tmp/phase3-build/demonstration_timing/CTestConfiguration.ini
+Parse Config file:/tmp/phase3-build/demonstration_timing/CTestConfiguration.ini
+   Site: gap-nuc-202
+   Build name: (empty)
+ Add coverage exclude regular expressions.
+Create new tag: 20261023-1537 - Experimental
+UpdateCTestConfiguration  from :/tmp/phase3-build/demonstration_timing/CTestConfiguration.ini
+Parse Config file:/tmp/phase3-build/demonstration_timing/CTestConfiguration.ini
+Test project /tmp/phase3-build/demonstration_timing
+Constructing a list of tests
+Done constructing a list of tests
+Updating test list for fixtures
+Added 0 tests to meet fixture requirements
+Checking test dependency graph...
+Checking test dependency graph end
+test 1
+    Start 1: test_timing
+
+1: Test command: /usr/bin/python3 "-u" "/opt/ros/humble/share/ament_cmake_test/cmake/run_test.py" "/tmp/phase3-build/demonstration_timing/test_results/demonstration_timing/test_timing.xunit.xml" "--package-name" "demonstration_timing" "--output-file" "/tmp/phase3-build/demonstration_timing/ament_cmake_pytest/test_timing.txt" "--command" "/usr/bin/python3" "-u" "-m" "pytest" "/home/mirmi/aljabnouni/franka_teleoperation_cameras/src/demonstration_timing/test/test_timing.py" "-o" "cache_dir=/tmp/phase3-build/demonstration_timing/ament_cmake_pytest/test_timing/.cache" "--junit-xml=/tmp/phase3-build/demonstration_timing/test_results/demonstration_timing/test_timing.xunit.xml" "--junit-prefix=demonstration_timing"
+1: Test timeout computed to be: 60
+1: -- run_test.py: invoking following command in '/tmp/phase3-build/camera_bringup':
+1:  - /usr/bin/python3 -u -m pytest /home/mirmi/aljabnouni/franka_teleoperation_cameras/src/camera_bringup/test/test_configuration.py -o cache_dir=/tmp/phase3-build/camera_bringup/ament_cmake_pytest/test_configuration/.cache --junit-xml=/tmp/phase3-build/camera_bringup/test_results/camera_bringup/test_configuration.xunit.xml --junit-prefix=camera_bringup
+1: -- run_test.py: invoking following command in '/tmp/phase3-build/demonstration_timing':
+1:  - /usr/bin/python3 -u -m pytest /home/mirmi/aljabnouni/franka_teleoperation_cameras/src/demonstration_timing/test/test_timing.py -o cache_dir=/tmp/phase3-build/demonstration_timing/ament_cmake_pytest/test_timing/.cache --junit-xml=/tmp/phase3-build/demonstration_timing/test_results/demonstration_timing/test_timing.xunit.xml --junit-prefix=demonstration_timing
+1: ============================= test session starts ==============================
+1: platform linux -- Python 3.10.12, pytest-6.2.5, py-1.10.0, pluggy-0.13.0
+1: ============================= test session starts ==============================
+1: platform linux -- Python 3.10.12, pytest-6.2.5, py-1.10.0, pluggy-0.13.0
+1: cachedir: /tmp/phase3-build/camera_bringup/ament_cmake_pytest/test_configuration/.cache
+1: rootdir: /home/mirmi/aljabnouni/franka_teleoperation_cameras/src/camera_bringup/test
+1: plugins: ament-flake8-0.12.11, launch-testing-1.0.6, launch-testing-ros-0.19.7, ament-copyright-0.12.11, ament-lint-0.12.11, ament-pep257-0.12.11, ament-xmllint-0.12.11, cov-3.0.0, colcon-core-0.18.3
+1: cachedir: /tmp/phase3-build/demonstration_timing/ament_cmake_pytest/test_timing/.cache
+1: rootdir: /home/mirmi/aljabnouni/franka_teleoperation_cameras/src/demonstration_timing/test
+1: plugins: ament-flake8-0.12.11, launch-testing-1.0.6, launch-testing-ros-0.19.7, ament-copyright-0.12.11, ament-lint-0.12.11, ament-pep257-0.12.11, ament-xmllint-0.12.11, cov-3.0.0, colcon-core-0.18.3
+1: collected 5 items
+1: 
+1: collected 23 items
+1: 
+1: ../../../home/mirmi/aljabnouni/franka_teleoperation_cameras/src/camera_bringup/test/test_configuration.py . [ 20%]
+1: ../../../home/mirmi/aljabnouni/franka_teleoperation_cameras/src/demonstration_timing/test/test_timing.py . [  4%]
+1: ....                                                                     [100%]
+1: 
+1: - generated xml file: /tmp/phase3-build/camera_bringup/test_results/camera_bringup/test_configuration.xunit.xml -
+1: ============================== 5 passed in 0.03s ===============================
+1: ......................                                                   [100%]
+1: 
+1: - generated xml file: /tmp/phase3-build/demonstration_timing/test_results/demonstration_timing/test_timing.xunit.xml -
+1: ============================== 23 passed in 0.03s ==============================
+1: -- run_test.py: return code 0
+1: -- run_test.py: verify result file '/tmp/phase3-build/camera_bringup/test_results/camera_bringup/test_configuration.xunit.xml'
+1/1 Test #1: test_configuration ...............   Passed    0.34 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+pytest    =   0.34 sec*proc (1 test)
+
+Total Test time (real) =   0.34 sec
+1: -- run_test.py: return code 0
+1: -- run_test.py: verify result file '/tmp/phase3-build/demonstration_timing/test_results/demonstration_timing/test_timing.xunit.xml'
+1/1 Test #1: test_timing ......................   Passed    0.35 sec
+
+100% tests passed, 0 tests failed out of 1
+
+Label Time Summary:
+pytest    =   0.35 sec*proc (1 test)
+
+Total Test time (real) =   0.35 sec
+Finished <<< demonstration_timing [0.38s]
+Finished <<< camera_bringup [0.39s]
+
+Summary: 2 packages finished [0.60s]

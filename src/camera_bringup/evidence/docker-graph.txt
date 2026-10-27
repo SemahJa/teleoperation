@@ -1,0 +1,25 @@
+/cameras/scene
+/cameras/wrist
+/cameras/scene/aligned_depth_to_color/camera_info
+/cameras/scene/aligned_depth_to_color/image_raw
+/cameras/scene/color/camera_info
+/cameras/scene/color/image_raw
+/cameras/scene/color/metadata
+/cameras/scene/depth/camera_info
+/cameras/scene/depth/image_rect_raw
+/cameras/scene/depth/metadata
+/cameras/scene/extrinsics/depth_to_color
+/cameras/scene/extrinsics/depth_to_depth
+/cameras/wrist/aligned_depth_to_color/camera_info
+/cameras/wrist/aligned_depth_to_color/image_raw
+/cameras/wrist/color/camera_info
+/cameras/wrist/color/image_raw
+/cameras/wrist/color/metadata
+/cameras/wrist/depth/camera_info
+/cameras/wrist/depth/image_rect_raw
+/cameras/wrist/depth/metadata
+/cameras/wrist/extrinsics/depth_to_color
+/parameter_events
+/rosout
+/tf_static
+	librealsense2.so.2.56 => /usr/local/lib/librealsense2.so.2.56 (0x00007f6b4a88b000)

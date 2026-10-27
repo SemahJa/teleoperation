@@ -122,6 +122,12 @@ BRIDGE_DEFAULTS = dict(
     client_receive_timeout_ms=500,
 )
 RECORDING_DEFAULTS = dict(
+    profile="teleop",
+    record_late_topics=False,
+    max_cache_size=104857600,
+    clock_provenance="unverified",
+    mcap_compression="None",
+    mcap_compression_level="Fast",
     mode="menu",
     namespace="/quest",
     left_controller_state_topic="",
@@ -201,6 +207,18 @@ def unified_settings(data):
     if set(raw) - set(RECORDING_DEFAULTS):
         raise ValueError("unknown recording setting")
     recording = dict(RECORDING_DEFAULTS, **raw)
+    if recording["mcap_compression"] not in ("None", "Zstd"):
+        raise ValueError("recording.mcap_compression must be None/Zstd")
+    if recording["mcap_compression_level"] not in ("Fastest", "Fast", "Default", "Slow", "Slowest"):
+        raise ValueError("invalid recording.mcap_compression_level")
+    if recording["profile"] not in ("teleop", "demonstration"):
+        raise ValueError("recording.profile must be teleop/demonstration")
+    if type(recording["record_late_topics"]) is not bool:
+        raise ValueError("recording.record_late_topics must be boolean")
+    if type(recording["max_cache_size"]) is not int or recording["max_cache_size"] < 0:
+        raise ValueError("recording.max_cache_size must be a nonnegative integer")
+    if recording["clock_provenance"] not in ("unverified", "same_host"):
+        raise ValueError("recording.clock_provenance must be unverified/same_host")
     if recording["mode"] not in ("menu", "continuous"):
         raise ValueError("recording.mode must be menu/continuous")
     if not isinstance(recording["namespace"], str):
