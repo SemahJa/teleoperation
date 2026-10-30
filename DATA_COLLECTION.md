@@ -113,3 +113,22 @@ To restore normal headset-wearing behavior:
 docker exec docker-quest-adb-server-1 adb shell am broadcast \
   -a com.oculus.vrpowermanager.automation_disabled
 ```
+
+## Export a dataset after collection
+
+To remove trigger-release idle periods while keeping gripper activity, create a
+separate strict LeRobot dataset without changing raw recordings:
+
+```bash
+bash scripts/data_collection/export_lerobot.sh
+```
+
+For all-recording, outcome-aware exporter revision 3 and grouped dataset assembly:
+
+```bash
+bash scripts/data_collection/reprocess_all_demonstrations.sh \
+  --output ~/aljabnouni/data/panda_cable_reprocessed_v3_20261030_r1
+```
+
+See [LeRobot export](src/recording/LEROBOT_EXPORT.md) and [Reprocessing](src/recording/REPROCESSING.md)
+for dependencies, feature masks, source timestamps and output locations. Review success labels before training.

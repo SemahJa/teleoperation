@@ -1,0 +1,236 @@
+{
+  "schema_version": 1,
+  "label_source": "Operator-provided historical labels; identity resolved against the 20261028 export provenance and original MCAP start times.",
+  "episodes": [
+    {
+      "episode_id": "quest_20261028T153604Z_20d21fb4",
+      "historical_index": 0,
+      "recorded_start_ns": 1793201765121265527,
+      "outcome": "failure",
+      "success": false,
+      "mcap_sha256": {
+        "quest_20261028T153604Z_20d21fb4_0.mcap": "a2ccef39eaca60dd74be6d37213f83872d02b31ff56146a820761df113089b8d"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T160611Z_64aac1b5",
+      "historical_index": 1,
+      "recorded_start_ns": 1793203572146372392,
+      "outcome": "success_after_recovery",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T160611Z_64aac1b5_0.mcap": "32bd2ce223db62c4be7f293887d45b39263341c8e46e2e9e9066b07c18451ea0"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T160812Z_be43bc06",
+      "historical_index": 2,
+      "recorded_start_ns": 1793203692810635244,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T160812Z_be43bc06_0.mcap": "903e07b4f3a9228f8c9c68af7f8ab128a31986a99c3fd81ea6fd4e619202b9b2"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T161344Z_3b8e99d3",
+      "historical_index": 3,
+      "recorded_start_ns": 1793204027740193525,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T161344Z_3b8e99d3_0.mcap": "9fcc654fdaa531415f8995d6e2e7e41aa21394c1be206da37fd8f6ae4d4ba702"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T161826Z_0fff3752",
+      "historical_index": 4,
+      "recorded_start_ns": 1793204307295797082,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T161826Z_0fff3752_0.mcap": "8adc11faebf4164a1696398da2ae4b8702fc1eecdaf20b4e279cd4d43648ba59"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T162035Z_98f8d0da",
+      "historical_index": 5,
+      "recorded_start_ns": 1793204436707257978,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T162035Z_98f8d0da_0.mcap": "40c16391ad487b1e0fe91e34a10484e4bbc44486cbbbcb3663a7c07e69a785ea"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T162307Z_ec15c75a",
+      "historical_index": 6,
+      "recorded_start_ns": 1793204588854821270,
+      "outcome": "unknown",
+      "success": null,
+      "mcap_sha256": {
+        "quest_20261028T162307Z_ec15c75a_0.mcap": "d8209c8967a515fc13be6c1629c87105950bbf0ece39e906a574fd9597b7d429"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T162542Z_3e08e65a",
+      "historical_index": 7,
+      "recorded_start_ns": 1793204744492896516,
+      "outcome": "unknown",
+      "success": null,
+      "mcap_sha256": {
+        "quest_20261028T162542Z_3e08e65a_0.mcap": "7bc7c89e28a0c3993a02b3c3d1f19c14e6403ef6cbc4e8b4b0e6849a7ed1780c"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173012Z_94736132",
+      "historical_index": 8,
+      "recorded_start_ns": 1793208613649527806,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173012Z_94736132_0.mcap": "9f5cf8eb9229338f70f8ba0a85c028f99cad795b2af23abed749bdb8aab66055"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173123Z_52a3b729",
+      "historical_index": 9,
+      "recorded_start_ns": 1793208684054556342,
+      "outcome": "success_after_recovery",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173123Z_52a3b729_0.mcap": "108a5f83b3f7ed89d3cd6ee6412db3306ec738b75903786b521aa9aa6d336d38"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173310Z_cc734846",
+      "historical_index": 10,
+      "recorded_start_ns": 1793208790722772702,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173310Z_cc734846_0.mcap": "f620c7b4ad95bf1d1d2323a3f2200b0aa7ebca6155d79d1d2bcddbd2490458f1"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173357Z_157d97d1",
+      "historical_index": 11,
+      "recorded_start_ns": 1793208838026961745,
+      "outcome": "success_after_recovery",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173357Z_157d97d1_0.mcap": "36c34cbaebc6c9fdc46e1fea0abf1316a0c81f4d26f1d8791bfa7f2ab8ca0fac"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173540Z_62261edc",
+      "historical_index": 12,
+      "recorded_start_ns": 1793208941621181286,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173540Z_62261edc_0.mcap": "cce993d723144c08f5cf39d6afac9b2941187a2df3be3f182381e677d7f408a4"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173718Z_76b4a8b6",
+      "historical_index": 13,
+      "recorded_start_ns": 1793209039254220276,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173718Z_76b4a8b6_0.mcap": "42902fdbf40e4f95668c55f6ff94b2fd3bcbaafa6d0b01982cf66a52869d1c87"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173822Z_c37a56d3",
+      "historical_index": 14,
+      "recorded_start_ns": 1793209103197209129,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T173822Z_c37a56d3_0.mcap": "c3a259ef841adc5d1ac0fb790dcc82f3f387812a86bb90441d1e39d1f23aed3e"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T173935Z_6c2f598a",
+      "historical_index": 15,
+      "recorded_start_ns": 1793209175922232268,
+      "outcome": "failure",
+      "success": false,
+      "mcap_sha256": {
+        "quest_20261028T173935Z_6c2f598a_0.mcap": "21aedf6960acc2d94964a0b3218bca9f73b486ab51b5f4ade3e140adebb59475"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174114Z_e020497d",
+      "historical_index": 16,
+      "recorded_start_ns": 1793209275462961668,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T174114Z_e020497d_0.mcap": "ed15b946d947bc4f525751a78658d78421f62e9467ce2c7944026f28cf9dde37"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174257Z_814706b8",
+      "historical_index": 17,
+      "recorded_start_ns": 1793209378018256448,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T174257Z_814706b8_0.mcap": "4981739863cd055f24df30a5fb3cac1865d57db1984f3f33549c24ff61449d0a"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174407Z_5f7891bb",
+      "historical_index": 18,
+      "recorded_start_ns": 1793209448485201400,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T174407Z_5f7891bb_0.mcap": "55019b5d5b914b7299a18b930f51ee8d9f07b70bc9cfd2dc68670d52afb0d593"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174456Z_0764ea2b",
+      "historical_index": 19,
+      "recorded_start_ns": 1793209497749477243,
+      "outcome": "success_after_recovery",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T174456Z_0764ea2b_0.mcap": "6f9435995539ff4ce9ebc6df7b18b8f190215b511402350f1f38f2e63a7eda7c"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174635Z_b15b5d30",
+      "historical_index": 20,
+      "recorded_start_ns": 1793209595974264174,
+      "outcome": "partial_success",
+      "success": null,
+      "mcap_sha256": {
+        "quest_20261028T174635Z_b15b5d30_0.mcap": "bb7be78cb9651eb2b9a1405c1493dab0451d4d3716eb7b77e16d7e8feb438580"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174738Z_f5c7c5ab",
+      "historical_index": 21,
+      "recorded_start_ns": 1793209659077238855,
+      "outcome": "direct_success",
+      "success": true,
+      "mcap_sha256": {
+        "quest_20261028T174738Z_f5c7c5ab_0.mcap": "66504249ee1752c931a78dc9d062d3a8dccc533a602e4abaa01bc935cebea871"
+      }
+    },
+    {
+      "episode_id": "quest_20261028T174829Z_5f1c3265",
+      "historical_index": 22,
+      "recorded_start_ns": 1793209710099855973,
+      "outcome": "unknown",
+      "success": null,
+      "mcap_sha256": {
+        "quest_20261028T174829Z_5f1c3265_0.mcap": "eff21e156953b849b3aa7a970f79f0e141c51fc0fb4d5d6d3e75510c3e896509"
+      }
+    }
+  ]
+}
